@@ -205,6 +205,294 @@ response_id = interview_service.record_interview_response(
 )
 ```
 
+## Conversation Engine
+
+The Conversation Engine is the heart of the Legacy AI platform, enabling natural, personalized interactions between family members and the AI representation of their loved one. This sophisticated system orchestrates multiple AI services to generate contextually appropriate, emotionally resonant responses based on the deceased person's stored memories.
+
+### Core Architecture
+
+The Conversation Engine integrates multiple specialized services:
+
+- **Memory Search**: Semantic similarity search using vector embeddings to find relevant memories
+- **Access Control**: Filters memories based on beneficiary permissions and sensitivity levels
+- **Context Building**: Constructs rich context from chronological, emotional, and relational data
+- **Personality Integration**: Applies the person's communication style and values to responses
+- **Wisdom Distillation**: Incorporates life lessons and distilled insights for meaningful guidance
+- **Content Moderation**: Ensures all responses remain safe and appropriate
+
+### Response Generation Workflow
+
+1. **Query Processing**: Analyzes user questions for intent and emotional context
+2. **Memory Retrieval**: Finds semantically similar memories using embedding similarity
+3. **Authorization**: Applies access controls to filter accessible memories
+4. **Context Enrichment**: Adds chronological context and life stage information
+5. **Prompt Construction**: Builds detailed prompts incorporating personality and wisdom
+6. **Response Generation**: Uses LLM integration (placeholder for OpenAI, local models, etc.)
+7. **Safety Moderation**: Reviews and filters responses for appropriateness
+8. **Response Delivery**: Returns moderated, personalized responses
+
+### Integration Points
+
+The Conversation Engine serves as the central orchestrator, connecting:
+
+- **Memory Services**: Retrieval and embedding systems
+- **AI Services**: Personality modeling and distillation
+- **Security Services**: Access control and content moderation
+- **Interview Services**: Structured data collection for improved responses
+
+### Future LLM Integration
+
+Currently uses placeholder response generation. Designed for integration with:
+
+- **OpenAI GPT Models**: Advanced conversational AI with fine-tuning
+- **Local LLMs**: Llama, Mistral, or other open-source models
+- **Azure OpenAI**: Enterprise-grade AI services
+- **Custom Fine-tuned Models**: Specialized for legacy interactions
+
+### Usage Example
+
+```python
+from app.services.ai.conversation_engine import ConversationEngine
+from app.services.memory_capture_service import MemoryCaptureService
+from app.services.timeline_engine import TimelineEngine
+from app.services.memory.memory_embedding_service import MemoryEmbeddingService
+from app.services.security.legacy_access_service import LegacyAccessService
+from app.services.security.response_moderation_service import ResponseModerationService
+
+# Initialize all services
+memory_service = MemoryCaptureService()
+timeline_engine = TimelineEngine(memory_service)
+embedding_service = MemoryEmbeddingService()
+access_service = LegacyAccessService()
+moderation_service = ResponseModerationService()
+
+# Create conversation engine with all integrations
+conversation_engine = ConversationEngine(
+    memory_service=memory_service,
+    timeline_engine=timeline_engine,
+    embedding_service=embedding_service,
+    access_service=access_service,
+    moderation_service=moderation_service
+)
+
+# Generate personalized response
+response = conversation_engine.generate_response(
+    user_query="Tell me about Dad's childhood adventures",
+    beneficiary=family_member
+)
+```
+
+## Personality Model Service
+
+The Personality Model Service analyzes stored memories to create a comprehensive psychological profile of the deceased person, enabling the AI to respond in a way that authentically reflects their personality, values, and communication style.
+
+### Personality Analysis Framework
+
+The service extracts multiple dimensions of personality:
+
+- **Core Traits**: Extraversion, openness, conscientiousness, agreeableness, emotional stability
+- **Communication Style**: Direct vs. indirect, formal vs. casual, emotional expression levels
+- **Values & Beliefs**: Moral framework, life priorities, decision-making principles
+- **Behavioral Patterns**: Problem-solving approaches, conflict resolution styles
+- **Emotional Patterns**: How emotions are expressed and processed
+
+### Memory Analysis Process
+
+1. **Content Extraction**: Parses memory text for personality indicators
+2. **Pattern Recognition**: Identifies recurring themes and behavioral patterns
+3. **Trait Scoring**: Quantifies personality dimensions based on linguistic patterns
+4. **Context Integration**: Considers life stage and situational factors
+5. **Profile Synthesis**: Creates cohesive personality profile for AI responses
+
+### Integration with Conversation Engine
+
+The personality profile enhances AI responses by:
+
+- **Authentic Voice**: Matching communication style and vocabulary
+- **Value-Aligned Responses**: Reflecting the person's moral framework
+- **Emotional Resonance**: Appropriate emotional expression levels
+- **Behavioral Consistency**: Maintaining characteristic decision patterns
+
+### Future Enhancements
+
+Designed for integration with advanced personality analysis:
+
+- **Psychological NLP Models**: Specialized models for personality trait detection
+- **Multi-modal Analysis**: Voice recordings, writing samples, photos
+- **Longitudinal Tracking**: Personality evolution across life stages
+- **Cultural Context**: Culturally-aware personality interpretation
+
+### Usage Example
+
+```python
+from app.services.ai.personality_model_service import PersonalityModelService
+from app.services.memory_capture_service import MemoryCaptureService
+
+# Initialize services
+memory_service = MemoryCaptureService()
+personality_service = PersonalityModelService()
+
+# Analyze memories to build personality profile
+memories = memory_service.list_memories()
+personality_profile = personality_service.build_personality_profile(memories)
+
+# Profile includes traits, values, communication style, etc.
+print(f"Communication style: {personality_profile.communication_style}")
+print(f"Core values: {personality_profile.values}")
+```
+
+## Memory Distillation Engine
+
+The Memory Distillation Engine transforms raw memories into higher-level wisdom, extracting life lessons, advice, regrets, and guiding principles that provide deeper meaning and guidance for family members.
+
+### Distillation Categories
+
+The service identifies and extracts four types of distilled wisdom:
+
+- **Life Lessons**: Fundamental principles learned through experience
+- **Advice**: Practical guidance for future generations
+- **Regrets**: Important lessons from mistakes and missed opportunities
+- **Recurring Patterns**: Themes that appear across multiple life experiences
+
+### Wisdom Extraction Process
+
+1. **Pattern Recognition**: Identifies recurring themes across memories
+2. **Lesson Extraction**: Distills explicit and implicit lessons from experiences
+3. **Advice Synthesis**: Generates actionable guidance based on life experiences
+4. **Regret Analysis**: Identifies important "what if" moments and their lessons
+5. **Confidence Scoring**: Rates the significance and reliability of each insight
+
+### Integration Benefits
+
+Memory distillation enhances the AI's responses by providing:
+
+- **Deeper Wisdom**: Beyond surface-level memories to fundamental life principles
+- **Guidance Value**: Offers meaningful advice and life lessons
+- **Emotional Support**: Helps family members process grief through shared wisdom
+- **Legacy Preservation**: Captures the person's accumulated life experience
+
+### Quality Assurance
+
+The distillation process includes:
+
+- **Confidence Scoring**: Each distilled insight has a confidence score
+- **Source Attribution**: Links wisdom back to specific memories
+- **Context Preservation**: Maintains situational context for insights
+- **Bias Mitigation**: Balances positive and challenging experiences
+
+### Future Enhancements
+
+Prepared for advanced distillation techniques:
+
+- **LLM-Powered Analysis**: Using large language models for deeper insight extraction
+- **Sentiment Analysis**: Understanding emotional context of lessons
+- **Cross-Memory Synthesis**: Connecting insights across different life domains
+- **Personalized Wisdom**: Tailoring insights for specific family members
+
+### Usage Example
+
+```python
+from app.services.ai.memory_distillation_service import MemoryDistillationService
+from app.services.memory_capture_service import MemoryCaptureService
+
+# Initialize services
+memory_service = MemoryCaptureService()
+distillation_service = MemoryDistillationService(memory_service)
+
+# Extract wisdom from memories
+memories = memory_service.list_memories()
+life_lessons = distillation_service.distill_life_lessons(memories)
+advice = distillation_service.extract_advice(memories)
+regrets = distillation_service.extract_regrets(memories)
+patterns = distillation_service.identify_recurring_patterns(memories)
+
+# Each insight includes text, confidence score, and source memories
+for lesson in life_lessons:
+    print(f"Lesson: {lesson.insight_text} (Confidence: {lesson.confidence_score})")
+```
+
+## Legacy Access Control
+
+The Legacy Access Control system provides ethical, posthumous access management for the Legacy AI platform, ensuring that sensitive memories are shared appropriately with designated family members while protecting privacy and maintaining trust.
+
+### Access Control Framework
+
+The system implements a hierarchical access model:
+
+- **Public Level**: General memories suitable for all family and friends
+- **Family Level**: Personal memories shared within the immediate family
+- **Intimate Level**: Highly personal or sensitive memories for closest relationships
+
+### Beneficiary Management
+
+- **Registration Process**: Family members register with verified relationships
+- **Relationship Verification**: Confirms familial connections and access levels
+- **Authorization Checks**: Validates access permissions for each memory request
+- **Audit Logging**: Tracks access patterns for security and compliance
+
+### Memory Sensitivity Classification
+
+Memories are automatically classified based on content analysis:
+
+- **Content Analysis**: Scans for sensitive topics, personal information, emotional intensity
+- **Context Evaluation**: Considers relationship context and emotional sensitivity
+- **Dynamic Classification**: Access levels can be adjusted based on beneficiary feedback
+- **Ethical Safeguards**: Prevents inappropriate access to highly personal content
+
+### Integration with Conversation Engine
+
+Access control is seamlessly integrated into the conversation pipeline:
+
+1. **Query Analysis**: Determines appropriate access level for the conversation
+2. **Memory Filtering**: Only authorized memories are included in responses
+3. **Context Preservation**: Maintains conversation flow while respecting boundaries
+4. **Transparent Operation**: Users unaware of filtered content for natural interaction
+
+### Legal and Ethical Compliance
+
+The system addresses important considerations:
+
+- **Privacy Protection**: Respects individual privacy even after death
+- **Family Dynamics**: Accommodates complex family relationships and boundaries
+- **Cultural Sensitivity**: Adapts to different cultural norms around legacy sharing
+- **Legal Compliance**: Designed to meet data protection and inheritance laws
+
+### Future Enhancements
+
+Prepared for advanced access control features:
+
+- **Biometric Verification**: Voice or facial recognition for beneficiary authentication
+- **Time-Based Access**: Gradual release of sensitive memories over time
+- **Conditional Access**: Access based on life events or family agreements
+- **Third-Party Auditing**: External verification of access control compliance
+
+### Usage Example
+
+```python
+from app.services.security.legacy_access_service import LegacyAccessService, AccessLevel, Relationship
+from app.services.memory_capture_service import MemoryCaptureService
+
+# Initialize services
+access_service = LegacyAccessService()
+memory_service = MemoryCaptureService()
+
+# Register a beneficiary
+beneficiary = access_service.register_beneficiary(
+    name="Sarah Johnson",
+    relationship=Relationship.CHILD,
+    access_level=AccessLevel.FAMILY
+)
+
+# Check memory access authorization
+memory_id = "mem_001"
+if access_service.authorize_memory_access(beneficiary, memory_id):
+    memory = memory_service.retrieve_memory(memory_id)
+    # Process authorized memory
+else:
+    # Handle unauthorized access
+    pass
+```
+
 ## Response Moderation Service
 
 The Response Moderation Service is a critical safety component that ensures all AI-generated responses in the Legacy AI platform remain appropriate, respectful, and safe for family members. Given the deeply personal and emotional nature of legacy interactions, content moderation is essential to maintain trust and prevent harm.
