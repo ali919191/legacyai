@@ -3,6 +3,7 @@ from datetime import date
 from ..memory_capture_service import MemoryCaptureService, Memory
 from ..timeline_engine import TimelineEngine
 from ..memory.memory_embedding_service import MemoryEmbeddingService
+from .personality_model_service import PersonalityProfile
 
 
 class ConversationEngine:
@@ -27,7 +28,8 @@ class ConversationEngine:
         self,
         memory_service: MemoryCaptureService,
         timeline_engine: TimelineEngine,
-        embedding_service: MemoryEmbeddingService
+        embedding_service: MemoryEmbeddingService,
+        personality_profile: Optional[PersonalityProfile] = None
     ):
         """
         Initialize the Conversation Engine.
@@ -36,10 +38,12 @@ class ConversationEngine:
             memory_service: Instance of MemoryCaptureService for accessing stored memories.
             timeline_engine: Instance of TimelineEngine for chronological and life-stage context.
             embedding_service: Instance of MemoryEmbeddingService for semantic similarity search.
+            personality_profile: Optional PersonalityProfile to personalize responses.
         """
         self.memory_service = memory_service
         self.timeline_engine = timeline_engine
         self.embedding_service = embedding_service
+        self.personality_profile = personality_profile
 
     def generate_response(self, user_query: str) -> Dict[str, Any]:
         """
@@ -164,8 +168,20 @@ class ConversationEngine:
             for mem in context['memories']
         ])
 
+        personality_text = ""
+        if self.personality_profile:
+            profile = self.personality_profile
+            personality_text = f"""
+Personality traits: {', '.join(profile.traits)}
+Core beliefs: {', '.join(profile.core_beliefs)}
+Communication style: {profile.communication_style.get('formality', 'neutral')} and {profile.communication_style.get('emotional_expression', 'balanced')}
+Values: {', '.join(profile.values)}
+Decision patterns: {', '.join(profile.decision_heuristics)}
+
+Respond in a way that reflects these personality characteristics."""
+
         prompt = f"""You are an AI representation of a person based on their life memories.
-Your responses should be warm, personal, and drawn from the actual experiences described in the memories.
+Your responses should be warm, personal, and drawn from the actual experiences described in the memories.{personality_text}
 
 User's question: {user_query}
 
