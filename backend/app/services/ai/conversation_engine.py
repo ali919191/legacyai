@@ -3,6 +3,7 @@ from ..memory_capture_service import MemoryCaptureService, Memory
 from ..timeline_engine import TimelineEngine
 from ..memory.memory_embedding_service import MemoryEmbeddingService
 from .personality_model_service import PersonalityProfile
+from .memory_distillation_service import MemoryDistillationService, DistilledInsight
 
 
 class ConversationEngine:
@@ -13,10 +14,11 @@ class ConversationEngine:
     generated from stored memories. It integrates with memory services to find
     relevant experiences and construct meaningful answers.
 
-    The engine is designed for future integration with:
-    - PersonalityModelService for personalized responses
-    - MemoryDistillationService for wisdom-based answers
-    - LegacyAccessService for access control
+    The engine combines:
+    - Retrieved memories for specific context
+    - Personality profile for authentic responses
+    - Distilled insights for wisdom-based guidance
+    - LegacyAccessService for access control (future)
     """
 
     def __init__(
@@ -24,7 +26,8 @@ class ConversationEngine:
         memory_service: MemoryCaptureService,
         timeline_engine: TimelineEngine,
         embedding_service: MemoryEmbeddingService,
-        personality_profile: Optional[PersonalityProfile] = None
+        personality_profile: Optional[PersonalityProfile] = None,
+        distillation_service: Optional[MemoryDistillationService] = None
     ):
         """
         Initialize the Conversation Engine.
@@ -34,11 +37,13 @@ class ConversationEngine:
             timeline_engine: Instance of TimelineEngine for chronological context.
             embedding_service: Instance of MemoryEmbeddingService for semantic search.
             personality_profile: Optional PersonalityProfile for personalized responses.
+            distillation_service: Optional MemoryDistillationService for wisdom insights.
         """
         self.memory_service = memory_service
         self.timeline_engine = timeline_engine
         self.embedding_service = embedding_service
         self.personality_profile = personality_profile
+        self.distillation_service = distillation_service
 
     def generate_response(self, user_query: str) -> Dict[str, Any]:
         """
@@ -48,8 +53,9 @@ class ConversationEngine:
         1. Use MemoryEmbeddingService to find similar memories via semantic search.
         2. Use TimelineEngine to add chronological context.
         3. Build context object with memory information.
-        4. Construct AI prompt and generate response (placeholder for now).
-        5. Return structured response.
+        4. Add distilled insights if available.
+        5. Construct AI prompt and generate response (placeholder for now).
+        6. Return structured response.
 
         Args:
             user_query: The user's question or query string.
@@ -58,6 +64,7 @@ class ConversationEngine:
             Dict containing:
             - 'generated_answer': The AI-generated response text.
             - 'memories_used': List of memory IDs used in the response.
+            - 'insights_used': List of distilled insight texts used.
             - 'confidence_score': Float between 0-1 indicating response confidence.
         """
         # Step 1: Semantic search for relevant memories
@@ -79,16 +86,23 @@ class ConversationEngine:
         # Step 4: Build context object
         context = self._build_context(relevant_memories, relevant_chronological)
 
-        # Step 5: Construct prompt and generate response
+        # Step 5: Add distilled insights if service is available
+        relevant_insights = []
+        if self.distillation_service:
+            relevant_insights = self._get_relevant_insights(user_query, relevant_memories)
+            context['distilled_insights'] = [insight.to_dict() for insight in relevant_insights]
+
+        # Step 6: Construct prompt and generate response
         prompt = self._construct_prompt(user_query, context)
         response = self._generate_ai_response(prompt)
 
-        # Step 6: Calculate confidence based on similarity scores
-        confidence = self._calculate_confidence(similar_memories)
+        # Step 7: Calculate confidence based on similarity scores and insights
+        confidence = self._calculate_confidence(similar_memories, relevant_insights)
 
         return {
             'generated_answer': response,
             'memories_used': memory_ids,
+            'insights_used': [insight.insight_text for insight in relevant_insights],
             'confidence_score': confidence
         }
 
@@ -210,14 +224,52 @@ Please answer the question using these memories. Be conversational and authentic
         else:
             return "Based on my memories, I can share that..."
 
-    def _calculate_confidence(self, similar_memories: List[tuple]) -> float:
+    def _get_relevant_insights(self, user_query: str, relevant_memories: List[Memory]) -> List[DistilledInsight]:
+        """
+        Get distilled insights relevant to the user query.
+
+        Args:
+            user_query: The user's question.
+            relevant_memories: Memories that were found relevant to the query.
+
+        Returns:
+            List of relevant DistilledInsight objects.
+        """
+        if not self.distillation_service:
+            return []
+
+        # Get all types of insights from relevant memories
+        all_insights = []
+        all_insights.extend(self.distillation_service.distill_life_lessons(relevant_memories))
+        all_insights.extend(self.distillation_service.extract_advice(relevant_memories))
+        all_insights.extend(self.distillation_service.identify_recurring_patterns(relevant_memories))
+
+        # Filter insights relevant to the query (simple keyword matching for now)
+        query_lower = user_query.lower()
+        relevant_insights = []
+
+        for insight in all_insights:
+            insight_text_lower = insight.insight_text.lower()
+            # Check if query keywords appear in insight
+            query_words = set(query_lower.split())
+            insight_words = set(insight_text_lower.split())
+
+            if query_words & insight_words:  # Intersection of words
+                relevant_insights.append(insight)
+
+        # Return top 3 most confident insights
+        relevant_insights.sort(key=lambda x: x.confidence_score, reverse=True)
+        return relevant_insights[:3]
+
+    def _calculate_confidence(self, similar_memories: List[tuple], insights: Optional[List[DistilledInsight]] = None) -> float:
         """
         Calculate confidence score for the response.
 
-        Based on average similarity score and number of memories.
+        Based on average similarity score, number of memories, and insight quality.
 
         Args:
             similar_memories: List of (memory_id, similarity_score) tuples.
+            insights: Optional list of distilled insights used.
 
         Returns:
             Confidence score between 0 and 1.
@@ -228,5 +280,13 @@ Please answer the question using these memories. Be conversational and authentic
         avg_similarity = sum(score for _, score in similar_memories) / len(similar_memories)
         memory_count_factor = min(len(similar_memories) / 5.0, 1.0)  # Normalize to 0-1
 
-        confidence = (avg_similarity + memory_count_factor) / 2.0
+        base_confidence = (avg_similarity + memory_count_factor) / 2.0
+
+        # Boost confidence if insights are available
+        insight_boost = 0.0
+        if insights:
+            avg_insight_confidence = sum(insight.confidence_score for insight in insights) / len(insights)
+            insight_boost = avg_insight_confidence * 0.2  # 20% boost from insights
+
+        confidence = base_confidence + insight_boost
         return min(confidence, 1.0)
