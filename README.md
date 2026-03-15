@@ -11,33 +11,108 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 
 ## Project Structure
 
+### Directory Tree
+
 ```
-legacyai/
-├── backend/                 # Backend server code
-│   ├── app/
-│   │   ├── api/            # API endpoints
-│   │   ├── models/         # Data models
-│   │   └── services/       # Business logic services
-│   ├── config/             # Configuration files
-│   └── tests/              # Backend tests
-├── frontend/                # Frontend web application
-│   ├── public/             # Static assets
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Application pages
-│   │   └── services/       # Frontend services
-│   └── tests/              # Frontend tests
-├── ai/                     # AI components
-│   ├── models/             # Trained AI models
-│   ├── scripts/            # AI training and processing scripts
-│   └── data/               # AI training data
-├── data/                   # Data storage
-│   ├── memories/           # Stored memory data
-│   └── users/              # User data
-├── docs/                   # Documentation
-├── scripts/                # Utility scripts
-└── tests/                  # General tests
+.
+|-- ai
+|   |-- data
+|   |   `-- README.md
+|   |-- models
+|   |   `-- README.md
+|   `-- scripts
+|       `-- placeholder.py
+|-- backend
+|   |-- app
+|   |   |-- api
+|   |   |   `-- __init__.py
+|   |   |-- models
+|   |   |   `-- __init__.py
+|   |   `-- services
+|   |       `-- __init__.py
+|   |-- config
+|   |   `-- __init__.py
+|   |-- tests
+|   |   `-- test_placeholder.py
+|   |-- app.py
+|   `-- requirements.txt
+|-- data
+|   |-- memories
+|   |   `-- README.md
+|   `-- users
+|       `-- README.md
+|-- docs
+|   `-- README.md
+|-- frontend
+|   |-- public
+|   |   `-- index.html
+|   |-- src
+|   |   |-- components
+|   |   |   `-- index.js
+|   |   |-- pages
+|   |   |   `-- index.js
+|   |   `-- services
+|   |       `-- index.js
+|   |-- tests
+|   |   `-- App.test.js
+|   `-- package.json
+|-- scripts
+|   `-- README.md
+|-- tests
+|   `-- test_placeholder.py
+`-- README.md
+
+25 directories, 22 files
 ```
+
+### Detailed Explanations
+
+#### Root Level
+- **README.md**: This file, containing project overview, setup instructions, and detailed structure explanations.
+
+#### ai/
+AI-related components and resources.
+- **data/README.md**: Placeholder for AI training data directory. Explains the purpose and ensures the folder is tracked in Git.
+- **models/README.md**: Placeholder for trained AI models. Includes notes on storing model artifacts and checkpoints.
+- **scripts/placeholder.py**: Sample Python script for AI workflows, such as data preprocessing or model training.
+
+#### backend/
+Backend server code using Flask.
+- **app.py**: Main Flask application file with routes for login, memories, and database setup.
+- **requirements.txt**: Python dependencies for the backend.
+- **app/api/__init__.py**: API endpoints module. Contains a sample health check route and setup for additional Blueprints.
+- **app/models/__init__.py**: Data models module. Placeholder for SQLAlchemy models like User and Memory.
+- **app/services/__init__.py**: Business logic services. Includes a sample service function for shared logic.
+- **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
+- **tests/test_placeholder.py**: Placeholder test file for backend unit tests.
+
+#### data/
+Data storage directories.
+- **memories/README.md**: Directory for stored memory data. Explains storing memory export files or fixtures.
+- **users/README.md**: Directory for user data files. Notes on storing user JSON or serialized data.
+
+#### docs/
+Documentation directory.
+- **README.md**: Placeholder for project documentation, including guides and architecture docs.
+
+#### frontend/
+Frontend web application using React.
+- **package.json**: Node.js dependencies and scripts for the React app.
+- **public/index.html**: Main HTML template for the React application.
+- **src/components/index.js**: Placeholder for reusable UI components.
+- **src/pages/index.js**: Placeholder for application pages, with a sample HomePage component.
+- **src/services/index.js**: Placeholder for frontend services, with a sample service function.
+- **tests/App.test.js**: Sample test for the main App component.
+
+#### scripts/
+Utility scripts.
+- **README.md**: Explains the purpose of utility scripts for maintenance, data migration, etc.
+
+#### tests/
+General tests.
+- **test_placeholder.py**: Placeholder test file for overall project tests.
+
+This structure ensures all directories are tracked in Git by including at least one file in each. Update this README with each commit to reflect changes.
 
 ## Getting Started
 
