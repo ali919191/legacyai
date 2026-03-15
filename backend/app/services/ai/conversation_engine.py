@@ -4,6 +4,7 @@ from ..memory_capture_service import MemoryCaptureService, Memory
 from ..timeline_engine import TimelineEngine
 from ..memory.memory_embedding_service import MemoryEmbeddingService
 from .personality_model_service import PersonalityProfile
+from .memory_distillation_service import MemoryDistillationService, DistilledInsight
 
 
 class ConversationEngine:
@@ -29,7 +30,8 @@ class ConversationEngine:
         memory_service: MemoryCaptureService,
         timeline_engine: TimelineEngine,
         embedding_service: MemoryEmbeddingService,
-        personality_profile: Optional[PersonalityProfile] = None
+        personality_profile: Optional[PersonalityProfile] = None,
+        distillation_service: Optional[MemoryDistillationService] = None
     ):
         """
         Initialize the Conversation Engine.
@@ -39,11 +41,13 @@ class ConversationEngine:
             timeline_engine: Instance of TimelineEngine for chronological and life-stage context.
             embedding_service: Instance of MemoryEmbeddingService for semantic similarity search.
             personality_profile: Optional PersonalityProfile to personalize responses.
+            distillation_service: Optional MemoryDistillationService for wisdom-based insights.
         """
         self.memory_service = memory_service
         self.timeline_engine = timeline_engine
         self.embedding_service = embedding_service
         self.personality_profile = personality_profile
+        self.distillation_service = distillation_service
 
     def generate_response(self, user_query: str) -> Dict[str, Any]:
         """
@@ -84,7 +88,12 @@ class ConversationEngine:
         # Step 4: Build context object
         context = self._build_context(relevant_memories, relevant_chronological)
 
-        # Step 5: Construct prompt and generate response
+        # Step 5: Add distilled insights if available
+        if self.distillation_service:
+            distilled_insights = self._get_relevant_insights(user_query, relevant_memories)
+            context['distilled_insights'] = [insight.to_dict() for insight in distilled_insights]
+
+        # Step 6: Construct prompt and generate response
         prompt = self._construct_prompt(user_query, context)
         response = self._generate_ai_response(prompt, context)
 
@@ -150,6 +159,44 @@ class ConversationEngine:
 
         return context
 
+    def _get_relevant_insights(self, user_query: str, memories: List[Memory]) -> List[DistilledInsight]:
+        """
+        Get distilled insights relevant to the user query.
+
+        Args:
+            user_query: The user's question.
+            memories: Relevant memories for context.
+
+        Returns:
+            List of relevant DistilledInsight objects.
+        """
+        if not self.distillation_service:
+            return []
+
+        # Get all types of insights
+        all_insights = []
+        all_insights.extend(self.distillation_service.distill_life_lessons(memories))
+        all_insights.extend(self.distillation_service.extract_advice(memories))
+        all_insights.extend(self.distillation_service.extract_regrets(memories))
+        all_insights.extend(self.distillation_service.identify_recurring_patterns(memories))
+
+        # Filter insights relevant to the query (simple keyword matching for now)
+        query_lower = user_query.lower()
+        relevant_insights = []
+
+        for insight in all_insights:
+            insight_text_lower = insight.insight_text.lower()
+            # Check if query keywords appear in insight
+            query_words = set(query_lower.split())
+            insight_words = set(insight_text_lower.split())
+
+            if query_words & insight_words:  # Intersection of words
+                relevant_insights.append(insight)
+
+        # Return top 3 most confident insights
+        relevant_insights.sort(key=lambda x: x.confidence_score, reverse=True)
+        return relevant_insights[:3]
+
     def _construct_prompt(self, user_query: str, context: Dict[str, Any]) -> str:
         """
         Construct a prompt for AI response generation.
@@ -180,16 +227,24 @@ Decision patterns: {', '.join(profile.decision_heuristics)}
 
 Respond in a way that reflects these personality characteristics."""
 
+        wisdom_text = ""
+        if 'distilled_insights' in context and context['distilled_insights']:
+            insights = context['distilled_insights']
+            wisdom_text = "\n\nRelevant wisdom and insights:\n" + "\n".join([
+                f"- {insight['category'].title()}: {insight['insight_text']}"
+                for insight in insights
+            ])
+
         prompt = f"""You are an AI representation of a person based on their life memories.
 Your responses should be warm, personal, and drawn from the actual experiences described in the memories.{personality_text}
 
 User's question: {user_query}
 
 Relevant memories from my life:
-{memories_text}
+{memories_text}{wisdom_text}
 
-Please answer the question using these memories. Be conversational and authentic, as if sharing personal stories.
-If the memories don't directly answer the question, say so honestly but try to relate them where possible."""
+Please answer the question using these memories and insights. Be conversational and authentic, as if sharing personal stories and wisdom.
+If the memories don't directly answer the question, draw from the distilled insights and personality to provide meaningful guidance."""
 
         return prompt
 
