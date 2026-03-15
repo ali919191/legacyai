@@ -360,6 +360,18 @@ The following systems are planned for future development to enhance the Legacy A
 - **Structured Interview Engine**: Provides guided interview experiences to capture comprehensive life stories
 - **Safety / Moderation Layer**: Ensures all AI responses remain appropriate and safe for family interactions
 
+## Testing
+
+The project includes unit tests for key services. Run the test suite using:
+
+```bash
+PYTHONPATH=backend python -m unittest discover -s backend/tests -p "test_*.py"
+```
+
+Current coverage includes:
+
+- Access control logic for beneficiaries and sensitive memories (LegacyAccessService)
+
 ## Project Structure
 
 ### Directory Tree
@@ -398,7 +410,10 @@ The following systems are planned for future development to enhance the Legacy A
 |   |       |   `-- response_moderation_service.py
 |   |       |-- __init__.py
 |   |       |-- memory_capture_service.py
-|   |       `-- timeline_engine.py
+|   |-- tests
+|   |   |-- __init__.py
+|   |   `-- test_legacy_access_service.py
+```|   |       `-- timeline_engine.py
 |   |-- config
 |   |   `-- __init__.py
 |   |-- tests

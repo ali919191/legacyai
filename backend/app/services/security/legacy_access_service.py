@@ -107,7 +107,7 @@ class LegacyAccessService:
             relationship=relationship,
             access_level=access_level,
             registered_date=self._get_current_date(),
-            is_active=False  # Will be activated after legacy conditions are met
+            is_active=self.legacy_activated  # Activate immediately if legacy already activated
         )
 
         self.beneficiaries[user_id] = beneficiary
