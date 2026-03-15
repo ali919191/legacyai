@@ -43,7 +43,8 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 |   |       |   `-- vector_store.py
 |   |       |-- security
 |   |       |   |-- __init__.py
-|   |       |   `-- legacy_access_service.py
+|   |       |   |-- legacy_access_service.py
+|   |       |   `-- response_moderation_service.py
 |   |       |-- __init__.py
 |   |       |-- memory_capture_service.py
 |   |       `-- timeline_engine.py
@@ -113,6 +114,7 @@ Backend server code using Flask.
 - **app/services/memory/vector_store.py**: Simple vector store implementation with cosine similarity search. Stores embeddings in JSON for persistence; designed to be replaced with scalable vector databases like Pinecone or Weaviate in production.
 - **app/services/security/__init__.py**: Package initializer for security services, exporting LegacyAccessService and related enums.
 - **app/services/security/legacy_access_service.py**: Legacy access control service. Manages posthumous access to memories with beneficiary registration, access levels (public, family, intimate), relationship verification, and authorization checks to ensure ethical memory sharing.
+- **app/services/security/response_moderation_service.py**: Response moderation service. Reviews all AI-generated responses before delivery to ensure appropriateness, safety, and respectfulness. Detects sensitive topics (violence, illegal activity, explicit content, self-harm), applies content filtering, and replaces inappropriate responses with safe alternatives. Designed for future integration with external AI moderation APIs.
 - **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
 - **tests/test_placeholder.py**: Placeholder test file for backend unit tests.
 
@@ -201,6 +203,77 @@ response_id = interview_service.record_interview_response(
     question_id="childhood_001",
     response="My favorite childhood memory was building treehouses with my brother..."
 )
+```
+
+## Response Moderation Service
+
+The Response Moderation Service is a critical safety component that ensures all AI-generated responses in the Legacy AI platform remain appropriate, respectful, and safe for family members. Given the deeply personal and emotional nature of legacy interactions, content moderation is essential to maintain trust and prevent harm.
+
+### Safety Categories Monitored
+
+The service monitors responses for multiple categories of inappropriate content:
+
+- **Violence**: References to harm, injury, death, or aggressive behavior
+- **Illegal Activity**: Discussions of crime, drugs, fraud, or unlawful actions
+- **Explicit Content**: Sexual content, nudity, or inappropriate intimacy
+- **Self-Harm**: References to suicide, self-injury, or severe emotional distress
+- **Hate Speech**: Discriminatory language, prejudice, or harmful stereotypes
+- **Medical Sensitivity**: Overly detailed medical information or diagnoses
+- **Financial Privacy**: Personal financial details or sensitive monetary information
+
+### Moderation Process
+
+1. **Content Analysis**: Each response is scanned for sensitive keywords and patterns
+2. **Pattern Detection**: Regex patterns identify potentially harmful instructions or content
+3. **Severity Assessment**: Content is categorized by sensitivity level (safe, sensitive, inappropriate, harmful)
+4. **Action Determination**: Based on severity, responses are allowed, modified, or blocked
+5. **Safe Response Generation**: Inappropriate content is replaced with contextually appropriate alternatives
+
+### Integration with Conversation Engine
+
+The moderation service is seamlessly integrated into the conversation pipeline:
+
+```
+User Query → Memory Search → Context Building → Response Generation → Content Moderation → Safe Response
+```
+
+Every response passes through moderation before being returned to users, ensuring consistent safety standards.
+
+### Future API Integration
+
+The service is architected for easy integration with external moderation APIs:
+
+- **OpenAI Moderation API**: Advanced content classification and safety scoring
+- **Google Perspective API**: Toxicity and harassment detection
+- **Custom ML Models**: Fine-tuned moderation models for legacy-specific content
+- **Third-party Services**: Commercial content moderation platforms
+
+### Safety Response Examples
+
+When inappropriate content is detected, responses are replaced with safe alternatives:
+
+- **Violence**: "I'm not able to discuss topics related to violence, but I'd be happy to share a peaceful memory from my life."
+- **Illegal Activity**: "I can't discuss anything related to illegal activities. How about I share a story about following my principles?"
+- **Self-Harm**: "If you're feeling distressed, please reach out to someone who can help you. I'm here to share positive memories and wisdom."
+- **General Inappropriate**: "I'm not able to discuss that topic, but I'd be happy to share another meaningful memory."
+
+### Usage Example
+
+```python
+from app.services.security.response_moderation_service import ResponseModerationService
+
+# Initialize moderation service
+moderation_service = ResponseModerationService()
+
+# Review a response
+review_result = moderation_service.review_response("Some potentially inappropriate response text")
+
+if not review_result['is_safe']:
+    safe_response = review_result['safe_alternative']
+    print(f"Response moderated: {safe_response}")
+
+# Or use the convenience method
+safe_response = moderation_service.adjust_response_if_needed("original response")
 ```
 
 ## Getting Started

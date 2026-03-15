@@ -6,6 +6,7 @@ from ..memory.memory_embedding_service import MemoryEmbeddingService
 from .personality_model_service import PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
 from ..security.legacy_access_service import LegacyAccessService, Beneficiary
+from ..security.response_moderation_service import ResponseModerationService
 
 
 class ConversationEngine:
@@ -14,13 +15,18 @@ class ConversationEngine:
 
     This engine enables family members to interact with an AI representation of a loved one
     by generating responses based on stored life memories. It integrates semantic memory search,
-    chronological organization, and contextual retrieval to provide meaningful, personalized answers.
+    chronological organization, contextual retrieval, and content moderation to provide meaningful,
+    personalized, and safe answers.
 
     The engine follows this workflow:
     1. Retrieve semantically similar memories using vector embeddings.
-    2. Enhance context with chronological and life-stage information.
-    3. Construct a prompt for AI response generation.
-    4. Generate a structured response with answer, used memories, and confidence.
+    2. Apply access control filtering if beneficiary is provided.
+    3. Retrieve full memory details and add chronological context.
+    4. Build context object with memory information.
+    5. Construct a prompt for AI response generation.
+    6. Generate a structured response with answer, used memories, and confidence.
+    7. Apply content moderation to ensure appropriateness.
+    8. Return the moderated response.
 
     Future integration: Replace placeholder response generation with actual LLM calls
     (e.g., OpenAI GPT, local models like Llama, or Azure OpenAI).
@@ -33,7 +39,8 @@ class ConversationEngine:
         embedding_service: MemoryEmbeddingService,
         personality_profile: Optional[PersonalityProfile] = None,
         distillation_service: Optional[MemoryDistillationService] = None,
-        access_service: Optional[LegacyAccessService] = None
+        access_service: Optional[LegacyAccessService] = None,
+        moderation_service: Optional[ResponseModerationService] = None
     ):
         """
         Initialize the Conversation Engine.
@@ -45,6 +52,7 @@ class ConversationEngine:
             personality_profile: Optional PersonalityProfile to personalize responses.
             distillation_service: Optional MemoryDistillationService for wisdom-based insights.
             access_service: Optional LegacyAccessService for controlling memory access.
+            moderation_service: Optional ResponseModerationService for content moderation.
         """
         self.memory_service = memory_service
         self.timeline_engine = timeline_engine
@@ -52,6 +60,7 @@ class ConversationEngine:
         self.personality_profile = personality_profile
         self.distillation_service = distillation_service
         self.access_service = access_service
+        self.moderation_service = moderation_service
 
     def generate_response(self, user_query: str, beneficiary: Optional[Beneficiary] = None) -> Dict[str, Any]:
         """
@@ -63,7 +72,8 @@ class ConversationEngine:
         3. Retrieve full memory details and add chronological context.
         4. Build context object with memory information.
         5. Construct AI prompt and generate response (placeholder for now).
-        6. Return structured response with answer, memories used, and confidence.
+        6. Apply content moderation to ensure appropriateness.
+        7. Return structured response with answer, memories used, and confidence.
 
         Args:
             user_query: The user's question or query string.
@@ -71,7 +81,7 @@ class ConversationEngine:
 
         Returns:
             Dict containing:
-            - 'answer': The generated response text.
+            - 'answer': The moderated response text.
             - 'memories_used': List of memory IDs used in the response.
             - 'confidence_score': Float between 0-1 indicating response confidence.
         """
@@ -113,6 +123,10 @@ class ConversationEngine:
 
         # Step 8: Calculate confidence based on similarity scores and number of memories
         confidence = self._calculate_confidence(similar_memories, relevant_memories)
+
+        # Step 9: Apply response moderation if service is available
+        if self.moderation_service:
+            response = self.moderation_service.adjust_response_if_needed(response)
 
         return {
             'answer': response,

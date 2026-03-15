@@ -10,11 +10,13 @@ from .legacy_access_service import (
     Beneficiary,
     MemoryMetadata
 )
+from .response_moderation_service import ResponseModerationService
 
 __all__ = [
     'LegacyAccessService',
     'AccessLevel',
     'Relationship',
     'Beneficiary',
-    'MemoryMetadata'
+    'MemoryMetadata',
+    'ResponseModerationService'
 ]
