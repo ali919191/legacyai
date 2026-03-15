@@ -9,6 +9,170 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - **AI Interaction**: Allow family members to converse with an AI-powered persona based on the stored memories.
 - **Secure Access**: Posthumous access controls for designated family members.
 
+## System Pipeline
+
+The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
+
+**Structured Interview → Memory Capture → Timeline Engine → Memory Embeddings → Vector Search → Conversation Engine → Personality Model → AI Response**
+
+### Pipeline Components
+
+1. **Structured Interview**: Guided question sets across life domains capture comprehensive personal experiences
+2. **Memory Capture**: Converts interview responses and stories into structured memory entries with metadata
+3. **Timeline Engine**: Organizes memories chronologically and by life stages for contextual understanding
+4. **Memory Embeddings**: Transforms memory text into vector representations for semantic search
+5. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
+6. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
+7. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
+8. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
+
+### Data Flow Integration
+
+- **Interview responses** automatically become **structured memories** with rich metadata
+- **Timeline context** enhances memory relevance by considering chronological relationships
+- **Semantic embeddings** enable natural language queries to find relevant experiences
+- **Vector search** provides fast, accurate memory retrieval for conversational context
+- **Conversation engine** synthesizes multiple memory sources into coherent, personalized responses
+
+## Conversation Engine
+
+The Conversation Engine is the core component that enables family members to interact with an AI representation of their loved one. It processes natural language queries and generates responses based on stored memories.
+
+### Key Features
+
+- **Semantic Memory Search**: Uses vector embeddings to find memories most relevant to user questions
+- **Chronological Context**: Integrates timeline information to provide temporal context in responses
+- **Structured Response Format**: Returns responses with generated answers, memory references, and confidence scores
+- **Future LLM Integration**: Designed for easy integration with OpenAI, local models, or Azure OpenAI
+
+### API Interface
+
+```python
+# Initialize the conversation engine
+conversation_engine = ConversationEngine(
+    memory_service=memory_service,
+    timeline_engine=timeline_engine,
+    embedding_service=embedding_service
+)
+
+# Generate a response to a user query
+response = conversation_engine.generate_response("What was your favorite family vacation?")
+
+# Response structure
+{
+    'generated_answer': "I remember our trip to Hawaii in 2015...",
+    'memories_used': ['mem_001', 'mem_045', 'mem_078'],
+    'confidence_score': 0.87
+}
+```
+
+### Workflow
+
+1. **Semantic Search**: Finds top 5 most similar memories using vector embeddings
+2. **Memory Retrieval**: Fetches full memory details for relevant memories
+3. **Context Building**: Constructs chronological and thematic context from memories
+4. **Prompt Construction**: Creates AI prompts with memory context and user questions
+5. **Response Generation**: Generates conversational responses (currently placeholder)
+6. **Confidence Calculation**: Computes response confidence based on similarity scores
+
+### Integration Points
+
+- **MemoryCaptureService**: Retrieves stored memory objects
+- **TimelineEngine**: Provides chronological organization and life stage grouping
+- **MemoryEmbeddingService**: Performs semantic similarity search using vector embeddings
+
+## Personality Modeling Engine
+
+The Personality Modeling Engine analyzes stored memories to build comprehensive personality profiles that capture the authentic character, values, and behavioral patterns of the individual. This enables the Conversation Engine to generate responses that reflect the person's true personality.
+
+### Key Features
+
+- **Trait Analysis**: Identifies personality traits through keyword analysis and pattern recognition
+- **Value Extraction**: Discovers core values and life principles from memory content
+- **Communication Style Analysis**: Determines formality, emotional expression, and interaction patterns
+- **Decision Pattern Recognition**: Identifies decision-making heuristics and approaches
+- **Belief System Modeling**: Extracts core beliefs and philosophies from life experiences
+- **Personality Evolution Tracking**: Analyzes how personality develops across life stages
+
+### Personality Profile Structure
+
+The engine generates structured personality profiles containing:
+
+```python
+@dataclass
+class PersonalityProfile:
+    traits: List[str]              # e.g., ['compassionate', 'adventurous', 'disciplined']
+    core_beliefs: List[str]        # e.g., ['Family comes first', 'Honesty is crucial']
+    communication_style: Dict      # formality, emotional_expression, directness
+    values: List[str]              # e.g., ['family', 'integrity', 'achievement']
+    decision_heuristics: List[str] # e.g., ['Makes decisions after careful consideration']
+```
+
+### API Interface
+
+```python
+# Initialize the personality modeling service
+personality_service = PersonalityModelService(
+    memory_service=memory_service,
+    timeline_engine=timeline_engine,
+    embedding_service=embedding_service
+)
+
+# Build a personality profile from all memories
+profile = personality_service.build_personality_profile()
+
+# Extract specific personality components
+traits = personality_service.extract_traits(memories)
+values = personality_service.extract_values(memories)
+beliefs = personality_service.extract_core_beliefs(memories)
+style = personality_service.extract_communication_style(memories)
+patterns = personality_service.extract_decision_patterns(memories)
+
+# Analyze personality evolution across life stages
+evolution = personality_service.analyze_personality_evolution(memories)
+```
+
+### Integration with Conversation Engine
+
+The Personality Modeling Engine seamlessly integrates with the Conversation Engine to provide personalized responses:
+
+```python
+# Create conversation engine with personality profile
+conversation_engine = ConversationEngine(
+    memory_service=memory_service,
+    timeline_engine=timeline_engine,
+    embedding_service=embedding_service,
+    personality_profile=profile  # Enables personalized responses
+)
+
+# Generate personality-aware response
+response = conversation_engine.generate_response("What do you think about taking risks?")
+```
+
+### Analysis Methods
+
+- **Keyword Analysis**: Matches memory content against predefined trait and value dictionaries
+- **Pattern Recognition**: Uses regex patterns to identify belief statements and decision patterns
+- **Frequency Analysis**: Determines dominant traits based on occurrence frequency
+- **Contextual Analysis**: Considers emotional metadata and relationship patterns
+- **Temporal Analysis**: Tracks personality development across different life stages
+
+### Future Enhancements
+
+- **LLM Integration**: Use advanced language models for nuanced personality analysis
+- **Semantic Clustering**: Group related personality indicators using embedding similarity
+- **Cross-Memory Validation**: Ensure personality consistency across different memory types
+- **Dynamic Profile Updates**: Adapt personality profiles as new memories are added
+
+## Upcoming Components
+
+The following systems are planned for future development to enhance the Legacy AI platform:
+
+- **Memory Distillation Engine**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
+- **Legacy Access Control System**: Implements ethical posthumous access controls for different family members
+- **Structured Interview Engine**: Provides guided interview experiences to capture comprehensive life stories
+- **Safety / Moderation Layer**: Ensures all AI responses remain appropriate and safe for family interactions
+
 ## Project Structure
 
 ### Directory Tree

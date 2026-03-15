@@ -1,391 +1,349 @@
-from typing import List, Dict, Any, Set
-from collections import Counter, defaultdict
-from ..memory_capture_service import Memory
+from typing import List, Dict, Any, Optional
+from dataclasses import dataclass, field
+from ..memory_capture_service import MemoryCaptureService, Memory
+from ..timeline_engine import TimelineEngine
+from ..memory.memory_embedding_service import MemoryEmbeddingService
+import re
+from collections import Counter
 
 
+@dataclass
 class PersonalityProfile:
     """
-    Structured representation of a person's personality derived from memories.
+    Represents a personality profile extracted from life memories.
 
-    Contains traits, beliefs, values, and patterns that define their character.
-    Used by the Conversation Engine to generate authentic responses.
+    This profile captures the core aspects of a person's character, values,
+    and behavioral patterns as evidenced by their life experiences.
     """
-
-    def __init__(self):
-        self.traits: List[str] = []
-        self.core_beliefs: List[str] = []
-        self.communication_style: Dict[str, Any] = {}
-        self.values: List[str] = []
-        self.decision_heuristics: List[str] = []
-        self.emotional_patterns: Dict[str, float] = {}
-        self.relationship_patterns: Dict[str, Any] = {}
+    traits: List[str] = field(default_factory=list)
+    core_beliefs: List[str] = field(default_factory=list)
+    communication_style: Dict[str, Any] = field(default_factory=dict)
+    values: List[str] = field(default_factory=list)
+    decision_heuristics: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert profile to dictionary for serialization."""
+        """Convert the profile to a dictionary for serialization."""
         return {
             'traits': self.traits,
             'core_beliefs': self.core_beliefs,
             'communication_style': self.communication_style,
             'values': self.values,
-            'decision_heuristics': self.decision_heuristics,
-            'emotional_patterns': self.emotional_patterns,
-            'relationship_patterns': self.relationship_patterns
+            'decision_heuristics': self.decision_heuristics
         }
 
 
 class PersonalityModelService:
     """
-    Personality Modeling Service for Legacy AI.
+    Personality Modeling Engine for the Legacy AI platform.
 
-    Analyzes stored memories to extract and model personality traits, beliefs, values,
-    and behavioral patterns. This creates a comprehensive personality profile that can
-    be used by the Conversation Engine to generate responses that authentically reflect
-    the person's character.
+    This service analyzes stored memories to build a comprehensive personality profile
+    that captures the user's values, beliefs, communication style, and decision patterns.
+    The profile can be used by the Conversation Engine to generate more authentic,
+    personalized responses.
 
-    Future enhancements:
-    - Integrate LLM analysis (e.g., GPT-4) to interpret memory content and extract nuanced traits.
-    - Use embeddings for semantic clustering of personality indicators.
-    - Implement machine learning models for trait prediction and validation.
-    - Add temporal analysis to track personality evolution over time.
+    The service integrates with:
+    - MemoryCaptureService: Access to stored memories
+    - TimelineEngine: Chronological context and life stage analysis
+    - MemoryEmbeddingService: Semantic analysis of memory content
     """
 
-    # Common personality traits to look for
-    COMMON_TRAITS = [
-        'adventurous', 'analytical', 'artistic', 'compassionate', 'creative',
-        'disciplined', 'empathetic', 'extroverted', 'generous', 'honest',
-        'humble', 'independent', 'introspective', 'loyal', 'optimistic',
-        'patient', 'practical', 'resilient', 'responsible', 'wise'
-    ]
+    def __init__(
+        self,
+        memory_service: MemoryCaptureService,
+        timeline_engine: TimelineEngine,
+        embedding_service: MemoryEmbeddingService
+    ):
+        """
+        Initialize the Personality Modeling Service.
 
-    # Common values
-    COMMON_VALUES = [
-        'family', 'friendship', 'honesty', 'integrity', 'justice',
-        'kindness', 'learning', 'loyalty', 'perseverance', 'respect',
-        'responsibility', 'wisdom', 'compassion', 'courage', 'empathy'
-    ]
+        Args:
+            memory_service: Instance of MemoryCaptureService for accessing stored memories.
+            timeline_engine: Instance of TimelineEngine for chronological and life-stage context.
+            embedding_service: Instance of MemoryEmbeddingService for semantic analysis.
+        """
+        self.memory_service = memory_service
+        self.timeline_engine = timeline_engine
+        self.embedding_service = embedding_service
 
-    def __init__(self):
-        """Initialize the personality modeling service."""
-        pass
+        # Predefined patterns for personality analysis
+        self.trait_keywords = {
+            'adventurous': ['adventure', 'explore', 'travel', 'risk', 'bold', 'daring'],
+            'compassionate': ['care', 'help', 'support', 'empathy', 'kind', 'understanding'],
+            'creative': ['create', 'art', 'music', 'write', 'design', 'innovative'],
+            'disciplined': ['discipline', 'routine', 'consistent', 'focused', 'determined'],
+            'optimistic': ['hope', 'positive', 'optimism', 'bright', 'future', 'possibility'],
+            'practical': ['practical', 'realistic', 'logical', 'efficient', 'useful'],
+            'social': ['friends', 'social', 'community', 'gather', 'together', 'relationships'],
+            'independent': ['independent', 'self-reliant', 'alone', 'solo', 'autonomous']
+        }
 
-    def build_personality_profile(self, memories: List[Memory]) -> PersonalityProfile:
+        self.value_keywords = {
+            'family': ['family', 'children', 'parents', 'siblings', 'home', 'together'],
+            'integrity': ['honest', 'truth', 'integrity', 'ethical', 'moral', 'right'],
+            'achievement': ['success', 'accomplish', 'achieve', 'goal', 'excel', 'excellence'],
+            'freedom': ['freedom', 'liberty', 'independent', 'choice', 'autonomy'],
+            'justice': ['fair', 'justice', 'equality', 'right', 'wrong', 'balance'],
+            'knowledge': ['learn', 'knowledge', 'education', 'wisdom', 'understand', 'grow'],
+            'health': ['health', 'wellness', 'fitness', 'care', 'body', 'mind']
+        }
+
+        self.belief_patterns = [
+            r'I (always|never|believe|think) that (.+)',
+            r'My philosophy is (.+)',
+            r'I stand for (.+)',
+            r'I value (.+) above all',
+            r'The most important thing is (.+)'
+        ]
+
+        self.decision_patterns = [
+            r'I decided to (.+) because (.+)',
+            r'I chose (.+) over (.+)',
+            r'When faced with (.+), I (.+)',
+            r'My approach to (.+) is (.+)'
+        ]
+
+    def build_personality_profile(self, memories: Optional[List[Memory]] = None) -> PersonalityProfile:
         """
         Build a comprehensive personality profile from memories.
 
-        Analyzes all aspects of the provided memories to extract personality characteristics.
+        If no memories are provided, analyzes all available memories.
 
         Args:
-            memories: List of Memory objects to analyze.
+            memories: Optional list of memories to analyze. If None, uses all memories.
 
         Returns:
-            PersonalityProfile object containing extracted traits and patterns.
+            PersonalityProfile containing traits, beliefs, communication style, values, and decision patterns.
         """
+        if memories is None:
+            memories = self.memory_service.list_memories()
+
         profile = PersonalityProfile()
 
-        if not memories:
-            return profile
-
-        # Extract different aspects
-        profile.traits = self._extract_traits(memories)
-        profile.core_beliefs = self._extract_beliefs(memories)
-        profile.communication_style = self._extract_communication_style(memories)
+        # Extract personality components
+        profile.traits = self.extract_traits(memories)
         profile.values = self.extract_values(memories)
+        profile.core_beliefs = self.extract_core_beliefs(memories)
+        profile.communication_style = self.extract_communication_style(memories)
         profile.decision_heuristics = self.extract_decision_patterns(memories)
-        profile.emotional_patterns = self._extract_emotional_patterns(memories)
-        profile.relationship_patterns = self._extract_relationship_patterns(memories)
 
         return profile
 
-    def _extract_traits(self, memories: List[Memory]) -> List[str]:
+    def extract_traits(self, memories: List[Memory]) -> List[str]:
         """
-        Extract personality traits from memories.
-
-        Currently uses keyword matching and pattern recognition.
-        Future: Use LLM to analyze memory content for trait indicators.
+        Extract personality traits from memories using keyword analysis.
 
         Args:
             memories: List of memories to analyze.
 
         Returns:
-            List of identified personality traits.
+            List of identified personality traits, sorted by frequency.
         """
-        trait_indicators = defaultdict(int)
+        trait_scores = Counter()
 
         for memory in memories:
-            text = f"{memory.title} {memory.description}".lower()
+            text_content = f"{memory.title} {memory.description}".lower()
 
-            # Simple keyword matching for traits
-            for trait in self.COMMON_TRAITS:
-                if trait in text:
-                    trait_indicators[trait] += 1
+            for trait, keywords in self.trait_keywords.items():
+                matches = sum(1 for keyword in keywords if keyword in text_content)
+                if matches > 0:
+                    trait_scores[trait] += matches
 
-            # Pattern-based trait detection
-            if any(word in text for word in ['helped', 'supported', 'cared for']):
-                trait_indicators['compassionate'] += 1
-            if any(word in text for word in ['learned', 'studied', 'explored']):
-                trait_indicators['curious'] += 1
-            if any(word in text for word in ['decided', 'chose', 'planned']):
-                trait_indicators['decisive'] += 1
-
-        # Return traits that appear in at least 10% of memories
-        min_occurrences = max(1, len(memories) // 10)
-        return [trait for trait, count in trait_indicators.items() if count >= min_occurrences]
-
-    def _extract_beliefs(self, memories: List[Memory]) -> List[str]:
-        """
-        Extract core beliefs from memories.
-
-        Looks for recurring statements about life, people, or principles.
-        Future: Use NLP to identify belief statements and cluster similar beliefs.
-
-        Args:
-            memories: List of memories to analyze.
-
-        Returns:
-            List of core beliefs.
-        """
-        beliefs = set()
-
-        for memory in memories:
-            text = f"{memory.title} {memory.description}".lower()
-
-            # Look for belief indicators
-            belief_phrases = []
-            if 'believe' in text or 'always thought' in text or 'principle' in text:
-                # Extract sentences containing belief words
-                sentences = text.split('.')
-                for sentence in sentences:
-                    if any(word in sentence for word in ['believe', 'thought', 'principle', 'value']):
-                        belief_phrases.append(sentence.strip())
-
-            # Common belief patterns
-            if 'family comes first' in text or 'family is important' in text:
-                beliefs.add('Family is the most important thing')
-            if 'honesty' in text and 'important' in text:
-                beliefs.add('Honesty is crucial')
-            if 'hard work' in text and 'pays off' in text:
-                beliefs.add('Hard work leads to success')
-
-        return list(beliefs)
-
-    def _extract_communication_style(self, memories: List[Memory]) -> Dict[str, Any]:
-        """
-        Extract communication style patterns.
-
-        Analyzes how the person expresses themselves in memories.
-        Future: Use linguistic analysis to determine formality, directness, etc.
-
-        Args:
-            memories: List of memories to analyze.
-
-        Returns:
-            Dict describing communication style.
-        """
-        style = {
-            'formality': 'neutral',
-            'directness': 'moderate',
-            'emotional_expression': 'balanced',
-            'storytelling': False
-        }
-
-        total_memories = len(memories)
-        formal_count = 0
-        direct_count = 0
-        emotional_count = 0
-        storytelling_count = 0
-
-        for memory in memories:
-            text = f"{memory.title} {memory.description}".lower()
-
-            # Check formality
-            if any(word in text for word in ['please', 'thank you', 'excuse me']):
-                formal_count += 1
-
-            # Check directness
-            if any(word in text for word in ['clearly', 'directly', 'straightforward']):
-                direct_count += 1
-
-            # Check emotional expression
-            emotional_words = ['happy', 'sad', 'angry', 'excited', 'worried', 'proud']
-            if any(word in text for word in emotional_words):
-                emotional_count += 1
-
-            # Check storytelling
-            if any(word in text for word in ['remember when', 'there was this time', 'story']):
-                storytelling_count += 1
-
-        # Determine style based on counts
-        if formal_count > total_memories * 0.6:
-            style['formality'] = 'formal'
-        elif formal_count < total_memories * 0.2:
-            style['formality'] = 'casual'
-
-        if direct_count > total_memories * 0.5:
-            style['directness'] = 'direct'
-        elif direct_count < total_memories * 0.2:
-            style['directness'] = 'indirect'
-
-        if emotional_count > total_memories * 0.7:
-            style['emotional_expression'] = 'expressive'
-        elif emotional_count < total_memories * 0.3:
-            style['emotional_expression'] = 'reserved'
-
-        style['storytelling'] = storytelling_count > total_memories * 0.4
-
-        return style
+        # Return traits that appear at least once, sorted by frequency
+        significant_traits = [trait for trait, score in trait_scores.most_common() if score > 0]
+        return significant_traits[:8]  # Limit to top 8 traits
 
     def extract_values(self, memories: List[Memory]) -> List[str]:
         """
         Extract core values from memories.
 
-        Identifies what the person considers important in life.
-        Future: Use semantic analysis to cluster and rank values.
+        Args:
+            memories: List of memories to analyze.
+
+        Returns:
+            List of identified core values, sorted by relevance.
+        """
+        value_scores = Counter()
+
+        for memory in memories:
+            text_content = f"{memory.title} {memory.description}".lower()
+
+            for value, keywords in self.value_keywords.items():
+                matches = sum(1 for keyword in keywords if keyword in text_content)
+                if matches > 0:
+                    value_scores[value] += matches
+
+        # Return values that appear at least once, sorted by frequency
+        significant_values = [value for value, score in value_scores.most_common() if score > 0]
+        return significant_values[:6]  # Limit to top 6 values
+
+    def extract_core_beliefs(self, memories: List[Memory]) -> List[str]:
+        """
+        Extract core beliefs and philosophies from memories using pattern matching.
 
         Args:
             memories: List of memories to analyze.
 
         Returns:
-            List of identified values.
+            List of identified core beliefs.
         """
-        value_counts = Counter()
+        beliefs = set()
+
+        for memory in memories:
+            text_content = f"{memory.title} {memory.description}"
+
+            for pattern in self.belief_patterns:
+                matches = re.findall(pattern, text_content, re.IGNORECASE)
+                for match in matches:
+                    if isinstance(match, tuple):
+                        belief = match[1] if len(match) > 1 else match[0]
+                    else:
+                        belief = match
+
+                    # Clean up the belief statement
+                    belief = belief.strip()
+                    if belief and len(belief) > 10:  # Only meaningful beliefs
+                        beliefs.add(belief.lower())
+
+        return list(beliefs)[:5]  # Limit to top 5 beliefs
+
+    def extract_communication_style(self, memories: List[Memory]) -> Dict[str, Any]:
+        """
+        Analyze communication style from memory content and metadata.
+
+        Args:
+            memories: List of memories to analyze.
+
+        Returns:
+            Dictionary describing communication style characteristics.
+        """
+        style_analysis = {
+            'formality': 'neutral',
+            'emotional_expression': 'balanced',
+            'directness': 'moderate',
+            'verbosity': 'moderate',
+            'humor_usage': 'occasional'
+        }
+
+        # Analyze formality based on language patterns
+        formal_indicators = ['therefore', 'consequently', 'accordingly', 'moreover', 'furthermore']
+        casual_indicators = ['kinda', 'sorta', 'yeah', 'like', 'totally', 'awesome']
+
+        formal_count = 0
+        casual_count = 0
 
         for memory in memories:
             text = f"{memory.title} {memory.description}".lower()
-            tags = [tag.lower() for tag in memory.tags]
+            formal_count += sum(1 for word in formal_indicators if word in text)
+            casual_count += sum(1 for word in casual_indicators if word in text)
 
-            # Count value mentions in text and tags
-            for value in self.COMMON_VALUES:
-                if value in text or value in tags:
-                    value_counts[value] += 1
+        if formal_count > casual_count * 2:
+            style_analysis['formality'] = 'formal'
+        elif casual_count > formal_count * 2:
+            style_analysis['formality'] = 'casual'
 
-            # Additional value detection
-            if any(word in text for word in ['helped others', 'volunteered', 'gave back']):
-                value_counts['compassion'] += 1
-            if any(word in text for word in ['learned new', 'education', 'studied']):
-                value_counts['learning'] += 1
+        # Analyze emotional expression based on emotion tags
+        emotion_frequency = Counter()
+        for memory in memories:
+            emotion_frequency.update(memory.emotions)
 
-        # Return top values (appearing in at least 15% of memories)
-        min_occurrences = max(1, len(memories) // 7)
-        return [value for value, count in value_counts.most_common() if count >= min_occurrences]
+        high_emotion = emotion_frequency.most_common(1)
+        if high_emotion and high_emotion[0][1] > len(memories) * 0.3:
+            style_analysis['emotional_expression'] = 'expressive'
+        elif len([e for e, c in emotion_frequency.items() if c > 0]) < 3:
+            style_analysis['emotional_expression'] = 'reserved'
+
+        return style_analysis
 
     def extract_decision_patterns(self, memories: List[Memory]) -> List[str]:
         """
-        Extract decision-making patterns and heuristics.
-
-        Identifies how the person typically makes decisions.
-        Future: Use pattern recognition and causal analysis.
+        Extract decision-making patterns and heuristics from memories.
 
         Args:
             memories: List of memories to analyze.
 
         Returns:
-            List of decision patterns.
+            List of identified decision patterns.
         """
         patterns = set()
 
         for memory in memories:
-            text = f"{memory.title} {memory.description}".lower()
+            text_content = f"{memory.title} {memory.description}"
 
-            # Look for decision indicators
-            if any(phrase in text for phrase in ['decided to', 'chose to', 'made the choice']):
-                if 'carefully' in text or 'thought about' in text:
-                    patterns.add('Makes decisions after careful consideration')
-                elif 'quickly' in text or 'immediately' in text:
-                    patterns.add('Makes quick decisions when needed')
-                elif 'heart' in text or 'feeling' in text:
-                    patterns.add('Follows heart/emotions in decisions')
-                elif 'logic' in text or 'reason' in text:
-                    patterns.add('Uses logical reasoning for decisions')
+            for pattern in self.decision_patterns:
+                matches = re.findall(pattern, text_content, re.IGNORECASE)
+                for match in matches:
+                    if isinstance(match, tuple):
+                        decision = f"When {match[0]}, I {match[1]}"
+                    else:
+                        decision = match
 
-            # Risk patterns
-            if 'risk' in text or 'gamble' in text:
-                if 'took the risk' in text:
-                    patterns.add('Willing to take calculated risks')
-                elif 'avoided risk' in text:
-                    patterns.add('Prefers to avoid risks')
+                    # Clean up and store meaningful patterns
+                    decision = decision.strip()
+                    if decision and len(decision) > 15:  # Only substantial patterns
+                        patterns.add(decision.lower())
 
-            # Social decision patterns
-            if 'friends' in text and 'advice' in text:
-                patterns.add('Seeks advice from friends/family')
-            if 'alone' in text and 'decided' in text:
-                patterns.add('Makes independent decisions')
+        return list(patterns)[:4]  # Limit to top 4 patterns
 
-        return list(patterns)
-
-    def _extract_emotional_patterns(self, memories: List[Memory]) -> Dict[str, float]:
+    def analyze_personality_evolution(self, memories: List[Memory]) -> Dict[str, Any]:
         """
-        Extract emotional response patterns.
-
-        Analyzes emotional content across memories.
-        Future: Use sentiment analysis and emotion detection models.
+        Analyze how personality traits evolved over time using TimelineEngine.
 
         Args:
             memories: List of memories to analyze.
 
         Returns:
-            Dict mapping emotions to frequency percentages.
+            Dictionary showing personality evolution across life stages.
         """
-        emotion_counts = Counter()
+        # Group memories by life stage
+        life_stages = self.timeline_engine.group_by_life_stage(memories)
 
-        for memory in memories:
-            for emotion in memory.emotions:
-                emotion_counts[emotion.lower()] += 1
+        evolution = {}
+        for stage, stage_memories in life_stages.items():
+            if stage_memories:  # Only analyze stages with memories
+                profile = self.build_personality_profile(stage_memories)
+                evolution[stage] = {
+                    'traits': profile.traits,
+                    'values': profile.values,
+                    'beliefs': profile.core_beliefs
+                }
 
-        total_emotions = sum(emotion_counts.values())
-        if total_emotions == 0:
-            return {}
+        return evolution
 
-        return {emotion: count / total_emotions for emotion, count in emotion_counts.items()}
-
-    def _extract_relationship_patterns(self, memories: List[Memory]) -> Dict[str, Any]:
+    def get_personality_insights(self, profile: PersonalityProfile) -> Dict[str, Any]:
         """
-        Extract relationship and social interaction patterns.
-
-        Analyzes how the person interacts with others.
-        Future: Use social network analysis on people_involved data.
+        Generate insights about the personality profile.
 
         Args:
-            memories: List of memories to analyze.
+            profile: PersonalityProfile to analyze.
 
         Returns:
-            Dict describing relationship patterns.
+            Dictionary with personality insights and recommendations.
         """
-        patterns = {
-            'social_orientation': 'neutral',
-            'relationship_focus': [],
-            'interaction_style': 'balanced'
+        insights = {
+            'dominant_traits': profile.traits[:3] if profile.traits else [],
+            'core_values': profile.values[:3] if profile.values else [],
+            'communication_tips': [],
+            'decision_style': 'balanced'
         }
 
-        total_people_mentions = 0
-        family_mentions = 0
-        friend_mentions = 0
-        colleague_mentions = 0
+        # Generate communication tips based on style
+        style = profile.communication_style
+        if style.get('formality') == 'formal':
+            insights['communication_tips'].append('Uses formal, structured language')
+        elif style.get('formality') == 'casual':
+            insights['communication_tips'].append('Prefers casual, conversational tone')
 
-        for memory in memories:
-            people = memory.people_involved
-            total_people_mentions += len(people)
+        if style.get('emotional_expression') == 'expressive':
+            insights['communication_tips'].append('Expresses emotions openly')
+        elif style.get('emotional_expression') == 'reserved':
+            insights['communication_tips'].append('Tends to be emotionally reserved')
 
-            for person in people:
-                person_lower = person.lower()
-                if any(rel in person_lower for rel in ['mom', 'dad', 'brother', 'sister', 'family']):
-                    family_mentions += 1
-                elif any(rel in person_lower for rel in ['friend', 'buddy']):
-                    friend_mentions += 1
-                elif any(rel in person_lower for rel in ['colleague', 'coworker', 'boss']):
-                    colleague_mentions += 1
+        # Determine decision style
+        if any('practical' in trait for trait in profile.traits):
+            insights['decision_style'] = 'practical'
+        elif any('creative' in trait for trait in profile.traits):
+            insights['decision_style'] = 'creative'
+        elif any('compassionate' in trait for trait in profile.traits):
+            insights['decision_style'] = 'compassionate'
 
-        if total_people_mentions > 0:
-            family_ratio = family_mentions / total_people_mentions
-            friend_ratio = friend_mentions / total_people_mentions
-
-            if family_ratio > 0.6:
-                patterns['relationship_focus'].append('Family-oriented')
-            if friend_ratio > 0.4:
-                patterns['relationship_focus'].append('Friend-focused')
-
-            if total_people_mentions / len(memories) > 2:
-                patterns['social_orientation'] = 'social'
-            elif total_people_mentions / len(memories) < 0.5:
-                patterns['social_orientation'] = 'private'
-
-        return patterns
+        return insights

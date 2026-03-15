@@ -1,35 +1,22 @@
 from typing import List, Dict, Any, Optional
-from datetime import date
 from ..memory_capture_service import MemoryCaptureService, Memory
 from ..timeline_engine import TimelineEngine
 from ..memory.memory_embedding_service import MemoryEmbeddingService
 from .personality_model_service import PersonalityProfile
-from .memory_distillation_service import MemoryDistillationService, DistilledInsight
-from ..security.legacy_access_service import LegacyAccessService, Beneficiary
-from ..security.response_moderation_service import ResponseModerationService
 
 
 class ConversationEngine:
     """
     Conversation Engine for the Legacy AI platform.
 
-    This engine enables family members to interact with an AI representation of a loved one
-    by generating responses based on stored life memories. It integrates semantic memory search,
-    chronological organization, contextual retrieval, and content moderation to provide meaningful,
-    personalized, and safe answers.
+    This engine allows family members to ask questions and receive responses
+    generated from stored memories. It integrates with memory services to find
+    relevant experiences and construct meaningful answers.
 
-    The engine follows this workflow:
-    1. Retrieve semantically similar memories using vector embeddings.
-    2. Apply access control filtering if beneficiary is provided.
-    3. Retrieve full memory details and add chronological context.
-    4. Build context object with memory information.
-    5. Construct a prompt for AI response generation.
-    6. Generate a structured response with answer, used memories, and confidence.
-    7. Apply content moderation to ensure appropriateness.
-    8. Return the moderated response.
-
-    Future integration: Replace placeholder response generation with actual LLM calls
-    (e.g., OpenAI GPT, local models like Llama, or Azure OpenAI).
+    The engine is designed for future integration with:
+    - PersonalityModelService for personalized responses
+    - MemoryDistillationService for wisdom-based answers
+    - LegacyAccessService for access control
     """
 
     def __init__(
@@ -37,51 +24,39 @@ class ConversationEngine:
         memory_service: MemoryCaptureService,
         timeline_engine: TimelineEngine,
         embedding_service: MemoryEmbeddingService,
-        personality_profile: Optional[PersonalityProfile] = None,
-        distillation_service: Optional[MemoryDistillationService] = None,
-        access_service: Optional[LegacyAccessService] = None,
-        moderation_service: Optional[ResponseModerationService] = None
+        personality_profile: Optional[PersonalityProfile] = None
     ):
         """
         Initialize the Conversation Engine.
 
         Args:
             memory_service: Instance of MemoryCaptureService for accessing stored memories.
-            timeline_engine: Instance of TimelineEngine for chronological and life-stage context.
-            embedding_service: Instance of MemoryEmbeddingService for semantic similarity search.
-            personality_profile: Optional PersonalityProfile to personalize responses.
-            distillation_service: Optional MemoryDistillationService for wisdom-based insights.
-            access_service: Optional LegacyAccessService for controlling memory access.
-            moderation_service: Optional ResponseModerationService for content moderation.
+            timeline_engine: Instance of TimelineEngine for chronological context.
+            embedding_service: Instance of MemoryEmbeddingService for semantic search.
+            personality_profile: Optional PersonalityProfile for personalized responses.
         """
         self.memory_service = memory_service
         self.timeline_engine = timeline_engine
         self.embedding_service = embedding_service
         self.personality_profile = personality_profile
-        self.distillation_service = distillation_service
-        self.access_service = access_service
-        self.moderation_service = moderation_service
 
-    def generate_response(self, user_query: str, beneficiary: Optional[Beneficiary] = None) -> Dict[str, Any]:
+    def generate_response(self, user_query: str) -> Dict[str, Any]:
         """
         Generate a response to the user's query based on relevant memories.
 
         Workflow:
-        1. Perform semantic search to find relevant memories.
-        2. Apply access control filtering if beneficiary is provided.
-        3. Retrieve full memory details and add chronological context.
-        4. Build context object with memory information.
-        5. Construct AI prompt and generate response (placeholder for now).
-        6. Apply content moderation to ensure appropriateness.
-        7. Return structured response with answer, memories used, and confidence.
+        1. Use MemoryEmbeddingService to find similar memories via semantic search.
+        2. Use TimelineEngine to add chronological context.
+        3. Build context object with memory information.
+        4. Construct AI prompt and generate response (placeholder for now).
+        5. Return structured response.
 
         Args:
             user_query: The user's question or query string.
-            beneficiary: Optional Beneficiary for access control filtering.
 
         Returns:
             Dict containing:
-            - 'answer': The moderated response text.
+            - 'generated_answer': The AI-generated response text.
             - 'memories_used': List of memory IDs used in the response.
             - 'confidence_score': Float between 0-1 indicating response confidence.
         """
@@ -89,47 +64,30 @@ class ConversationEngine:
         similar_memories = self.embedding_service.search_similar_memories(user_query, top_k=5)
         memory_ids = [mem_id for mem_id, _ in similar_memories]
 
-        # Step 2: Apply access control filtering if beneficiary is provided
-        if beneficiary and self.access_service:
-            authorized_memory_ids = []
-            for mem_id in memory_ids:
-                if self.access_service.authorize_memory_access(beneficiary, mem_id):
-                    authorized_memory_ids.append(mem_id)
-            memory_ids = authorized_memory_ids
-
-        # Step 3: Retrieve full memory objects
+        # Step 2: Retrieve full memory objects
         relevant_memories = []
         for mem_id in memory_ids:
             memory = self.memory_service.retrieve_memory(mem_id)
             if memory:
                 relevant_memories.append(memory)
 
-        # Step 4: Add chronological context using TimelineEngine
+        # Step 3: Add chronological context using TimelineEngine
         chronological_context = self.timeline_engine.get_chronological_timeline()
         # Filter chronological context to only include relevant memories
         relevant_chronological = [mem for mem in chronological_context if mem.id in memory_ids]
 
-        # Step 5: Build context object
+        # Step 4: Build context object
         context = self._build_context(relevant_memories, relevant_chronological)
 
-        # Step 6: Add distilled insights if available
-        if self.distillation_service:
-            distilled_insights = self._get_relevant_insights(user_query, relevant_memories)
-            context['distilled_insights'] = [insight.to_dict() for insight in distilled_insights]
-
-        # Step 7: Construct prompt and generate response
+        # Step 5: Construct prompt and generate response
         prompt = self._construct_prompt(user_query, context)
-        response = self._generate_ai_response(prompt, context)
+        response = self._generate_ai_response(prompt)
 
-        # Step 8: Calculate confidence based on similarity scores and number of memories
-        confidence = self._calculate_confidence(similar_memories, relevant_memories)
-
-        # Step 9: Apply response moderation if service is available
-        if self.moderation_service:
-            response = self.moderation_service.adjust_response_if_needed(response)
+        # Step 6: Calculate confidence based on similarity scores
+        confidence = self._calculate_confidence(similar_memories)
 
         return {
-            'answer': response,
+            'generated_answer': response,
             'memories_used': memory_ids,
             'confidence_score': confidence
         }
@@ -143,7 +101,7 @@ class ConversationEngine:
             chronological: Chronologically sorted relevant memories.
 
         Returns:
-            Dict with context information.
+            Dict with context information including descriptions, timestamps, tags, emotions.
         """
         context = {
             'memories': [],
@@ -187,47 +145,9 @@ class ConversationEngine:
 
         return context
 
-    def _get_relevant_insights(self, user_query: str, memories: List[Memory]) -> List[DistilledInsight]:
-        """
-        Get distilled insights relevant to the user query.
-
-        Args:
-            user_query: The user's question.
-            memories: Relevant memories for context.
-
-        Returns:
-            List of relevant DistilledInsight objects.
-        """
-        if not self.distillation_service:
-            return []
-
-        # Get all types of insights
-        all_insights = []
-        all_insights.extend(self.distillation_service.distill_life_lessons(memories))
-        all_insights.extend(self.distillation_service.extract_advice(memories))
-        all_insights.extend(self.distillation_service.extract_regrets(memories))
-        all_insights.extend(self.distillation_service.identify_recurring_patterns(memories))
-
-        # Filter insights relevant to the query (simple keyword matching for now)
-        query_lower = user_query.lower()
-        relevant_insights = []
-
-        for insight in all_insights:
-            insight_text_lower = insight.insight_text.lower()
-            # Check if query keywords appear in insight
-            query_words = set(query_lower.split())
-            insight_words = set(insight_text_lower.split())
-
-            if query_words & insight_words:  # Intersection of words
-                relevant_insights.append(insight)
-
-        # Return top 3 most confident insights
-        relevant_insights.sort(key=lambda x: x.confidence_score, reverse=True)
-        return relevant_insights[:3]
-
     def _construct_prompt(self, user_query: str, context: Dict[str, Any]) -> str:
         """
-        Construct a prompt for AI response generation.
+        Construct a prompt template for AI response generation.
 
         Args:
             user_query: The user's question.
@@ -255,39 +175,28 @@ Decision patterns: {', '.join(profile.decision_heuristics)}
 
 Respond in a way that reflects these personality characteristics."""
 
-        wisdom_text = ""
-        if 'distilled_insights' in context and context['distilled_insights']:
-            insights = context['distilled_insights']
-            wisdom_text = "\n\nRelevant wisdom and insights:\n" + "\n".join([
-                f"- {insight['category'].title()}: {insight['insight_text']}"
-                for insight in insights
-            ])
-
-        prompt = f"""You are an AI representation of a person based on their life memories.
-Your responses should be warm, personal, and drawn from the actual experiences described in the memories.{personality_text}
+        prompt = f"""You are an AI representation of a person built from their life memories. Use the memories below to answer the user's question.{personality_text}
 
 User's question: {user_query}
 
 Relevant memories from my life:
-{memories_text}{wisdom_text}
+{memories_text}
 
-Please answer the question using these memories and insights. Be conversational and authentic, as if sharing personal stories and wisdom.
-If the memories don't directly answer the question, draw from the distilled insights and personality to provide meaningful guidance."""
+Please answer the question using these memories. Be conversational and authentic, as if sharing personal stories."""
 
         return prompt
 
-    def _generate_ai_response(self, prompt: str, context: Dict[str, Any]) -> str:
+    def _generate_ai_response(self, prompt: str) -> str:
         """
         Generate AI response from the prompt.
 
         Currently a placeholder. In production, integrate with:
-        - OpenAI API: Use GPT models for response generation.
-        - Local models: Integrate with transformers library or local LLM servers.
-        - Azure OpenAI: For enterprise deployments.
+        - OpenAI API
+        - Local LLM models
+        - Azure OpenAI
 
         Args:
             prompt: The constructed prompt.
-            context: Context object (for future use in response generation).
 
         Returns:
             Generated response text.
@@ -301,15 +210,14 @@ If the memories don't directly answer the question, draw from the distilled insi
         else:
             return "Based on my memories, I can share that..."
 
-    def _calculate_confidence(self, similar_memories: List[tuple], relevant_memories: List[Memory]) -> float:
+    def _calculate_confidence(self, similar_memories: List[tuple]) -> float:
         """
         Calculate confidence score for the response.
 
-        Based on average similarity score and number of relevant memories.
+        Based on average similarity score and number of memories.
 
         Args:
             similar_memories: List of (memory_id, similarity_score) tuples.
-            relevant_memories: List of retrieved Memory objects.
 
         Returns:
             Confidence score between 0 and 1.
@@ -318,7 +226,7 @@ If the memories don't directly answer the question, draw from the distilled insi
             return 0.0
 
         avg_similarity = sum(score for _, score in similar_memories) / len(similar_memories)
-        memory_count_factor = min(len(relevant_memories) / 5.0, 1.0)  # Normalize to 0-1
+        memory_count_factor = min(len(similar_memories) / 5.0, 1.0)  # Normalize to 0-1
 
         confidence = (avg_similarity + memory_count_factor) / 2.0
         return min(confidence, 1.0)
