@@ -4,6 +4,7 @@ from ..timeline_engine import TimelineEngine
 from ..memory.memory_embedding_service import MemoryEmbeddingService
 from .personality_model_service import PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
+from ..security.legacy_access_service import LegacyAccessService, MemoryMetadata
 
 
 class ConversationEngine:
@@ -18,7 +19,7 @@ class ConversationEngine:
     - Retrieved memories for specific context
     - Personality profile for authentic responses
     - Distilled insights for wisdom-based guidance
-    - LegacyAccessService for access control (future)
+    - LegacyAccessService for access control and privacy protection
     """
 
     def __init__(
@@ -27,7 +28,8 @@ class ConversationEngine:
         timeline_engine: TimelineEngine,
         embedding_service: MemoryEmbeddingService,
         personality_profile: Optional[PersonalityProfile] = None,
-        distillation_service: Optional[MemoryDistillationService] = None
+        distillation_service: Optional[MemoryDistillationService] = None,
+        access_service: Optional[LegacyAccessService] = None
     ):
         """
         Initialize the Conversation Engine.
@@ -38,27 +40,31 @@ class ConversationEngine:
             embedding_service: Instance of MemoryEmbeddingService for semantic search.
             personality_profile: Optional PersonalityProfile for personalized responses.
             distillation_service: Optional MemoryDistillationService for wisdom insights.
+            access_service: Optional LegacyAccessService for access control and privacy.
         """
         self.memory_service = memory_service
         self.timeline_engine = timeline_engine
         self.embedding_service = embedding_service
         self.personality_profile = personality_profile
         self.distillation_service = distillation_service
+        self.access_service = access_service
 
-    def generate_response(self, user_query: str) -> Dict[str, Any]:
+    def generate_response(self, user_query: str, user_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Generate a response to the user's query based on relevant memories.
 
         Workflow:
         1. Use MemoryEmbeddingService to find similar memories via semantic search.
-        2. Use TimelineEngine to add chronological context.
-        3. Build context object with memory information.
-        4. Add distilled insights if available.
-        5. Construct AI prompt and generate response (placeholder for now).
-        6. Return structured response.
+        2. Apply access control filtering if LegacyAccessService is available.
+        3. Use TimelineEngine to add chronological context.
+        4. Build context object with memory information.
+        5. Add distilled insights if available.
+        6. Construct AI prompt and generate response (placeholder for now).
+        7. Return structured response.
 
         Args:
             user_query: The user's question or query string.
+            user_id: Optional user ID for access control (required if access_service is used).
 
         Returns:
             Dict containing:
@@ -66,6 +72,7 @@ class ConversationEngine:
             - 'memories_used': List of memory IDs used in the response.
             - 'insights_used': List of distilled insight texts used.
             - 'confidence_score': Float between 0-1 indicating response confidence.
+            - 'access_denied': Boolean indicating if access was denied for some memories.
         """
         # Step 1: Semantic search for relevant memories
         similar_memories = self.embedding_service.search_similar_memories(user_query, top_k=5)
@@ -73,10 +80,28 @@ class ConversationEngine:
 
         # Step 2: Retrieve full memory objects
         relevant_memories = []
+        access_denied = False
+
         for mem_id in memory_ids:
             memory = self.memory_service.retrieve_memory(mem_id)
             if memory:
-                relevant_memories.append(memory)
+                # Apply access control if service is available
+                if self.access_service and user_id:
+                    # Create memory metadata for access control
+                    memory_metadata = MemoryMetadata(
+                        memory_id=memory.id,
+                        sensitivity_tags=memory.sensitivity_tags or [],
+                        created_date=memory.timestamp.isoformat() if hasattr(memory.timestamp, 'isoformat') else str(memory.timestamp),
+                        is_legacy_active=True  # Assume legacy is active for now
+                    )
+
+                    if self.access_service.authorize_memory_access(user_id, memory_metadata):
+                        relevant_memories.append(memory)
+                    else:
+                        access_denied = True
+                else:
+                    # No access control, include all memories
+                    relevant_memories.append(memory)
 
         # Step 3: Add chronological context using TimelineEngine
         chronological_context = self.timeline_engine.get_chronological_timeline()
@@ -101,9 +126,10 @@ class ConversationEngine:
 
         return {
             'generated_answer': response,
-            'memories_used': memory_ids,
+            'memories_used': [mem.id for mem in relevant_memories],  # Use actual memories used after filtering
             'insights_used': [insight.insight_text for insight in relevant_insights],
-            'confidence_score': confidence
+            'confidence_score': confidence,
+            'access_denied': access_denied
         }
 
     def _build_context(self, memories: List[Memory], chronological: List[Memory]) -> Dict[str, Any]:

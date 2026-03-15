@@ -15,6 +15,7 @@ class Memory:
     location: str
     emotions: List[str]
     tags: List[str]
+    sensitivity_tags: Optional[List[str]] = None  # For access control: 'public', 'personal', 'medical', 'financial', 'intimate'
 
 
 class MemoryCaptureService:
@@ -32,7 +33,8 @@ class MemoryCaptureService:
         people_involved: Optional[List[str]] = None,
         location: str = "",
         emotions: Optional[List[str]] = None,
-        tags: Optional[List[str]] = None
+        tags: Optional[List[str]] = None,
+        sensitivity_tags: Optional[List[str]] = None
     ) -> str:
         """
         Create a new memory entry.
@@ -45,6 +47,7 @@ class MemoryCaptureService:
             location: Where the memory took place.
             emotions: List of emotions associated with the memory.
             tags: List of tags for categorization.
+            sensitivity_tags: Access control tags ('public', 'personal', 'medical', 'financial', 'intimate').
 
         Returns:
             The ID of the created memory.
@@ -57,6 +60,8 @@ class MemoryCaptureService:
             emotions = []
         if tags is None:
             tags = []
+        if sensitivity_tags is None:
+            sensitivity_tags = []
 
         memory_id = str(uuid.uuid4())
         memory = Memory(
@@ -67,7 +72,8 @@ class MemoryCaptureService:
             people_involved=people_involved,
             location=location,
             emotions=emotions,
-            tags=tags
+            tags=tags,
+            sensitivity_tags=sensitivity_tags
         )
         self.memories[memory_id] = memory
         return memory_id
@@ -81,7 +87,8 @@ class MemoryCaptureService:
         people_involved: Optional[List[str]] = None,
         location: Optional[str] = None,
         emotions: Optional[List[str]] = None,
-        tags: Optional[List[str]] = None
+        tags: Optional[List[str]] = None,
+        sensitivity_tags: Optional[List[str]] = None
     ) -> bool:
         """
         Update an existing memory entry.
@@ -111,6 +118,8 @@ class MemoryCaptureService:
             memory.emotions = emotions
         if tags is not None:
             memory.tags = tags
+        if sensitivity_tags is not None:
+            memory.sensitivity_tags = sensitivity_tags
         return True
 
     def retrieve_memory(self, memory_id: str) -> Optional[Memory]:

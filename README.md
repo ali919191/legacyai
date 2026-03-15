@@ -13,7 +13,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Structured Interview → Memory Capture → Timeline Engine → Memory Embeddings → Vector Search → Memory Distillation → Conversation Engine → Personality Model → AI Response**
+**Structured Interview → Memory Capture → Timeline Engine → Memory Embeddings → Vector Search → Conversation Engine → Personality Model → Memory Distillation → Legacy Access Control → AI Response**
 
 ### Pipeline Components
 
@@ -22,10 +22,11 @@ The Legacy AI platform follows a comprehensive data processing pipeline that tra
 3. **Timeline Engine**: Organizes memories chronologically and by life stages for contextual understanding
 4. **Memory Embeddings**: Transforms memory text into vector representations for semantic search
 5. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
-6. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
-7. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
-8. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
-9. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
+6. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
+7. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
+8. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
+9. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
+10. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
 
 ### Data Flow Integration
 
@@ -35,6 +36,7 @@ The Legacy AI platform follows a comprehensive data processing pipeline that tra
 - **Vector search** provides fast, accurate memory retrieval for conversational context
 - **Memory distillation** transforms raw memories into actionable wisdom and life lessons
 - **Conversation engine** synthesizes multiple memory sources into coherent, personalized responses
+- **Legacy access control** ensures privacy protection and authorized beneficiary access
 
 ## Conversation Engine
 
@@ -259,11 +261,102 @@ response = conversation_engine.generate_response("What would you tell your young
 - **Multi-Language Support**: Extract insights from memories in different languages
 - **Insight Evolution Tracking**: Analyze how wisdom develops and changes over time
 
+## Legacy Access Control System
+
+The Legacy Access Control System implements comprehensive privacy and security measures for the Legacy AI platform, ensuring that sensitive memories and personal information are only accessible to authorized beneficiaries under appropriate conditions. This system provides graduated access levels based on relationship, trust, and memory sensitivity.
+
+### Key Features
+
+- **Beneficiary Management**: Register and manage authorized users with different relationship types
+- **Access Level Control**: Three-tier access system (Restricted, Limited, Full) based on relationship and trust
+- **Memory Sensitivity Classification**: Tag memories with sensitivity levels (public, personal, medical, financial, intimate)
+- **Legacy Activation Control**: Post-mortem access activation with verification mechanisms
+- **Privacy-First Design**: Default to restrictive access with explicit permission grants
+
+### Access Levels
+
+- **RESTRICTED_ACCESS**: Basic public information and general memories
+- **LIMITED_ACCESS**: Personal but non-sensitive memories and information
+- **FULL_ACCESS**: Complete access including medical, financial, and intimate memories
+
+### Relationship-Based Access
+
+The system automatically assigns access levels based on beneficiary relationships:
+
+- **Children & Spouse**: FULL_ACCESS by default
+- **Parents**: LIMITED_ACCESS (respecting generational boundaries)
+- **Siblings**: LIMITED_ACCESS
+- **Friends & Others**: RESTRICTED_ACCESS
+
+### API Interface
+
+```python
+# Initialize the access control service
+access_service = LegacyAccessService()
+
+# Register beneficiaries
+access_service.register_beneficiary("child_123", Relationship.CHILD)
+access_service.register_beneficiary("sibling_456", Relationship.SIBLING)
+
+# Activate legacy access (after verification)
+access_service.verify_legacy_activation("deceased")
+
+# Check memory access authorization
+memory_metadata = MemoryMetadata(
+    memory_id="mem_001",
+    sensitivity_tags=["personal", "medical"],
+    created_date="2024-01-15",
+    is_legacy_active=True
+)
+
+can_access = access_service.authorize_memory_access("child_123", memory_metadata)
+access_level = access_service.get_access_level("child_123")
+```
+
+### Integration with Conversation Engine
+
+The Legacy Access Control System integrates seamlessly with the Conversation Engine to filter memories based on user permissions:
+
+```python
+# Create conversation engine with access control
+conversation_engine = ConversationEngine(
+    memory_service=memory_service,
+    timeline_engine=timeline_engine,
+    embedding_service=embedding_service,
+    personality_profile=profile,
+    distillation_service=distillation_service,
+    access_service=access_service  # Enables privacy protection
+)
+
+# Generate response with access filtering
+response = conversation_engine.generate_response(
+    "Tell me about your medical history",
+    user_id="child_123"  # Access control applied
+)
+
+# Response includes access_denied flag if some memories were filtered
+print(response['access_denied'])  # True if access was restricted
+```
+
+### Security Architecture
+
+- **Multi-Factor Authorization**: Combines relationship, access level, and memory sensitivity
+- **Audit Trail**: Logs all access attempts for compliance and security monitoring
+- **Graceful Degradation**: System continues to function with partial access restrictions
+- **Future Legal Integration**: Designed for integration with death certificates and legal verification services
+
+### Future Enhancements
+
+- **Legal Verification Integration**: Connect with government death registries and legal executor systems
+- **Multi-Party Approval**: Require multiple beneficiaries for highly sensitive access
+- **Time-Based Access**: Graduated access over time after legacy activation
+- **Digital Estate Management**: Integration with broader digital estate planning platforms
+- **Audit & Compliance**: Comprehensive logging for legal and regulatory requirements
+
 ## Upcoming Components
 
 The following systems are planned for future development to enhance the Legacy AI platform:
 
-- **Legacy Access Control System**: Implements ethical posthumous access controls for different family members
 - **Structured Interview Engine**: Provides guided interview experiences to capture comprehensive life stories
 - **Safety / Moderation Layer**: Ensures all AI responses remain appropriate and safe for family interactions
 
