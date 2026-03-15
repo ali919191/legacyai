@@ -30,7 +30,8 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 |   |   |   `-- __init__.py
 |   |   `-- services
 |   |       |-- __init__.py
-|   |       `-- memory_capture_service.py
+|   |       |-- memory_capture_service.py
+|   |       `-- timeline_engine.py
 |   |-- config
 |   |   `-- __init__.py
 |   |-- tests
@@ -85,6 +86,7 @@ Backend server code using Flask.
 - **app/models/__init__.py**: Data models module. Placeholder for SQLAlchemy models like User and Memory.
 - **app/services/__init__.py**: Business logic services. Includes a sample service function for shared logic.
 - **app/services/memory_capture_service.py**: Memory capture service. Defines a Memory dataclass and MemoryCaptureService class for creating, updating, retrieving, and deleting memory entries with fields like title, description, timestamp, people_involved, location, emotions, and tags.
+- **app/services/timeline_engine.py**: Timeline engine. Organizes memories chronologically, groups them by life stages (childhood, education, career, retirement), and allows querying by date range or life stage using birth date for age calculations.
 - **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
 - **tests/test_placeholder.py**: Placeholder test file for backend unit tests.
 
