@@ -5,6 +5,7 @@ from ..timeline_engine import TimelineEngine
 from ..memory.memory_embedding_service import MemoryEmbeddingService
 from .personality_model_service import PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
+from ..security.legacy_access_service import LegacyAccessService, Beneficiary
 
 
 class ConversationEngine:
@@ -31,7 +32,8 @@ class ConversationEngine:
         timeline_engine: TimelineEngine,
         embedding_service: MemoryEmbeddingService,
         personality_profile: Optional[PersonalityProfile] = None,
-        distillation_service: Optional[MemoryDistillationService] = None
+        distillation_service: Optional[MemoryDistillationService] = None,
+        access_service: Optional[LegacyAccessService] = None
     ):
         """
         Initialize the Conversation Engine.
@@ -42,26 +44,30 @@ class ConversationEngine:
             embedding_service: Instance of MemoryEmbeddingService for semantic similarity search.
             personality_profile: Optional PersonalityProfile to personalize responses.
             distillation_service: Optional MemoryDistillationService for wisdom-based insights.
+            access_service: Optional LegacyAccessService for controlling memory access.
         """
         self.memory_service = memory_service
         self.timeline_engine = timeline_engine
         self.embedding_service = embedding_service
         self.personality_profile = personality_profile
         self.distillation_service = distillation_service
+        self.access_service = access_service
 
-    def generate_response(self, user_query: str) -> Dict[str, Any]:
+    def generate_response(self, user_query: str, beneficiary: Optional[Beneficiary] = None) -> Dict[str, Any]:
         """
         Generate a response to the user's query based on relevant memories.
 
         Workflow:
         1. Perform semantic search to find relevant memories.
-        2. Retrieve full memory details and add chronological context.
-        3. Build context object with memory information.
-        4. Construct AI prompt and generate response (placeholder for now).
-        5. Return structured response with answer, memories used, and confidence.
+        2. Apply access control filtering if beneficiary is provided.
+        3. Retrieve full memory details and add chronological context.
+        4. Build context object with memory information.
+        5. Construct AI prompt and generate response (placeholder for now).
+        6. Return structured response with answer, memories used, and confidence.
 
         Args:
             user_query: The user's question or query string.
+            beneficiary: Optional Beneficiary for access control filtering.
 
         Returns:
             Dict containing:
@@ -73,31 +79,39 @@ class ConversationEngine:
         similar_memories = self.embedding_service.search_similar_memories(user_query, top_k=5)
         memory_ids = [mem_id for mem_id, _ in similar_memories]
 
-        # Step 2: Retrieve full memory objects
+        # Step 2: Apply access control filtering if beneficiary is provided
+        if beneficiary and self.access_service:
+            authorized_memory_ids = []
+            for mem_id in memory_ids:
+                if self.access_service.authorize_memory_access(beneficiary, mem_id):
+                    authorized_memory_ids.append(mem_id)
+            memory_ids = authorized_memory_ids
+
+        # Step 3: Retrieve full memory objects
         relevant_memories = []
         for mem_id in memory_ids:
             memory = self.memory_service.retrieve_memory(mem_id)
             if memory:
                 relevant_memories.append(memory)
 
-        # Step 3: Add chronological context using TimelineEngine
+        # Step 4: Add chronological context using TimelineEngine
         chronological_context = self.timeline_engine.get_chronological_timeline()
         # Filter chronological context to only include relevant memories
         relevant_chronological = [mem for mem in chronological_context if mem.id in memory_ids]
 
-        # Step 4: Build context object
+        # Step 5: Build context object
         context = self._build_context(relevant_memories, relevant_chronological)
 
-        # Step 5: Add distilled insights if available
+        # Step 6: Add distilled insights if available
         if self.distillation_service:
             distilled_insights = self._get_relevant_insights(user_query, relevant_memories)
             context['distilled_insights'] = [insight.to_dict() for insight in distilled_insights]
 
-        # Step 6: Construct prompt and generate response
+        # Step 7: Construct prompt and generate response
         prompt = self._construct_prompt(user_query, context)
         response = self._generate_ai_response(prompt, context)
 
-        # Step 6: Calculate confidence based on similarity scores and number of memories
+        # Step 8: Calculate confidence based on similarity scores and number of memories
         confidence = self._calculate_confidence(similar_memories, relevant_memories)
 
         return {

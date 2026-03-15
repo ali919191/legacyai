@@ -38,6 +38,9 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 |   |       |   |-- __init__.py
 |   |       |   |-- memory_embedding_service.py
 |   |       |   `-- vector_store.py
+|   |       |-- security
+|   |       |   |-- __init__.py
+|   |       |   `-- legacy_access_service.py
 |   |       |-- __init__.py
 |   |       |-- memory_capture_service.py
 |   |       `-- timeline_engine.py
@@ -95,7 +98,7 @@ Backend server code using Flask.
 - **app/models/__init__.py**: Data models module. Placeholder for SQLAlchemy models like User and Memory.
 - **app/services/__init__.py**: Business logic services. Includes a sample service function for shared logic.
 - **app/services/ai/__init__.py**: Package initializer for AI services, exporting ConversationEngine.
-- **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, timeline, and embedding services to generate personalized responses to user queries based on stored memories, with placeholder for LLM integration.
+- **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, timeline, embedding, personality, distillation, and access control services to generate personalized responses to user queries based on stored memories, with placeholder for LLM integration.
 - **app/services/ai/personality_model_service.py**: Personality modeling service. Analyzes memories to extract personality traits, beliefs, values, communication styles, and decision patterns, creating a comprehensive profile for authentic AI responses.
 - **app/services/ai/memory_distillation_service.py**: Memory distillation service. Extracts higher-level wisdom from memories including life lessons, advice, regrets, and guiding principles, providing distilled insights for wisdom-based conversations.
 - **app/services/memory_capture_service.py**: Memory capture service. Defines a Memory dataclass and MemoryCaptureService class for creating, updating, retrieving, and deleting memory entries with fields like title, description, timestamp, people_involved, location, emotions, and tags.
@@ -103,6 +106,8 @@ Backend server code using Flask.
 - **app/services/memory/__init__.py**: Package initializer for memory services, exporting MemoryEmbeddingService and VectorStore.
 - **app/services/memory/memory_embedding_service.py**: Semantic memory search service. Generates embeddings from memory text using a placeholder model, stores them in a vector store, and performs similarity search for retrieving relevant memories based on queries.
 - **app/services/memory/vector_store.py**: Simple vector store implementation with cosine similarity search. Stores embeddings in JSON for persistence; designed to be replaced with scalable vector databases like Pinecone or Weaviate in production.
+- **app/services/security/__init__.py**: Package initializer for security services, exporting LegacyAccessService and related enums.
+- **app/services/security/legacy_access_service.py**: Legacy access control service. Manages posthumous access to memories with beneficiary registration, access levels (public, family, intimate), relationship verification, and authorization checks to ensure ethical memory sharing.
 - **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
 - **tests/test_placeholder.py**: Placeholder test file for backend unit tests.
 
