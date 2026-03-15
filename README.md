@@ -34,6 +34,9 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 |   |       |   |-- __init__.py
 |   |       |   |-- memory_distillation_service.py
 |   |       |   `-- personality_model_service.py
+|   |       |-- interview
+|   |       |   |-- __init__.py
+|   |       |   `-- structured_interview_service.py
 |   |       |-- memory
 |   |       |   |-- __init__.py
 |   |       |   |-- memory_embedding_service.py
@@ -101,6 +104,8 @@ Backend server code using Flask.
 - **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, timeline, embedding, personality, distillation, and access control services to generate personalized responses to user queries based on stored memories, with placeholder for LLM integration.
 - **app/services/ai/personality_model_service.py**: Personality modeling service. Analyzes memories to extract personality traits, beliefs, values, communication styles, and decision patterns, creating a comprehensive profile for authentic AI responses.
 - **app/services/ai/memory_distillation_service.py**: Memory distillation service. Extracts higher-level wisdom from memories including life lessons, advice, regrets, and guiding principles, providing distilled insights for wisdom-based conversations.
+- **app/services/interview/__init__.py**: Package initializer for interview services, exporting StructuredInterviewService.
+- **app/services/interview/structured_interview_service.py**: Structured interview service. Guides users through systematic interviews across life domains (childhood, education, career, relationships, failures, lessons, advice, beliefs) to capture comprehensive life experiences. Automatically converts responses to memory entries with interview metadata, improving personality modeling and memory distillation quality.
 - **app/services/memory_capture_service.py**: Memory capture service. Defines a Memory dataclass and MemoryCaptureService class for creating, updating, retrieving, and deleting memory entries with fields like title, description, timestamp, people_involved, location, emotions, and tags.
 - **app/services/timeline_engine.py**: Timeline engine. Organizes memories chronologically, groups them by life stages (childhood, education, career, retirement), and allows querying by date range or life stage using birth date for age calculations.
 - **app/services/memory/__init__.py**: Package initializer for memory services, exporting MemoryEmbeddingService and VectorStore.
@@ -138,6 +143,65 @@ General tests.
 - **test_placeholder.py**: Placeholder test file for overall project tests.
 
 This structure ensures all directories are tracked in Git by including at least one file in each. Update this README with each commit to reflect changes.
+
+## Structured Interview Engine
+
+The Structured Interview Engine is a core component of the Legacy AI platform that guides users through systematic, domain-specific interviews to capture comprehensive life experiences. This structured approach significantly enhances the quality and depth of the memory database, leading to more authentic AI personality modeling and richer wisdom distillation.
+
+### Interview Categories
+
+The service organizes questions across eight life domains:
+
+- **Childhood**: Captures foundational memories and early influences
+- **Education**: Documents learning experiences and academic journeys
+- **Career**: Records professional achievements, challenges, and growth
+- **Relationships**: Explores interpersonal connections and social dynamics
+- **Failures and Regrets**: Extracts lessons from setbacks and mistakes
+- **Life Lessons**: Identifies core principles and wisdom gained
+- **Advice for Children**: Preserves guidance for future generations
+- **Personal Beliefs**: Documents core values and life philosophy
+
+### Memory Capture Pipeline Integration
+
+The Structured Interview Engine seamlessly integrates with the memory capture pipeline:
+
+1. **Question Presentation**: Users are guided through categorized question sets with follow-up prompts
+2. **Response Recording**: Each response is stored with metadata about the question and category
+3. **Automatic Memory Creation**: Responses are automatically converted to structured memory entries
+4. **Metadata Tagging**: Memories are tagged with interview origin, category, and extracted entities
+5. **Entity Extraction**: Simple NLP extracts people, locations, and emotions from responses
+6. **AI Processing**: Tagged memories feed into personality modeling and distillation services
+
+### Benefits for AI Modeling
+
+- **Personality Modeling**: Consistent questions reveal communication patterns, values, and decision-making styles
+- **Memory Distillation**: Targeted questions about regrets and lessons provide rich wisdom material
+- **Data Quality**: Structured format ensures comprehensive coverage of important life domains
+- **Authenticity**: Interview-derived memories provide deeper, more meaningful AI responses
+
+### Usage Example
+
+```python
+from app.services.interview.structured_interview_service import StructuredInterviewService
+from app.services.memory_capture_service import MemoryCaptureService
+
+# Initialize services
+memory_service = MemoryCaptureService()
+interview_service = StructuredInterviewService(memory_service)
+
+# Get available categories
+categories = interview_service.get_interview_categories()
+
+# Get questions for a category
+questions = interview_service.get_questions_for_category("childhood")
+
+# Record a response (automatically creates memory)
+response_id = interview_service.record_interview_response(
+    user_id="user123",
+    question_id="childhood_001",
+    response="My favorite childhood memory was building treehouses with my brother..."
+)
+```
 
 ## Getting Started
 
