@@ -29,11 +29,11 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 |   |   |-- models
 |   |   |   `-- __init__.py
 |   |   `-- services
-|   |       |-- __init__.py
 |   |       |-- memory
 |   |       |   |-- __init__.py
 |   |       |   |-- memory_embedding_service.py
 |   |       |   `-- vector_store.py
+|   |       |-- __init__.py
 |   |       |-- memory_capture_service.py
 |   |       `-- timeline_engine.py
 |   |-- config
@@ -68,7 +68,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 |   `-- test_placeholder.py
 `-- README.md
 
-25 directories, 22 files
+27 directories, 28 files
 ```
 
 ### Detailed Explanations
