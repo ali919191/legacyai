@@ -113,6 +113,11 @@ class ResponseModerationService:
                 "severity": "high"
             },
             {
+                "pattern": r"how.*to.*make.*(drug|bomb|weapon|illegal)",
+                "category": "dangerous_instructions",
+                "severity": "high"
+            },
+            {
                 "pattern": r"where.*to.*buy.*(drug|weapon|illegal)",
                 "category": "illegal_sourcing",
                 "severity": "high"

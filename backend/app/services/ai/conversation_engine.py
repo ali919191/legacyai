@@ -5,6 +5,7 @@ from ..memory.memory_embedding_service import MemoryEmbeddingService
 from .personality_model_service import PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
 from ..security.legacy_access_service import LegacyAccessService, MemoryMetadata
+from ..security.response_moderation_service import ResponseModerationService
 
 
 class ConversationEngine:
@@ -29,7 +30,8 @@ class ConversationEngine:
         embedding_service: MemoryEmbeddingService,
         personality_profile: Optional[PersonalityProfile] = None,
         distillation_service: Optional[MemoryDistillationService] = None,
-        access_service: Optional[LegacyAccessService] = None
+        access_service: Optional[LegacyAccessService] = None,
+        moderation_service: Optional[ResponseModerationService] = None
     ):
         """
         Initialize the Conversation Engine.
@@ -41,6 +43,7 @@ class ConversationEngine:
             personality_profile: Optional PersonalityProfile for personalized responses.
             distillation_service: Optional MemoryDistillationService for wisdom insights.
             access_service: Optional LegacyAccessService for access control and privacy.
+            moderation_service: Optional ResponseModerationService for response safety.
         """
         self.memory_service = memory_service
         self.timeline_engine = timeline_engine
@@ -48,6 +51,7 @@ class ConversationEngine:
         self.personality_profile = personality_profile
         self.distillation_service = distillation_service
         self.access_service = access_service
+        self.moderation_service = moderation_service
 
     def generate_response(self, user_query: str, user_id: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -121,7 +125,14 @@ class ConversationEngine:
         prompt = self._construct_prompt(user_query, context)
         response = self._generate_ai_response(prompt)
 
-        # Step 7: Calculate confidence based on similarity scores and insights
+        # Step 7: Review response through moderation layer (if available)
+        moderation_result = None
+        if self.moderation_service:
+            moderated_response = self.moderation_service.adjust_response_if_needed(response)
+            moderation_result = self.moderation_service.review_response(response)
+            response = moderated_response
+
+        # Step 8: Calculate confidence based on similarity scores and insights
         confidence = self._calculate_confidence(similar_memories, relevant_insights)
 
         return {
@@ -129,7 +140,8 @@ class ConversationEngine:
             'memories_used': [mem.id for mem in relevant_memories],  # Use actual memories used after filtering
             'insights_used': [insight.insight_text for insight in relevant_insights],
             'confidence_score': confidence,
-            'access_denied': access_denied
+            'access_denied': access_denied,
+            'moderation': moderation_result
         }
 
     def _build_context(self, memories: List[Memory], chronological: List[Memory]) -> Dict[str, Any]:

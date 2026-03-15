@@ -13,7 +13,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Structured Interview → Memory Capture → Timeline Engine → Memory Embeddings → Vector Search → Conversation Engine → Personality Model → Memory Distillation → Legacy Access Control → AI Response**
+**Structured Interview → Memory Capture → Timeline Engine → Memory Embeddings → Vector Search → Conversation Engine → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
 
 ### Pipeline Components
 
@@ -26,7 +26,8 @@ The Legacy AI platform follows a comprehensive data processing pipeline that tra
 7. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
 8. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
 9. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
-10. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
+10. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
+11. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
 
 ### Data Flow Integration
 
@@ -37,6 +38,7 @@ The Legacy AI platform follows a comprehensive data processing pipeline that tra
 - **Memory distillation** transforms raw memories into actionable wisdom and life lessons
 - **Conversation engine** synthesizes multiple memory sources into coherent, personalized responses
 - **Legacy access control** ensures privacy protection and authorized beneficiary access
+- **Response moderation** filters and adjusts AI responses for safety and appropriateness
 
 ## Conversation Engine
 
@@ -353,12 +355,94 @@ print(response['access_denied'])  # True if access was restricted
 - **Digital Estate Management**: Integration with broader digital estate planning platforms
 - **Audit & Compliance**: Comprehensive logging for legal and regulatory requirements
 
+## Response Moderation Service
+
+The Response Moderation Service acts as a critical safety layer that reviews all AI-generated responses before they are returned to users. The Legacy AI platform deals with deeply personal and emotional content, making content moderation essential for maintaining trust, safety, and appropriateness.
+
+### Key Features
+
+- **Content Analysis**: Detects sensitive topics including violence, illegal activities, explicit content, and self-harm
+- **Keyword Filtering**: Uses comprehensive keyword lists to identify inappropriate content
+- **Pattern Recognition**: Employs regex patterns to detect harmful instructions and dangerous content
+- **Safe Response Generation**: Automatically replaces inappropriate responses with safe alternatives
+- **Emotional Intensity Monitoring**: Flags responses with excessive negative emotional language
+- **Multi-Level Sensitivity Classification**: Categorizes content as safe, sensitive, inappropriate, or harmful
+
+### Content Categories Monitored
+
+- **Violence**: Physical harm, death, abuse, and related topics
+- **Illegal Activity**: Crime, drugs, fraud, and unlawful behavior
+- **Explicit Content**: Sexual topics, nudity, and inappropriate intimacy
+- **Self-Harm**: Suicide, self-injury, and mental health crises
+- **Hate Speech**: Discrimination, prejudice, and offensive language
+- **Medical/Financial Sensitive**: Private health and money matters
+- **Harmful Instructions**: Dangerous how-to content and illegal guidance
+
+### API Interface
+
+```python
+# Initialize the response moderation service
+moderation_service = ResponseModerationService()
+
+# Review a response for appropriateness
+review_result = moderation_service.review_response("Response text here")
+# Returns: {'is_safe': bool, 'sensitivity_level': ContentSensitivity, 'issues_found': [...], 'recommended_action': str}
+
+# Automatically adjust response if needed (primary method for ConversationEngine)
+safe_response = moderation_service.adjust_response_if_needed("Potentially inappropriate response")
+# Returns: Original response if safe, or safe alternative if inappropriate
+
+# Detect sensitive content details
+content_analysis = moderation_service.detect_sensitive_content("Response text")
+# Returns: Detailed analysis of detected issues and severity levels
+```
+
+### Integration with Conversation Engine
+
+The Response Moderation Service integrates seamlessly with the Conversation Engine to ensure all responses are safe:
+
+```python
+# Create conversation engine with response moderation
+conversation_engine = ConversationEngine(
+    memory_service=memory_service,
+    timeline_engine=timeline_engine,
+    embedding_service=embedding_service,
+    personality_profile=profile,
+    distillation_service=distillation_service,
+    access_service=access_service,
+    moderation_service=moderation_service  # Enables response safety
+)
+
+# Generate moderated response
+response = conversation_engine.generate_response("Tell me about that violent incident")
+
+# Response includes moderation metadata
+print(response['moderation']['is_safe'])  # True if response passed moderation
+print(response['generated_answer'])  # Safe response if original was inappropriate
+```
+
+### Moderation Architecture
+
+- **Rule-Based Filtering**: Current implementation uses keyword detection and pattern matching
+- **Severity Classification**: Issues are categorized by severity (low, medium, high)
+- **Action Recommendations**: Suggests allow, modify, or block based on content analysis
+- **Safe Response Templates**: Pre-written alternatives for different inappropriate content types
+- **Context Preservation**: Maintains conversational flow while ensuring safety
+
+### Future Enhancements
+
+- **AI-Powered Moderation**: Integration with OpenAI Moderation API, Google Perspective API
+- **Machine Learning Models**: Custom fine-tuned models for nuanced content analysis
+- **Multi-Language Support**: Content moderation for responses in different languages
+- **User Feedback Integration**: Learning from user reports to improve detection
+- **Contextual Analysis**: Understanding intent and context beyond keyword matching
+- **Real-Time Updates**: Dynamic keyword lists and pattern updates
+
 ## Upcoming Components
 
 The following systems are planned for future development to enhance the Legacy AI platform:
 
 - **Structured Interview Engine**: Provides guided interview experiences to capture comprehensive life stories
-- **Safety / Moderation Layer**: Ensures all AI responses remain appropriate and safe for family interactions
 
 ## Testing
 
