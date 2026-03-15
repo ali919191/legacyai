@@ -31,7 +31,8 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 |   |   `-- services
 |   |       |-- ai
 |   |       |   |-- conversation_engine.py
-|   |       |   `-- __init__.py
+|   |       |   |-- __init__.py
+|   |       |   `-- personality_model_service.py
 |   |       |-- memory
 |   |       |   |-- __init__.py
 |   |       |   |-- memory_embedding_service.py
@@ -71,7 +72,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 |   `-- test_placeholder.py
 `-- README.md
 
-27 directories, 29 files
+27 directories, 30 files
 ```
 
 ### Detailed Explanations
@@ -94,6 +95,7 @@ Backend server code using Flask.
 - **app/services/__init__.py**: Business logic services. Includes a sample service function for shared logic.
 - **app/services/ai/__init__.py**: Package initializer for AI services, exporting ConversationEngine.
 - **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, timeline, and embedding services to generate personalized responses to user queries based on stored memories, with placeholder for LLM integration.
+- **app/services/ai/personality_model_service.py**: Personality modeling service. Analyzes memories to extract personality traits, beliefs, values, communication styles, and decision patterns, creating a comprehensive profile for authentic AI responses.
 - **app/services/memory_capture_service.py**: Memory capture service. Defines a Memory dataclass and MemoryCaptureService class for creating, updating, retrieving, and deleting memory entries with fields like title, description, timestamp, people_involved, location, emotions, and tags.
 - **app/services/timeline_engine.py**: Timeline engine. Organizes memories chronologically, groups them by life stages (childhood, education, career, retirement), and allows querying by date range or life stage using birth date for age calculations.
 - **app/services/memory/__init__.py**: Package initializer for memory services, exporting MemoryEmbeddingService and VectorStore.
