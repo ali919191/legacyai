@@ -30,6 +30,10 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 |   |   |   `-- __init__.py
 |   |   `-- services
 |   |       |-- __init__.py
+|   |       |-- memory
+|   |       |   |-- __init__.py
+|   |       |   |-- memory_embedding_service.py
+|   |       |   `-- vector_store.py
 |   |       |-- memory_capture_service.py
 |   |       `-- timeline_engine.py
 |   |-- config
@@ -85,8 +89,9 @@ Backend server code using Flask.
 - **app/api/__init__.py**: API endpoints module. Contains a sample health check route and setup for additional Blueprints.
 - **app/models/__init__.py**: Data models module. Placeholder for SQLAlchemy models like User and Memory.
 - **app/services/__init__.py**: Business logic services. Includes a sample service function for shared logic.
-- **app/services/memory_capture_service.py**: Memory capture service. Defines a Memory dataclass and MemoryCaptureService class for creating, updating, retrieving, and deleting memory entries with fields like title, description, timestamp, people_involved, location, emotions, and tags.
-- **app/services/timeline_engine.py**: Timeline engine. Organizes memories chronologically, groups them by life stages (childhood, education, career, retirement), and allows querying by date range or life stage using birth date for age calculations.
+- **app/services/memory/__init__.py**: Package initializer for memory services, exporting MemoryEmbeddingService and VectorStore.
+- **app/services/memory/memory_embedding_service.py**: Semantic memory search service. Generates embeddings from memory text using a placeholder model, stores them in a vector store, and performs similarity search for retrieving relevant memories based on queries.
+- **app/services/memory/vector_store.py**: Simple vector store implementation with cosine similarity search. Stores embeddings in JSON for persistence; designed to be replaced with scalable vector databases like Pinecone or Weaviate in production.
 - **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
 - **tests/test_placeholder.py**: Placeholder test file for backend unit tests.
 
