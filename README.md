@@ -442,7 +442,10 @@ print(response['generated_answer'])  # Safe response if original was inappropria
 
 The following systems are planned for future development to enhance the Legacy AI platform:
 
-- **Structured Interview Engine**: Provides guided interview experiences to capture comprehensive life stories
+- **Advanced NLP Processing**: Enhanced entity extraction and sentiment analysis for richer memory metadata
+- **Multi-modal Memory Support**: Support for images, audio, and video memories alongside text
+- **Collaborative Memory Curation**: Tools for family members to collaboratively review and enhance memories
+- **AI-Powered Interview Adaptation**: Dynamic question generation based on previous responses and personality insights
 
 ## Testing
 

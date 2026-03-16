@@ -14,6 +14,7 @@ from services.security.legacy_access_service import (
     MemoryMetadata,
     AccessLevel,
 )
+from utils.test_logger import test_logger
 
 
 class TestLegacyAccessService(unittest.TestCase):
