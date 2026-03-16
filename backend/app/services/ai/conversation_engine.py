@@ -3,6 +3,7 @@ from ..memory_capture_service import MemoryCaptureService, Memory
 from ..timeline_engine import TimelineEngine
 from ..memory.memory_embedding_service import MemoryEmbeddingService
 from ..entity.person_profile_service import PersonProfileService
+from ..entity.relationship_service import RelationshipService
 from .personality_model_service import PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
 from .knowledge_gap_service import KnowledgeGapService
@@ -32,6 +33,7 @@ class ConversationEngine:
         timeline_engine: TimelineEngine,
         embedding_service: MemoryEmbeddingService,
         person_profile_service: Optional[PersonProfileService] = None,
+        relationship_service: Optional[RelationshipService] = None,
         personality_profile: Optional[PersonalityProfile] = None,
         distillation_service: Optional[MemoryDistillationService] = None,
         knowledge_gap_service: Optional[KnowledgeGapService] = None,
@@ -47,6 +49,7 @@ class ConversationEngine:
             timeline_engine: Instance of TimelineEngine for chronological context.
             embedding_service: Instance of MemoryEmbeddingService for semantic search.
             person_profile_service: Optional PersonProfileService for entity profile tracking.
+            relationship_service: Optional RelationshipService for entity relationship graph tracking.
             personality_profile: Optional PersonalityProfile for personalized responses.
             distillation_service: Optional MemoryDistillationService for wisdom insights.
             knowledge_gap_service: Optional KnowledgeGapService for missing-context follow-up questions.
@@ -58,6 +61,7 @@ class ConversationEngine:
         self.timeline_engine = timeline_engine
         self.embedding_service = embedding_service
         self.person_profile_service = person_profile_service
+        self.relationship_service = relationship_service
         self.personality_profile = personality_profile
         self.distillation_service = distillation_service
         self.knowledge_gap_service = knowledge_gap_service
@@ -139,6 +143,13 @@ class ConversationEngine:
                 user_query=user_query,
                 relevant_memories=relevant_memories,
             )
+
+        if self.relationship_service:
+            context["relationships"] = self._get_related_relationships(
+                user_query=user_query,
+                relevant_memories=relevant_memories,
+            )
+            self.relationship_service.detect_relationships_from_conversation(user_query)
 
         # Step 6: Add distilled insights if service is available
         relevant_insights = []
@@ -231,6 +242,7 @@ class ConversationEngine:
             'tags': set(),
             'time_range': {},
             'person_profiles': [],
+            'relationships': [],
             'memory_priority': [],
         }
 
@@ -359,6 +371,34 @@ Please answer the question using these memories. Be conversational and authentic
                     profile_map[profile["person_id"]] = profile
 
         return list(profile_map.values())
+
+    def _get_related_relationships(
+        self,
+        user_query: str,
+        relevant_memories: List[Memory],
+    ) -> List[Dict[str, Any]]:
+        """Collect relationship graph edges for people seen in the current context."""
+        if not self.relationship_service or not self.person_profile_service:
+            return []
+
+        related_person_ids = set()
+        for memory in relevant_memories:
+            for person_name in memory.people_involved:
+                for profile in self.person_profile_service.search_person_by_name(person_name):
+                    related_person_ids.add(profile["person_id"])
+
+        for token in user_query.split():
+            clean_token = token.strip(",.?!:;\"'()")
+            if clean_token[:1].isupper():
+                for profile in self.person_profile_service.search_person_by_name(clean_token):
+                    related_person_ids.add(profile["person_id"])
+
+        relationship_map: Dict[str, Dict[str, Any]] = {}
+        for person_id in related_person_ids:
+            for relationship in self.relationship_service.retrieve_relationships_for_person(person_id):
+                relationship_map[relationship["relationship_id"]] = relationship
+
+        return list(relationship_map.values())
 
     def _generate_ai_response(self, prompt: str) -> str:
         """

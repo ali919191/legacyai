@@ -29,11 +29,13 @@ class MemoryCaptureService:
         self,
         person_profile_service: Optional[Any] = None,
         episode_service: Optional[Any] = None,
+        relationship_service: Optional[Any] = None,
     ):
         """Initialize the service with an in-memory storage for memories."""
         self.memories: dict[str, Memory] = {}
         self.person_profile_service = person_profile_service
         self.episode_service = episode_service
+        self.relationship_service = relationship_service
 
     def set_person_profile_service(self, person_profile_service: Any):
         """Attach a profile service used for entity sync from memory mentions."""
@@ -42,6 +44,10 @@ class MemoryCaptureService:
     def set_episode_service(self, episode_service: Any):
         """Attach an episodic service used to group related memories."""
         self.episode_service = episode_service
+
+    def set_relationship_service(self, relationship_service: Any):
+        """Attach relationship graph service used for people link detection."""
+        self.relationship_service = relationship_service
 
     def _sync_person_profiles_from_memory(self, memory: Memory):
         """Push memory people references into the person-profile system when available."""
@@ -52,6 +58,13 @@ class MemoryCaptureService:
         """Attempt to group the memory into an episode when correlations are found."""
         if self.episode_service and hasattr(self.episode_service, "group_memory_by_similarity"):
             self.episode_service.group_memory_by_similarity(memory_id)
+
+    def _sync_relationships_from_memory(self, memory: Memory):
+        """Detect person-to-person relationships when multiple people are referenced."""
+        if self.relationship_service and hasattr(
+            self.relationship_service, "detect_relationships_from_memory"
+        ):
+            self.relationship_service.detect_relationships_from_memory(memory)
 
     def _infer_time_of_day(self, timestamp: datetime) -> str:
         """Infer a narrative-friendly time bucket from a timestamp hour."""
@@ -138,6 +151,7 @@ class MemoryCaptureService:
         self.memories[memory_id] = memory
         self._sync_person_profiles_from_memory(memory)
         self._sync_episode_grouping_from_memory(memory_id)
+        self._sync_relationships_from_memory(memory)
         return memory_id
 
     def update_memory(
@@ -207,6 +221,7 @@ class MemoryCaptureService:
 
         self._sync_person_profiles_from_memory(memory)
         self._sync_episode_grouping_from_memory(memory_id)
+        self._sync_relationships_from_memory(memory)
         return True
 
     def retrieve_memory(self, memory_id: str) -> Optional[Memory]:

@@ -26,6 +26,7 @@ from .services.ai.conversation_engine import ConversationEngine  # noqa: E402
 from .services.ai.knowledge_gap_service import KnowledgeGapService  # noqa: E402
 from .services.ai.memory_priority_service import MemoryPriorityService  # noqa: E402
 from .services.entity.person_profile_service import PersonProfileService  # noqa: E402
+from .services.entity.relationship_service import RelationshipService  # noqa: E402
 from .services.episode.episode_service import EpisodeService  # noqa: E402
 from .services.memory_capture_service import MemoryCaptureService  # noqa: E402
 from .services.memory.memory_embedding_service import MemoryEmbeddingService  # noqa: E402
@@ -69,7 +70,10 @@ def _build_services() -> dict:
 
     memory_service = MemoryCaptureService()
     person_profile_service = PersonProfileService(memory_service=memory_service)
+    relationship_service = RelationshipService(person_profile_service=person_profile_service)
+    person_profile_service.set_relationship_service(relationship_service)
     memory_service.set_person_profile_service(person_profile_service)
+    memory_service.set_relationship_service(relationship_service)
     timeline_engine = TimelineEngine(
         memory_service=memory_service,
         birth_date=birth_date,
@@ -91,6 +95,7 @@ def _build_services() -> dict:
         timeline_engine=timeline_engine,
         embedding_service=embedding_service,
         person_profile_service=person_profile_service,
+        relationship_service=relationship_service,
         knowledge_gap_service=knowledge_gap_service,
         memory_priority_service=memory_priority_service,
     )
@@ -101,6 +106,7 @@ def _build_services() -> dict:
     return {
         "memory_service": memory_service,
         "person_profile_service": person_profile_service,
+        "relationship_service": relationship_service,
         "episode_service": episode_service,
         "timeline_engine": timeline_engine,
         "conversation_engine": conversation_engine,

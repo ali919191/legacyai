@@ -43,6 +43,11 @@ class PersonProfileService:
         self.memory_service = memory_service
         self._profiles: Dict[str, PersonProfile] = {}
         self._name_index: Dict[str, str] = {}
+        self.relationship_service: Optional[Any] = None
+
+    def set_relationship_service(self, relationship_service: Any):
+        """Attach relationship graph service for cross-entity links."""
+        self.relationship_service = relationship_service
 
     def _normalize_name(self, name: str) -> str:
         return re.sub(r"\s+", " ", name.strip().lower())
@@ -103,7 +108,17 @@ class PersonProfileService:
 
     def retrieve_person_profile(self, person_id: str) -> Optional[Dict[str, Any]]:
         profile = self._profiles.get(person_id)
-        return profile.to_dict() if profile else None
+        if not profile:
+            return None
+
+        profile_dict = profile.to_dict()
+        if self.relationship_service and hasattr(
+            self.relationship_service, "retrieve_relationships_for_person"
+        ):
+            profile_dict["relationships"] = self.relationship_service.retrieve_relationships_for_person(
+                person_id
+            )
+        return profile_dict
 
     def link_memory_to_person(self, memory_id: str, person_id: str) -> bool:
         profile = self._profiles.get(person_id)
