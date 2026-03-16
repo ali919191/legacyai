@@ -13,7 +13,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Family Interaction API → Structured Interview → Memory Capture → Media Memory Service → Timeline Engine → Memory Embeddings → Vector Search → Conversation Engine → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
+**Family Interaction API → Structured Interview → Memory Capture → Media Memory Service → Timeline Engine → Memory Embeddings → Vector Search → Life Story Generator → Conversation Engine → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
 
 ### Pipeline Components
 
@@ -24,12 +24,13 @@ The Legacy AI platform follows a comprehensive data processing pipeline that tra
 5. **Timeline Engine**: Organizes memories chronologically and by life stages for contextual understanding
 6. **Memory Embeddings**: Transforms memory text into vector representations for semantic search
 7. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
-7. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
-7. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
-8. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
-9. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
-10. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
-11. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
+8. **Life Story Generator**: Compiles chronological narratives from memories, creating cohesive life stories with key events and personality evolution
+9. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
+10. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
+11. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
+12. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
+13. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
+14. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
 
 ### Data Flow Integration
 
@@ -264,6 +265,134 @@ response = conversation_engine.generate_response("What would you tell your young
 - **Dynamic Insight Updates**: Adapt distilled wisdom as new memories are added
 - **Multi-Language Support**: Extract insights from memories in different languages
 - **Insight Evolution Tracking**: Analyze how wisdom develops and changes over time
+
+## Life Story Generator
+
+The Life Story Generator is a sophisticated narrative engine that transforms raw memories into cohesive, chronological life stories. It synthesizes data from the Timeline Engine, Personality Model, and Memory Distillation services to create a comprehensive biographical narrative that captures the essence of a person's life journey.
+
+### Purpose and Capabilities
+
+The Life Story Generator serves multiple purposes in the Legacy AI platform:
+
+- **Biographical Preservation**: Creates a complete, readable life narrative from structured memories
+- **Life Stage Analysis**: Provides stage-specific summaries (childhood, education, career, retirement)
+- **Narrative Coherence**: Organizes events chronologically with thematic connections and transitions
+- **Key Event Extraction**: Identifies and highlights significant life moments and milestones
+- **Wisdom Integration**: Weaves lessons learned and distilled insights throughout the narrative
+- **Personality Evolution**: Traces how personality developed and changed across different life stages
+
+### Key Features
+
+- **Chronological Compilation**: Transforms memories into a readable sequential narrative
+- **Life Stage Summaries**: Generates focused narratives for each major life period
+- **Key Event Identification**: Automatically identifies and prioritizes significant moments based on emotional intensity and milestone indicators
+- **Thematic Analysis**: Extracts dominant themes and recurring patterns from memories
+- **Personality Development Tracking**: Traces character growth and value evolution across stages
+- **Lessons & Wisdom Integration**: Incorporates distilled insights and life lessons into the narrative
+- **Multi-Level Narrative**: Provides both comprehensive full-life narratives and focused stage summaries
+
+### Life Story Data Structure
+
+```python
+@dataclass
+class LifeStory:
+    user_id: str                                    # User identifier
+    full_narrative: str                             # Complete chronological narrative
+    life_stages: Dict[str, str]                     # Stage-specific summaries
+    key_events: List[Dict[str, Any]]                # Extracted significant events
+    lessons_learned: List[str]                      # Wisdom and insights from life
+    personality_insights: Dict[str, Any]            # Personality evolution and traits
+    memories_used: List[str]                        # IDs of memories included
+    generation_timestamp: datetime                  # When the story was generated
+
+@dataclass
+class LifeStageSummary:
+    stage_name: str                                 # e.g., 'childhood', 'career'
+    age_range: tuple                                # Age range for the stage
+    key_events: List[Dict[str, Any]]                # Important events in the stage
+    dominant_themes: List[str]                      # Theme patterns within the stage
+    personality_development: str                    # How personality evolved
+    lessons_from_stage: List[str]                   # Stage-specific wisdom
+    memory_count: int                               # Number of memories in stage
+```
+
+### API Interface
+
+```python
+# Initialize the Life Story Generator
+life_story_generator = LifeStoryGenerator(
+    memory_service=memory_service,
+    timeline_engine=timeline_engine,
+    personality_service=personality_service,
+    distillation_service=distillation_service
+)
+
+# Generate a complete life story
+life_story = life_story_generator.generate_life_story(user_id="user_123")
+
+# Access the narrative components
+print(life_story.full_narrative)           # Complete biography
+print(life_story.life_stages)              # Stage summaries
+print(life_story.key_events)               # Significant milestones
+print(life_story.lessons_learned)          # Wisdom learned
+print(life_story.personality_insights)     # Character development
+
+# Generate a specific life stage summary
+stage_summary = life_story_generator.generate_life_stage_summary("career")
+print(stage_summary.key_events)            # Career stage milestones
+print(stage_summary.dominant_themes)       # Themes during career
+print(stage_summary.lessons_from_stage)    # Career-related lessons
+
+# Compile custom narrative from specific memories
+narrative = life_story_generator.compile_chronological_narrative(selected_memories)
+```
+
+### Workflow
+
+1. **Memory Retrieval**: Gather all memories for the user
+2. **Chronological Organization**: Sort memories by timestamp
+3. **Life Stage Grouping**: Categorize memories into life stages based on age
+4. **Key Event Extraction**: Identify significant events using emotional and milestone indicators
+5. **Theme Analysis**: Identify dominant themes from tags, emotions, and locations
+6. **Personality Tracing**: Analyze personality development within each stage
+7. **Wisdom Integration**: Incorporate lessons from distillation service
+8. **Narrative Compilation**: Create readable prose from structured data
+9. **Story Assembly**: Combine all elements into LifeStory object
+
+### Integration with Other Components
+
+The Life Story Generator integrates seamlessly with multiple platform components:
+
+```python
+# Conversation Engine can reference the life story for context
+response = conversation_engine.generate_response(
+    user_query="Tell me about your career highlights",
+    context=life_story  # Provides narrative context
+)
+
+# Access Control applies to narrative access
+authorized_narrative = access_service.filter_life_story(
+    life_story=life_story,
+    beneficiary_id="beneficiary_456",
+    access_level="LIMITED_ACCESS"
+)
+
+# Family Interaction API can serve life story endpoints
+GET /api/v1/life-story/{user_id}          # Get full narrative
+GET /api/v1/life-story/{user_id}/stages   # Get stage summaries
+GET /api/v1/life-story/{user_id}/events   # Get key events
+```
+
+### Future Enhancements
+
+- **LLM-Enhanced Narratives**: Integrate GPT-4 or similar models for sophisticated prose generation
+- **Dialogue Synthesis**: Extract and include direct quotes from memory descriptions
+- **Narrative Styles**: Support multiple narrative styles (formal biography, casual storytelling, poetic)
+- **Thematic Threading**: Create semantic connections between related memories and themes
+- **Multi-Media Narrative**: Embed photos, audio clips, and videos into the narrative
+- **Collaborative Storytelling**: Allow family members to contribute to and refine the narrative
+- **Emotional Arc Mapping**: Visualize emotional journey across lifespan
+- **Comparative Narratives**: Generate variations highlighting different themes or perspectives
 
 ## Legacy Access Control System
 
@@ -606,8 +735,9 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |   |   `-- __init__.py
 |   |   `-- services
 |   |       |-- ai
-|   |       |   |-- conversation_engine.py
 |   |       |   |-- __init__.py
+|   |       |   |-- conversation_engine.py
+|   |       |   |-- life_story_generator.py
 |   |       |   |-- memory_distillation_service.py
 |   |       |   `-- personality_model_service.py
 |   |       |-- interview
@@ -665,7 +795,7 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   `-- test_placeholder.py
 `-- README.md
 
-29 directories, 35 files
+29 directories, 36 files
 ```
 
 ### Detailed Explanations
@@ -692,6 +822,7 @@ Backend server code using Flask.
 - **app/services/__init__.py**: Business logic services. Includes a sample service function for shared logic.
 - **app/services/ai/__init__.py**: Package initializer for AI services, exporting ConversationEngine.
 - **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, timeline, embedding, personality, distillation, and access control services to generate personalized responses to user queries based on stored memories, with placeholder for LLM integration.
+- **app/services/ai/life_story_generator.py**: Life story generator service. Compiles chronological narratives from memories, creates life stage summaries, extracts key events and lessons learned, and traces personality evolution across the lifespan. Integrates with timeline, personality, and distillation services to generate coherent biographical narratives suitable for family preservation and storytelling.
 - **app/services/ai/personality_model_service.py**: Personality modeling service. Analyzes memories to extract personality traits, beliefs, values, communication styles, and decision patterns, creating a comprehensive profile for authentic AI responses.
 - **app/services/ai/memory_distillation_service.py**: Memory distillation service. Extracts higher-level wisdom from memories including life lessons, advice, regrets, and guiding principles, providing distilled insights for wisdom-based conversations.
 - **app/services/interview/__init__.py**: Package initializer for interview services, exporting StructuredInterviewService.
