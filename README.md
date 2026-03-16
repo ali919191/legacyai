@@ -13,16 +13,17 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Structured Interview → Memory Capture → Timeline Engine → Memory Embeddings → Vector Search → Conversation Engine → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
+**Family Interaction API → Structured Interview → Memory Capture → Timeline Engine → Memory Embeddings → Vector Search → Conversation Engine → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
 
 ### Pipeline Components
 
-1. **Structured Interview**: Guided question sets across life domains capture comprehensive personal experiences
-2. **Memory Capture**: Converts interview responses and stories into structured memory entries with metadata
-3. **Timeline Engine**: Organizes memories chronologically and by life stages for contextual understanding
-4. **Memory Embeddings**: Transforms memory text into vector representations for semantic search
-5. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
-6. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
+1. **Family Interaction API**: REST endpoints allowing beneficiaries to ask questions, browse memories, and explore timelines
+2. **Structured Interview**: Guided question sets across life domains capture comprehensive personal experiences
+3. **Memory Capture**: Converts interview responses and stories into structured memory entries with metadata
+4. **Timeline Engine**: Organizes memories chronologically and by life stages for contextual understanding
+5. **Memory Embeddings**: Transforms memory text into vector representations for semantic search
+6. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
+7. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
 7. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
 8. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
 9. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
@@ -525,7 +526,8 @@ tail -50 tests.log
 |-- backend
 |   |-- app
 |   |   |-- api
-|   |   |   `-- __init__.py
+|   |   |   |-- __init__.py
+|   |   |   `-- family_interaction_api.py
 |   |   |-- models
 |   |   |   `-- __init__.py
 |   |   `-- services
@@ -605,6 +607,7 @@ Backend server code using Flask.
 - **app.py**: Main Flask application file with routes for login, memories, and database setup.
 - **requirements.txt**: Python dependencies for the backend.
 - **app/api/__init__.py**: API endpoints module. Contains a sample health check route and setup for additional Blueprints.
+- **app/api/family_interaction_api.py**: Family interaction API using FastAPI. Provides REST endpoints for asking questions to Legacy AI (/ask), browsing memories (/memories), exploring timelines (/timeline), and health checks. Integrates with ConversationEngine, LegacyAccessService, and ResponseModerationService for secure, moderated AI interactions.
 - **app/models/__init__.py**: Data models module. Placeholder for SQLAlchemy models like User and Memory.
 - **app/services/__init__.py**: Business logic services. Includes a sample service function for shared logic.
 - **app/services/ai/__init__.py**: Package initializer for AI services, exporting ConversationEngine.
@@ -709,6 +712,95 @@ response_id = interview_service.record_interview_response(
     question_id="childhood_001",
     response="My favorite childhood memory was building treehouses with my brother..."
 )
+```
+
+## Family Interaction API
+
+The Family Interaction API provides REST endpoints that serve as the primary interface for beneficiaries and family members to interact with the Legacy AI system. This API integrates with the complete AI reasoning pipeline while enforcing access controls and response moderation.
+
+### API Endpoints
+
+- **POST /ask**: Submit questions to the Legacy AI and receive personalized responses
+- **GET /timeline**: Retrieve chronologically organized life events and major milestones
+- **GET /memories**: Browse authorized memories with optional category filtering and pagination
+- **GET /health**: API health check and service status information
+
+### Integration with AI Pipeline
+
+The API serves as the entry point for user interactions, routing requests through the complete Legacy AI processing pipeline:
+
+1. **User Query Reception**: Accepts natural language questions via POST /ask
+2. **Conversation Engine Processing**: Routes queries through semantic search and response generation
+3. **Access Control Enforcement**: Applies LegacyAccessService authorization for memory access
+4. **Response Moderation**: Filters responses through ResponseModerationService for safety
+5. **Structured Response Delivery**: Returns AI answers with metadata about memories used and confidence scores
+
+### Authentication Design
+
+The API is structured to easily accommodate future authentication:
+
+```python
+# Future authentication middleware can populate user_id from tokens
+@app.middleware("http")
+async def authenticate_user(request, call_next):
+    # Extract user_id from JWT token or session
+    user_id = extract_user_from_token(request.headers.get("Authorization"))
+    request.state.user_id = user_id
+    return await call_next(request)
+```
+
+### Usage Examples
+
+```python
+import requests
+
+# Ask a question to Legacy AI
+response = requests.post("http://localhost:8000/ask", json={
+    "query": "What was your favorite family vacation?",
+    "user_id": "child_beneficiary_123"
+})
+
+# Get timeline events
+timeline = requests.get("http://localhost:8000/timeline", params={
+    "user_id": "child_beneficiary_123",
+    "limit": 20
+})
+
+# Browse memories
+memories = requests.get("http://localhost:8000/memories", params={
+    "user_id": "child_beneficiary_123",
+    "category": "family",
+    "limit": 10
+})
+```
+
+### Response Formats
+
+**Ask Response:**
+```json
+{
+  "answer": "My favorite family vacation was our trip to Hawaii in 1995...",
+  "memories_used": ["mem_001", "mem_045"],
+  "insights_used": ["Travel brought our family closer together"],
+  "confidence_score": 0.87,
+  "access_denied": false,
+  "moderation_applied": false,
+  "timestamp": "2026-03-16T14:30:25Z"
+}
+```
+
+**Timeline Response:**
+```json
+[
+  {
+    "id": "mem_001",
+    "title": "First Day of School",
+    "description": "Starting kindergarten at Lincoln Elementary...",
+    "timestamp": "1965-09-01T00:00:00Z",
+    "life_stage": "childhood",
+    "age": 5
+  }
+]
 ```
 
 ## Conversation Engine
