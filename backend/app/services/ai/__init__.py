@@ -6,11 +6,15 @@ Contains conversation engine, personality modeling, and memory distillation serv
 from .conversation_engine import ConversationEngine
 from .personality_model_service import PersonalityModelService, PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
+from .life_story_generator import LifeStoryGenerator, LifeStory, LifeStageSummary
 
 __all__ = [
     'ConversationEngine',
     'PersonalityModelService',
     'PersonalityProfile',
     'MemoryDistillationService',
-    'DistilledInsight'
+    'DistilledInsight',
+    'LifeStoryGenerator',
+    'LifeStory',
+    'LifeStageSummary',
 ]

@@ -4,10 +4,20 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 
 ## Features
 
-- **Life Experience Capture**: Tools and interfaces to record personal stories, memories, and experiences.
-- **Structured Memory Storage**: Organize and store memories in a structured format for AI processing.
-- **AI Interaction**: Allow family members to converse with an AI-powered persona based on the stored memories.
-- **Secure Access**: Posthumous access controls for designated family members.
+- **Life Experience Capture**: Guided structured interviews and free-form tools to record personal stories across all life domains.
+- **Structured Memory Storage**: Memories stored with rich metadata — life stage, emotional tone, people, locations, and timestamps.
+- **Media Memory Service**: Attach photos, audio recordings, and video clips to memory entries.
+- **Timeline Engine**: Organize memories chronologically and by life stage (childhood, education, career, retirement).
+- **Semantic Search**: Vector embeddings enable natural-language queries to find the most relevant memories instantly.
+- **Life Story Generator**: Compiles chronological biographical narratives with key events, themes, and personality evolution.
+- **Conversation Engine**: Orchestrates memory retrieval and context building to generate personalized AI responses.
+- **Personality Modeling**: Analyzes memory patterns to build authentic personality profiles for realistic interactions.
+- **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories.
+- **Secure Posthumous Access**: Role-based access controls (guardian, spouse, child, extended family, friend) for designated beneficiaries.
+- **Response Moderation**: Automatic filtering to ensure all AI responses remain respectful, safe, and appropriate.
+- **Family Interaction API**: REST endpoints for querying memories, browsing timelines, and conversing with the AI persona.
+- **Containerised Deployment**: Docker Compose setup with PostgreSQL and Qdrant vector database for one-command local deployment.
+- **CI/CD Pipeline**: GitHub Actions runs black, ruff, mypy, and pytest across Python 3.9 / 3.10 / 3.11 on every push.
 
 ## System Pipeline
 
@@ -635,8 +645,22 @@ tail -50 tests.log
 
 ### Test Coverage
 
-- **Legacy Access Service**: Beneficiary registration, access level assignment, memory authorization
-- **Response Moderation Service**: Content filtering, safe response generation, pattern detection
+| Test File | Service | Tests |
+|---|---|---|
+| `test_memory_capture_service.py` | MemoryCaptureService | 6 |
+| `test_timeline_engine.py` | TimelineEngine | 5 |
+| `test_life_story_generator.py` | LifeStoryGenerator | 6 |
+| `test_legacy_access_service.py` | LegacyAccessService | 4 |
+| `test_response_moderation_service.py` | ResponseModerationService | 12 |
+
+**Total: 33 tests**
+
+### Running Tests with Make
+
+```bash
+make test        # Run all tests with verbose output
+make test-cov    # Run tests with coverage report
+```
 
 ## Code Quality and Testing
 
@@ -653,26 +677,29 @@ The project uses the following tools for code quality:
 
 ### Running Code Quality Checks Locally
 
-Before committing code, ensure all checks pass:
+The `Makefile` provides shortcuts for all common development tasks:
 
 ```bash
-# Install quality tools
-pip install -r backend/requirements.txt
+# Install all dependencies
+make install
 
-# Format code with black
-black backend/app backend/tests
+# Format code (writes changes)
+make format
 
-# Check code style with ruff
-ruff check backend/app backend/tests
+# Check formatting without writing (CI mode)
+make format-check
 
-# Run type checking with mypy
-mypy backend/app backend/tests
+# Run mypy type checks
+make type-check
 
-# Run all tests with pytest
-PYTHONPATH=backend pytest backend/tests -v
+# Run all tests
+make test
 
-# Run tests with unittest (legacy method)
-PYTHONPATH=backend python -m unittest discover -s backend/tests -p "test_*.py" -v
+# Run tests with coverage
+make test-cov
+
+# Run all quality gates (format-check + type-check + tests)
+make quality
 ```
 
 ### Continuous Integration Pipeline
@@ -718,10 +745,13 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   `-- workflows
 |       `-- ci.yml
 |-- .gitignore
+|-- .pre-commit-config.yaml
+|-- CONTRIBUTING.md
+|-- LICENSE
+|-- Makefile
 |-- README.md
 |-- docker-compose.yml
 |-- pyproject.toml
-|-- tests.log
 |-- ai
 |   |-- data
 |   |   `-- README.md
@@ -733,12 +763,16 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |-- .dockerignore
 |   |-- Dockerfile
 |   |-- app
+|   |   |-- __init__.py
 |   |   |-- api
 |   |   |   |-- __init__.py
 |   |   |   `-- family_interaction_api.py
 |   |   |-- models
 |   |   |   `-- __init__.py
 |   |   `-- services
+|   |       |-- __init__.py
+|   |       |-- memory_capture_service.py
+|   |       |-- timeline_engine.py
 |   |       |-- ai
 |   |       |   |-- __init__.py
 |   |       |   |-- conversation_engine.py
@@ -748,27 +782,29 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |       |-- interview
 |   |       |   |-- __init__.py
 |   |       |   `-- structured_interview_service.py
+|   |       |-- media
+|   |       |   |-- __init__.py
+|   |       |   `-- media_memory_service.py
 |   |       |-- memory
 |   |       |   |-- __init__.py
 |   |       |   |-- memory_embedding_service.py
 |   |       |   `-- vector_store.py
-|   |       |-- security
-|   |       |   |-- __init__.py
-|   |       |   |-- legacy_access_service.py
-|   |       |   `-- response_moderation_service.py
-|   |       |-- media
-|   |       |   |-- __init__.py
-|   |       |   `-- media_memory_service.py
-|   |       |-- __init__.py
-|   |       |-- memory_capture_service.py
-|   |       `-- timeline_engine.py
+|   |       `-- security
+|   |           |-- __init__.py
+|   |           |-- legacy_access_service.py
+|   |           `-- response_moderation_service.py
 |   |-- config
 |   |   `-- __init__.py
 |   |-- tests
 |   |   |-- __init__.py
 |   |   |-- test_legacy_access_service.py
+|   |   |-- test_life_story_generator.py
+|   |   |-- test_memory_capture_service.py
+|   |   |-- test_placeholder.py
 |   |   |-- test_response_moderation_service.py
+|   |   |-- test_timeline_engine.py
 |   |   `-- utils
+|   |       |-- __init__.py
 |   |       `-- test_logger.py
 |   |-- app.py
 |   `-- requirements.txt
@@ -780,6 +816,7 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |-- docs
 |   `-- README.md
 |-- frontend
+|   |-- package.json
 |   |-- public
 |   |   `-- index.html
 |   |-- src
@@ -789,25 +826,26 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |   |   `-- index.js
 |   |   `-- services
 |   |       `-- index.js
-|   |-- tests
-|   |   `-- App.test.js
-|   `-- package.json
+|   `-- tests
+|       `-- App.test.js
 |-- scripts
 |   `-- README.md
-|-- tests
-|   `-- test_placeholder.py
-`-- README.md
-
-30 directories, 41 files
+`-- tests
+    `-- test_placeholder.py
 ```
 
 ### Detailed Explanations
 
 #### Root Level
-- **.github/workflows/**: GitHub Actions CI/CD configuration directory.
-  - **ci.yml**: Automated CI pipeline for linting, formatting, type checking, and testing.
-- **README.md**: This file, containing project overview, setup instructions, and detailed structure explanations.
-- **pyproject.toml**: Project configuration file with tool settings for black, ruff, mypy, and pytest.
+- **.env.example**: Template environment variables — copy to `.env` and fill in values before running locally.
+- **.github/workflows/ci.yml**: GitHub Actions CI pipeline — runs black, ruff, mypy, and pytest on Python 3.9/3.10/3.11.
+- **.gitignore**: Standard Python + Node.js + Docker ignore rules.
+- **.pre-commit-config.yaml**: Pre-commit hooks — auto-runs black and ruff on staged Python files before each commit.
+- **CONTRIBUTING.md**: Contributor guide — dev setup, code standards, branching strategy, and PR process.
+- **LICENSE**: MIT License.
+- **Makefile**: Developer shortcuts (`make test`, `make lint`, `make format`, `make build`, `make up`, `make down`, etc.).
+- **pyproject.toml**: Tool configuration for black (line-length=100), ruff (E/W/F/I/C/B rules), mypy (strict), and pytest (testpaths=backend/tests).
+- **docker-compose.yml**: Orchestrates backend + PostgreSQL 15 + Qdrant vector database for one-command local deployment.
 
 #### ai/
 AI-related components and resources.
@@ -838,8 +876,17 @@ Backend server code using Flask.
 - **app/services/security/__init__.py**: Package initializer for security services, exporting LegacyAccessService and related enums.
 - **app/services/security/legacy_access_service.py**: Legacy access control service. Manages posthumous access to memories with beneficiary registration, access levels (public, family, intimate), relationship verification, and authorization checks to ensure ethical memory sharing.
 - **app/services/security/response_moderation_service.py**: Response moderation service. Reviews all AI-generated responses before delivery to ensure appropriateness, safety, and respectfulness. Detects sensitive topics (violence, illegal activity, explicit content, self-harm), applies content filtering, and replaces inappropriate responses with safe alternatives. Designed for future integration with external AI moderation APIs.
+- **app/__init__.py**: Package initializer for the Flask app.
 - **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
+- **tests/__init__.py**: Test package initializer.
+- **tests/test_memory_capture_service.py**: Unit tests for MemoryCaptureService (create, retrieve, update, delete, retrieve_all — 6 tests).
+- **tests/test_timeline_engine.py**: Unit tests for TimelineEngine (chronological sort, life stage grouping, date range query, life stage filter — 5 tests).
+- **tests/test_life_story_generator.py**: Unit tests for LifeStoryGenerator (LifeStory object shape, narrative compilation, stage summaries — 6 tests).
+- **tests/test_legacy_access_service.py**: Unit tests for LegacyAccessService (4 tests).
+- **tests/test_response_moderation_service.py**: Unit tests for ResponseModerationService (12 tests).
 - **tests/test_placeholder.py**: Placeholder test file for backend unit tests.
+- **tests/utils/__init__.py**: Test utilities package initializer.
+- **tests/utils/test_logger.py**: Shared test logger that writes structured pass/fail records to `tests.log`.
 
 #### data/
 Data storage directories.
@@ -1089,366 +1136,6 @@ memories = requests.get("http://localhost:8000/memories", params={
   }
 ]
 ```
-
-## Conversation Engine
-
-The Conversation Engine is the heart of the Legacy AI platform, enabling natural, personalized interactions between family members and the AI representation of their loved one. This sophisticated system orchestrates multiple AI services to generate contextually appropriate, emotionally resonant responses based on the deceased person's stored memories.
-
-### Core Architecture
-
-The Conversation Engine integrates multiple specialized services:
-
-- **Memory Search**: Semantic similarity search using vector embeddings to find relevant memories
-- **Access Control**: Filters memories based on beneficiary permissions and sensitivity levels
-- **Context Building**: Constructs rich context from chronological, emotional, and relational data
-- **Personality Integration**: Applies the person's communication style and values to responses
-- **Wisdom Distillation**: Incorporates life lessons and distilled insights for meaningful guidance
-- **Content Moderation**: Ensures all responses remain safe and appropriate
-
-### Response Generation Workflow
-
-1. **Query Processing**: Analyzes user questions for intent and emotional context
-2. **Memory Retrieval**: Finds semantically similar memories using embedding similarity
-3. **Authorization**: Applies access controls to filter accessible memories
-4. **Context Enrichment**: Adds chronological context and life stage information
-5. **Prompt Construction**: Builds detailed prompts incorporating personality and wisdom
-6. **Response Generation**: Uses LLM integration (placeholder for OpenAI, local models, etc.)
-7. **Safety Moderation**: Reviews and filters responses for appropriateness
-8. **Response Delivery**: Returns moderated, personalized responses
-
-### Integration Points
-
-The Conversation Engine serves as the central orchestrator, connecting:
-
-- **Memory Services**: Retrieval and embedding systems
-- **AI Services**: Personality modeling and distillation
-- **Security Services**: Access control and content moderation
-- **Interview Services**: Structured data collection for improved responses
-
-### Future LLM Integration
-
-Currently uses placeholder response generation. Designed for integration with:
-
-- **OpenAI GPT Models**: Advanced conversational AI with fine-tuning
-- **Local LLMs**: Llama, Mistral, or other open-source models
-- **Azure OpenAI**: Enterprise-grade AI services
-- **Custom Fine-tuned Models**: Specialized for legacy interactions
-
-### Usage Example
-
-```python
-from app.services.ai.conversation_engine import ConversationEngine
-from app.services.memory_capture_service import MemoryCaptureService
-from app.services.timeline_engine import TimelineEngine
-from app.services.memory.memory_embedding_service import MemoryEmbeddingService
-from app.services.security.legacy_access_service import LegacyAccessService
-from app.services.security.response_moderation_service import ResponseModerationService
-
-# Initialize all services
-memory_service = MemoryCaptureService()
-timeline_engine = TimelineEngine(memory_service)
-embedding_service = MemoryEmbeddingService()
-access_service = LegacyAccessService()
-moderation_service = ResponseModerationService()
-
-# Create conversation engine with all integrations
-conversation_engine = ConversationEngine(
-    memory_service=memory_service,
-    timeline_engine=timeline_engine,
-    embedding_service=embedding_service,
-    access_service=access_service,
-    moderation_service=moderation_service
-)
-
-# Generate personalized response
-response = conversation_engine.generate_response(
-    user_query="Tell me about Dad's childhood adventures",
-    beneficiary=family_member
-)
-```
-
-## Personality Model Service
-
-The Personality Model Service analyzes stored memories to create a comprehensive psychological profile of the deceased person, enabling the AI to respond in a way that authentically reflects their personality, values, and communication style.
-
-### Personality Analysis Framework
-
-The service extracts multiple dimensions of personality:
-
-- **Core Traits**: Extraversion, openness, conscientiousness, agreeableness, emotional stability
-- **Communication Style**: Direct vs. indirect, formal vs. casual, emotional expression levels
-- **Values & Beliefs**: Moral framework, life priorities, decision-making principles
-- **Behavioral Patterns**: Problem-solving approaches, conflict resolution styles
-- **Emotional Patterns**: How emotions are expressed and processed
-
-### Memory Analysis Process
-
-1. **Content Extraction**: Parses memory text for personality indicators
-2. **Pattern Recognition**: Identifies recurring themes and behavioral patterns
-3. **Trait Scoring**: Quantifies personality dimensions based on linguistic patterns
-4. **Context Integration**: Considers life stage and situational factors
-5. **Profile Synthesis**: Creates cohesive personality profile for AI responses
-
-### Integration with Conversation Engine
-
-The personality profile enhances AI responses by:
-
-- **Authentic Voice**: Matching communication style and vocabulary
-- **Value-Aligned Responses**: Reflecting the person's moral framework
-- **Emotional Resonance**: Appropriate emotional expression levels
-- **Behavioral Consistency**: Maintaining characteristic decision patterns
-
-### Future Enhancements
-
-Designed for integration with advanced personality analysis:
-
-- **Psychological NLP Models**: Specialized models for personality trait detection
-- **Multi-modal Analysis**: Voice recordings, writing samples, photos
-- **Longitudinal Tracking**: Personality evolution across life stages
-- **Cultural Context**: Culturally-aware personality interpretation
-
-### Usage Example
-
-```python
-from app.services.ai.personality_model_service import PersonalityModelService
-from app.services.memory_capture_service import MemoryCaptureService
-
-# Initialize services
-memory_service = MemoryCaptureService()
-personality_service = PersonalityModelService()
-
-# Analyze memories to build personality profile
-memories = memory_service.list_memories()
-personality_profile = personality_service.build_personality_profile(memories)
-
-# Profile includes traits, values, communication style, etc.
-print(f"Communication style: {personality_profile.communication_style}")
-print(f"Core values: {personality_profile.values}")
-```
-
-## Memory Distillation Engine
-
-The Memory Distillation Engine transforms raw memories into higher-level wisdom, extracting life lessons, advice, regrets, and guiding principles that provide deeper meaning and guidance for family members.
-
-### Distillation Categories
-
-The service identifies and extracts four types of distilled wisdom:
-
-- **Life Lessons**: Fundamental principles learned through experience
-- **Advice**: Practical guidance for future generations
-- **Regrets**: Important lessons from mistakes and missed opportunities
-- **Recurring Patterns**: Themes that appear across multiple life experiences
-
-### Wisdom Extraction Process
-
-1. **Pattern Recognition**: Identifies recurring themes across memories
-2. **Lesson Extraction**: Distills explicit and implicit lessons from experiences
-3. **Advice Synthesis**: Generates actionable guidance based on life experiences
-4. **Regret Analysis**: Identifies important "what if" moments and their lessons
-5. **Confidence Scoring**: Rates the significance and reliability of each insight
-
-### Integration Benefits
-
-Memory distillation enhances the AI's responses by providing:
-
-- **Deeper Wisdom**: Beyond surface-level memories to fundamental life principles
-- **Guidance Value**: Offers meaningful advice and life lessons
-- **Emotional Support**: Helps family members process grief through shared wisdom
-- **Legacy Preservation**: Captures the person's accumulated life experience
-
-### Quality Assurance
-
-The distillation process includes:
-
-- **Confidence Scoring**: Each distilled insight has a confidence score
-- **Source Attribution**: Links wisdom back to specific memories
-- **Context Preservation**: Maintains situational context for insights
-- **Bias Mitigation**: Balances positive and challenging experiences
-
-### Future Enhancements
-
-Prepared for advanced distillation techniques:
-
-- **LLM-Powered Analysis**: Using large language models for deeper insight extraction
-- **Sentiment Analysis**: Understanding emotional context of lessons
-- **Cross-Memory Synthesis**: Connecting insights across different life domains
-- **Personalized Wisdom**: Tailoring insights for specific family members
-
-### Usage Example
-
-```python
-from app.services.ai.memory_distillation_service import MemoryDistillationService
-from app.services.memory_capture_service import MemoryCaptureService
-
-# Initialize services
-memory_service = MemoryCaptureService()
-distillation_service = MemoryDistillationService(memory_service)
-
-# Extract wisdom from memories
-memories = memory_service.list_memories()
-life_lessons = distillation_service.distill_life_lessons(memories)
-advice = distillation_service.extract_advice(memories)
-regrets = distillation_service.extract_regrets(memories)
-patterns = distillation_service.identify_recurring_patterns(memories)
-
-# Each insight includes text, confidence score, and source memories
-for lesson in life_lessons:
-    print(f"Lesson: {lesson.insight_text} (Confidence: {lesson.confidence_score})")
-```
-
-## Legacy Access Control
-
-The Legacy Access Control system provides ethical, posthumous access management for the Legacy AI platform, ensuring that sensitive memories are shared appropriately with designated family members while protecting privacy and maintaining trust.
-
-### Access Control Framework
-
-The system implements a hierarchical access model:
-
-- **Public Level**: General memories suitable for all family and friends
-- **Family Level**: Personal memories shared within the immediate family
-- **Intimate Level**: Highly personal or sensitive memories for closest relationships
-
-### Beneficiary Management
-
-- **Registration Process**: Family members register with verified relationships
-- **Relationship Verification**: Confirms familial connections and access levels
-- **Authorization Checks**: Validates access permissions for each memory request
-- **Audit Logging**: Tracks access patterns for security and compliance
-
-### Memory Sensitivity Classification
-
-Memories are automatically classified based on content analysis:
-
-- **Content Analysis**: Scans for sensitive topics, personal information, emotional intensity
-- **Context Evaluation**: Considers relationship context and emotional sensitivity
-- **Dynamic Classification**: Access levels can be adjusted based on beneficiary feedback
-- **Ethical Safeguards**: Prevents inappropriate access to highly personal content
-
-### Integration with Conversation Engine
-
-Access control is seamlessly integrated into the conversation pipeline:
-
-1. **Query Analysis**: Determines appropriate access level for the conversation
-2. **Memory Filtering**: Only authorized memories are included in responses
-3. **Context Preservation**: Maintains conversation flow while respecting boundaries
-4. **Transparent Operation**: Users unaware of filtered content for natural interaction
-
-### Legal and Ethical Compliance
-
-The system addresses important considerations:
-
-- **Privacy Protection**: Respects individual privacy even after death
-- **Family Dynamics**: Accommodates complex family relationships and boundaries
-- **Cultural Sensitivity**: Adapts to different cultural norms around legacy sharing
-- **Legal Compliance**: Designed to meet data protection and inheritance laws
-
-### Future Enhancements
-
-Prepared for advanced access control features:
-
-- **Biometric Verification**: Voice or facial recognition for beneficiary authentication
-- **Time-Based Access**: Gradual release of sensitive memories over time
-- **Conditional Access**: Access based on life events or family agreements
-- **Third-Party Auditing**: External verification of access control compliance
-
-### Usage Example
-
-```python
-from app.services.security.legacy_access_service import LegacyAccessService, AccessLevel, Relationship
-from app.services.memory_capture_service import MemoryCaptureService
-
-# Initialize services
-access_service = LegacyAccessService()
-memory_service = MemoryCaptureService()
-
-# Register a beneficiary
-beneficiary = access_service.register_beneficiary(
-    name="Sarah Johnson",
-    relationship=Relationship.CHILD,
-    access_level=AccessLevel.FAMILY
-)
-
-# Check memory access authorization
-memory_id = "mem_001"
-if access_service.authorize_memory_access(beneficiary, memory_id):
-    memory = memory_service.retrieve_memory(memory_id)
-    # Process authorized memory
-else:
-    # Handle unauthorized access
-    pass
-```
-
-## Response Moderation Service
-
-The Response Moderation Service is a critical safety component that ensures all AI-generated responses in the Legacy AI platform remain appropriate, respectful, and safe for family members. Given the deeply personal and emotional nature of legacy interactions, content moderation is essential to maintain trust and prevent harm.
-
-### Safety Categories Monitored
-
-The service monitors responses for multiple categories of inappropriate content:
-
-- **Violence**: References to harm, injury, death, or aggressive behavior
-- **Illegal Activity**: Discussions of crime, drugs, fraud, or unlawful actions
-- **Explicit Content**: Sexual content, nudity, or inappropriate intimacy
-- **Self-Harm**: References to suicide, self-injury, or severe emotional distress
-- **Hate Speech**: Discriminatory language, prejudice, or harmful stereotypes
-- **Medical Sensitivity**: Overly detailed medical information or diagnoses
-- **Financial Privacy**: Personal financial details or sensitive monetary information
-
-### Moderation Process
-
-1. **Content Analysis**: Each response is scanned for sensitive keywords and patterns
-2. **Pattern Detection**: Regex patterns identify potentially harmful instructions or content
-3. **Severity Assessment**: Content is categorized by sensitivity level (safe, sensitive, inappropriate, harmful)
-4. **Action Determination**: Based on severity, responses are allowed, modified, or blocked
-5. **Safe Response Generation**: Inappropriate content is replaced with contextually appropriate alternatives
-
-### Integration with Conversation Engine
-
-The moderation service is seamlessly integrated into the conversation pipeline:
-
-```
-User Query → Memory Search → Context Building → Response Generation → Content Moderation → Safe Response
-```
-
-Every response passes through moderation before being returned to users, ensuring consistent safety standards.
-
-### Future API Integration
-
-The service is architected for easy integration with external moderation APIs:
-
-- **OpenAI Moderation API**: Advanced content classification and safety scoring
-- **Google Perspective API**: Toxicity and harassment detection
-- **Custom ML Models**: Fine-tuned moderation models for legacy-specific content
-- **Third-party Services**: Commercial content moderation platforms
-
-### Safety Response Examples
-
-When inappropriate content is detected, responses are replaced with safe alternatives:
-
-- **Violence**: "I'm not able to discuss topics related to violence, but I'd be happy to share a peaceful memory from my life."
-- **Illegal Activity**: "I can't discuss anything related to illegal activities. How about I share a story about following my principles?"
-- **Self-Harm**: "If you're feeling distressed, please reach out to someone who can help you. I'm here to share positive memories and wisdom."
-- **General Inappropriate**: "I'm not able to discuss that topic, but I'd be happy to share another meaningful memory."
-
-### Usage Example
-
-```python
-from app.services.security.response_moderation_service import ResponseModerationService
-
-# Initialize moderation service
-moderation_service = ResponseModerationService()
-
-# Review a response
-review_result = moderation_service.review_response("Some potentially inappropriate response text")
-
-if not review_result['is_safe']:
-    safe_response = review_result['safe_alternative']
-    print(f"Response moderated: {safe_response}")
-
-# Or use the convenience method
-safe_response = moderation_service.adjust_response_if_needed("original response")
-```
-
 ## Running the Legacy AI Platform Locally
 
 The fastest way to run the full platform is with Docker Compose, which starts the backend API, PostgreSQL database, and Qdrant vector database with a single command.
@@ -1473,7 +1160,7 @@ cp .env.example .env
 nano .env
 
 # 4. Build and start all services
-docker-compose up --build
+make up         # or: docker compose up -d --build
 ```
 
 The backend API will be available at **http://localhost:5000**.
@@ -1487,29 +1174,19 @@ The backend API will be available at **http://localhost:5000**.
 | PostgreSQL | localhost:5432 | Relational database |
 | Qdrant | http://localhost:6333 | Vector database for semantic search |
 
-### Common Docker Compose Commands
+### Common Commands
 
 ```bash
-# Start all services in the background
-docker-compose up -d
+make up                          # Start all services in the background
+make logs                        # View live logs for all services
+make down                        # Stop all services
+make build                       # Rebuild images (no cache)
+make restart                     # Restart all containers
 
-# View live logs for all services
-docker-compose logs -f
-
-# View logs for a specific service
-docker-compose logs -f backend
-
-# Stop all services
-docker-compose down
-
-# Stop and remove all volumes (resets databases)
-docker-compose down -v
-
-# Rebuild the backend image after code changes
-docker-compose up --build backend
-
-# Open a shell inside the running backend container
-docker-compose exec backend sh
+# Or use docker compose directly:
+docker compose logs -f backend   # Logs for one service
+docker compose down -v           # Remove containers + volumes (resets databases)
+docker compose exec backend sh   # Shell inside running backend container
 ```
 
 ### Environment Variables
