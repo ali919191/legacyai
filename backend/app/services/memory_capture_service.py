@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Any, List, Optional
 from datetime import datetime
 import uuid
 
@@ -25,9 +25,19 @@ class Memory:
 class MemoryCaptureService:
     """Service for capturing, updating, and retrieving memories."""
 
-    def __init__(self):
+    def __init__(self, person_profile_service: Optional[Any] = None):
         """Initialize the service with an in-memory storage for memories."""
         self.memories: dict[str, Memory] = {}
+        self.person_profile_service = person_profile_service
+
+    def set_person_profile_service(self, person_profile_service: Any):
+        """Attach a profile service used for entity sync from memory mentions."""
+        self.person_profile_service = person_profile_service
+
+    def _sync_person_profiles_from_memory(self, memory: Memory):
+        """Push memory people references into the person-profile system when available."""
+        if self.person_profile_service and hasattr(self.person_profile_service, "sync_memory_entities"):
+            self.person_profile_service.sync_memory_entities(memory)
 
     def _infer_time_of_day(self, timestamp: datetime) -> str:
         """Infer a narrative-friendly time bucket from a timestamp hour."""
@@ -112,6 +122,7 @@ class MemoryCaptureService:
             sensitivity_tags=sensitivity_tags
         )
         self.memories[memory_id] = memory
+        self._sync_person_profiles_from_memory(memory)
         return memory_id
 
     def update_memory(
@@ -178,6 +189,8 @@ class MemoryCaptureService:
                 memory.end_time = memory.start_time
             if day_of_week is None:
                 memory.day_of_week = timestamp.strftime("%A")
+
+        self._sync_person_profiles_from_memory(memory)
         return True
 
     def retrieve_memory(self, memory_id: str) -> Optional[Memory]:

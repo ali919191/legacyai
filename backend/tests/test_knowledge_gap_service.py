@@ -15,18 +15,24 @@ from services.timeline_engine import TimelineEngine
 from services.memory.memory_embedding_service import MemoryEmbeddingService
 from services.ai.conversation_engine import ConversationEngine
 from services.ai.knowledge_gap_service import KnowledgeGapService
+from services.entity.person_profile_service import PersonProfileService
 
 
 class TestKnowledgeGapService(unittest.TestCase):
 
     def setUp(self):
         self.memory_service = MemoryCaptureService()
+        self.person_profile_service = PersonProfileService(memory_service=self.memory_service)
+        self.memory_service.set_person_profile_service(self.person_profile_service)
         self.timeline_engine = TimelineEngine(self.memory_service, birth_date=date(1970, 1, 1))
         vector_store_file = os.path.join(
             tempfile.gettempdir(), f"legacyai_kg_test_{uuid.uuid4().hex}.json"
         )
         self.embedding_service = MemoryEmbeddingService(vector_store_file=vector_store_file)
-        self.knowledge_gap_service = KnowledgeGapService(self.memory_service)
+        self.knowledge_gap_service = KnowledgeGapService(
+            self.memory_service,
+            person_profile_service=self.person_profile_service,
+        )
 
         self.memory_id = self.memory_service.create_memory(
             title="First IT Job",
@@ -54,6 +60,7 @@ class TestKnowledgeGapService(unittest.TestCase):
 
         self.assertGreater(len(generated), 0)
         self.assertTrue(any("Who was Mike" in q["question"] for q in generated))
+        self.assertEqual(len(self.person_profile_service.search_person_by_name("Mike")), 1)
 
     def test_store_and_retrieve_pending_questions(self):
         record = self.knowledge_gap_service.store_question(
@@ -102,6 +109,7 @@ class TestKnowledgeGapService(unittest.TestCase):
             memory_service=self.memory_service,
             timeline_engine=self.timeline_engine,
             embedding_service=self.embedding_service,
+            person_profile_service=self.person_profile_service,
             knowledge_gap_service=self.knowledge_gap_service,
         )
 

@@ -24,6 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from .api.family_interaction_api import create_family_interaction_api  # noqa: E402
 from .services.ai.conversation_engine import ConversationEngine  # noqa: E402
 from .services.ai.knowledge_gap_service import KnowledgeGapService  # noqa: E402
+from .services.entity.person_profile_service import PersonProfileService  # noqa: E402
 from .services.memory_capture_service import MemoryCaptureService  # noqa: E402
 from .services.memory.memory_embedding_service import MemoryEmbeddingService  # noqa: E402
 from .services.security.legacy_access_service import LegacyAccessService  # noqa: E402
@@ -65,16 +66,22 @@ def _build_services() -> dict:
     birth_date = _parse_birth_date()
 
     memory_service = MemoryCaptureService()
+    person_profile_service = PersonProfileService(memory_service=memory_service)
+    memory_service.set_person_profile_service(person_profile_service)
     timeline_engine = TimelineEngine(
         memory_service=memory_service,
         birth_date=birth_date,
     )
     embedding_service = MemoryEmbeddingService(vector_store_file=vector_store_file)
-    knowledge_gap_service = KnowledgeGapService(memory_service=memory_service)
+    knowledge_gap_service = KnowledgeGapService(
+        memory_service=memory_service,
+        person_profile_service=person_profile_service,
+    )
     conversation_engine = ConversationEngine(
         memory_service=memory_service,
         timeline_engine=timeline_engine,
         embedding_service=embedding_service,
+        person_profile_service=person_profile_service,
         knowledge_gap_service=knowledge_gap_service,
     )
     access_service = LegacyAccessService()
@@ -83,6 +90,7 @@ def _build_services() -> dict:
     logger.info("All platform services initialised (birth_date=%s).", birth_date)
     return {
         "memory_service": memory_service,
+        "person_profile_service": person_profile_service,
         "timeline_engine": timeline_engine,
         "conversation_engine": conversation_engine,
         "knowledge_gap_service": knowledge_gap_service,

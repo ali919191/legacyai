@@ -5,13 +5,19 @@ from typing import Any, Dict, List, Optional
 import re
 
 from ..memory_capture_service import MemoryCaptureService, Memory
+from ..entity.person_profile_service import PersonProfileService
 
 
 class KnowledgeGapService:
     """Detect missing context and manage enhanced follow-up questions."""
 
-    def __init__(self, memory_service: MemoryCaptureService):
+    def __init__(
+        self,
+        memory_service: MemoryCaptureService,
+        person_profile_service: Optional[PersonProfileService] = None,
+    ):
         self.memory_service = memory_service
+        self.person_profile_service = person_profile_service
         self._questions: Dict[str, Dict[str, Any]] = {}
         self._question_sequence = 1
 
@@ -28,6 +34,10 @@ class KnowledgeGapService:
             for person in (memory.people_involved or [])
             if person and person.strip()
         }
+        if self.person_profile_service:
+            for profile in self.person_profile_service.search_person_by_name(""):
+                if profile.get("name"):
+                    known_people.add(profile["name"].strip().lower())
 
         unknown_people = []
         # Capture capitalized names while avoiding sentence starters like I/We/The.
@@ -35,8 +45,17 @@ class KnowledgeGapService:
         for name in candidate_names:
             lowered = name.lower()
             if lowered not in known_people and lowered not in {"i", "we", "the", "my", "our"}:
-                if name not in unknown_people:
-                    unknown_people.append(name)
+                if not any(person["name"] == name for person in unknown_people):
+                    person_id = ""
+                    if self.person_profile_service:
+                        profile = self.person_profile_service.create_temporary_profile(
+                            name=name,
+                            context_description=(
+                                f"Temporary profile created from conversation: {conversation_text}"
+                            ),
+                        )
+                        person_id = profile["person_id"]
+                    unknown_people.append({"name": name, "person_id": person_id})
 
         incomplete_memories = []
         for memory in memories:
@@ -83,13 +102,16 @@ class KnowledgeGapService:
         source_timestamp = context.get("detected_at", datetime.now().isoformat())
 
         for person in context.get("unknown_people", []):
+            person_name = person["name"] if isinstance(person, dict) else str(person)
+            person_id = person.get("person_id", "") if isinstance(person, dict) else ""
             questions.append(
                 {
-                    "question": f"Who was {person}?",
+                    "question": f"Who was {person_name}?",
                     "related_memory_id": "",
+                    "person_id": person_id,
                     "source_conversation_timestamp": source_timestamp,
                     "context_description": (
-                        f"User mentioned {person} during free-style storytelling without prior context"
+                        f"User mentioned {person_name} during free-style storytelling without prior context"
                     ),
                     "priority": "medium",
                     "status": "pending",
@@ -168,6 +190,7 @@ class KnowledgeGapService:
             "priority": question_data.get("priority", "medium"),
             "status": question_data.get("status", "pending"),
             "user_id": question_data.get("user_id", "anonymous"),
+            "person_id": question_data.get("person_id", ""),
             "answer": question_data.get("answer"),
             "answered_timestamp": question_data.get("answered_timestamp"),
         }
@@ -187,6 +210,7 @@ class KnowledgeGapService:
         question_id: str,
         answer_text: str,
         memory_updates: Optional[Dict[str, Any]] = None,
+        person_updates: Optional[Dict[str, Any]] = None,
     ) -> Optional[Dict[str, Any]]:
         """
         Mark a question as answered and enrich the related memory when possible.
@@ -200,6 +224,16 @@ class KnowledgeGapService:
         record["status"] = "answered"
         record["answer"] = answer_text
         record["answered_timestamp"] = datetime.now().isoformat()
+
+        person_id = record.get("person_id")
+        if person_id and self.person_profile_service:
+            updates = person_updates or {}
+            if not updates:
+                updates = {
+                    "description": answer_text,
+                    "confidence_score": 0.7,
+                }
+            self.person_profile_service.update_person_profile(person_id, updates)
 
         related_memory_id = record.get("related_memory_id")
         if related_memory_id:

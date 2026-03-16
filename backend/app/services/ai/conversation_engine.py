@@ -2,6 +2,7 @@ from typing import List, Dict, Any, Optional
 from ..memory_capture_service import MemoryCaptureService, Memory
 from ..timeline_engine import TimelineEngine
 from ..memory.memory_embedding_service import MemoryEmbeddingService
+from ..entity.person_profile_service import PersonProfileService
 from .personality_model_service import PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
 from .knowledge_gap_service import KnowledgeGapService
@@ -29,6 +30,7 @@ class ConversationEngine:
         memory_service: MemoryCaptureService,
         timeline_engine: TimelineEngine,
         embedding_service: MemoryEmbeddingService,
+        person_profile_service: Optional[PersonProfileService] = None,
         personality_profile: Optional[PersonalityProfile] = None,
         distillation_service: Optional[MemoryDistillationService] = None,
         knowledge_gap_service: Optional[KnowledgeGapService] = None,
@@ -42,6 +44,7 @@ class ConversationEngine:
             memory_service: Instance of MemoryCaptureService for accessing stored memories.
             timeline_engine: Instance of TimelineEngine for chronological context.
             embedding_service: Instance of MemoryEmbeddingService for semantic search.
+            person_profile_service: Optional PersonProfileService for entity profile tracking.
             personality_profile: Optional PersonalityProfile for personalized responses.
             distillation_service: Optional MemoryDistillationService for wisdom insights.
             knowledge_gap_service: Optional KnowledgeGapService for missing-context follow-up questions.
@@ -51,6 +54,7 @@ class ConversationEngine:
         self.memory_service = memory_service
         self.timeline_engine = timeline_engine
         self.embedding_service = embedding_service
+        self.person_profile_service = person_profile_service
         self.personality_profile = personality_profile
         self.distillation_service = distillation_service
         self.knowledge_gap_service = knowledge_gap_service
@@ -119,6 +123,12 @@ class ConversationEngine:
         # Step 4: Build context object
         context = self._build_context(relevant_memories, relevant_chronological)
 
+        if self.person_profile_service:
+            context["person_profiles"] = self._get_related_person_profiles(
+                user_query=user_query,
+                relevant_memories=relevant_memories,
+            )
+
         # Step 5: Add distilled insights if service is available
         relevant_insights = []
         if self.distillation_service:
@@ -165,6 +175,7 @@ class ConversationEngine:
         question_id: str,
         answer_text: str,
         memory_updates: Optional[Dict[str, Any]] = None,
+        person_updates: Optional[Dict[str, Any]] = None,
     ) -> Optional[Dict[str, Any]]:
         """Answer a stored enhanced question and enrich the related memory."""
         if not self.knowledge_gap_service:
@@ -173,6 +184,7 @@ class ConversationEngine:
             question_id=question_id,
             answer_text=answer_text,
             memory_updates=memory_updates,
+            person_updates=person_updates,
         )
 
     def _build_context(self, memories: List[Memory], chronological: List[Memory]) -> Dict[str, Any]:
@@ -191,7 +203,8 @@ class ConversationEngine:
             'chronological_order': [],
             'emotions': set(),
             'tags': set(),
-            'time_range': {}
+            'time_range': {},
+            'person_profiles': [],
         }
 
         for memory in memories:
@@ -258,7 +271,15 @@ Decision patterns: {', '.join(profile.decision_heuristics)}
 
 Respond in a way that reflects these personality characteristics."""
 
-        prompt = f"""You are an AI representation of a person built from their life memories. Use the memories below to answer the user's question.{personality_text}
+        person_profile_text = ""
+        if context.get("person_profiles"):
+            person_profile_text = "\nKnown people related to these memories:\n" + "\n".join([
+                f"- {profile['name']} (relationship: {profile.get('relationship_to_user') or 'unknown'}, "
+                f"origin: {profile.get('origin') or 'unknown'}, memories linked: {len(profile.get('connected_memories', []))})"
+                for profile in context["person_profiles"]
+            ])
+
+        prompt = f"""You are an AI representation of a person built from their life memories. Use the memories below to answer the user's question.{personality_text}{person_profile_text}
 
 User's question: {user_query}
 
@@ -268,6 +289,29 @@ Relevant memories from my life:
 Please answer the question using these memories. Be conversational and authentic, as if sharing personal stories."""
 
         return prompt
+
+    def _get_related_person_profiles(
+        self,
+        user_query: str,
+        relevant_memories: List[Memory],
+    ) -> List[Dict[str, Any]]:
+        """Collect known person profiles connected to the current query and memories."""
+        if not self.person_profile_service:
+            return []
+
+        profile_map: Dict[str, Dict[str, Any]] = {}
+        for memory in relevant_memories:
+            for person_name in memory.people_involved:
+                for profile in self.person_profile_service.search_person_by_name(person_name):
+                    profile_map[profile["person_id"]] = profile
+
+        for token in user_query.split():
+            clean_token = token.strip(",.?!:;\"'()")
+            if clean_token[:1].isupper():
+                for profile in self.person_profile_service.search_person_by_name(clean_token):
+                    profile_map[profile["person_id"]] = profile
+
+        return list(profile_map.values())
 
     def _generate_ai_response(self, prompt: str) -> str:
         """
