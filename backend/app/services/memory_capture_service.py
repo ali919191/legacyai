@@ -25,19 +25,33 @@ class Memory:
 class MemoryCaptureService:
     """Service for capturing, updating, and retrieving memories."""
 
-    def __init__(self, person_profile_service: Optional[Any] = None):
+    def __init__(
+        self,
+        person_profile_service: Optional[Any] = None,
+        episode_service: Optional[Any] = None,
+    ):
         """Initialize the service with an in-memory storage for memories."""
         self.memories: dict[str, Memory] = {}
         self.person_profile_service = person_profile_service
+        self.episode_service = episode_service
 
     def set_person_profile_service(self, person_profile_service: Any):
         """Attach a profile service used for entity sync from memory mentions."""
         self.person_profile_service = person_profile_service
 
+    def set_episode_service(self, episode_service: Any):
+        """Attach an episodic service used to group related memories."""
+        self.episode_service = episode_service
+
     def _sync_person_profiles_from_memory(self, memory: Memory):
         """Push memory people references into the person-profile system when available."""
         if self.person_profile_service and hasattr(self.person_profile_service, "sync_memory_entities"):
             self.person_profile_service.sync_memory_entities(memory)
+
+    def _sync_episode_grouping_from_memory(self, memory_id: str):
+        """Attempt to group the memory into an episode when correlations are found."""
+        if self.episode_service and hasattr(self.episode_service, "group_memory_by_similarity"):
+            self.episode_service.group_memory_by_similarity(memory_id)
 
     def _infer_time_of_day(self, timestamp: datetime) -> str:
         """Infer a narrative-friendly time bucket from a timestamp hour."""
@@ -123,6 +137,7 @@ class MemoryCaptureService:
         )
         self.memories[memory_id] = memory
         self._sync_person_profiles_from_memory(memory)
+        self._sync_episode_grouping_from_memory(memory_id)
         return memory_id
 
     def update_memory(
@@ -191,6 +206,7 @@ class MemoryCaptureService:
                 memory.day_of_week = timestamp.strftime("%A")
 
         self._sync_person_profiles_from_memory(memory)
+        self._sync_episode_grouping_from_memory(memory_id)
         return True
 
     def retrieve_memory(self, memory_id: str) -> Optional[Memory]:

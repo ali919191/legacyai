@@ -8,6 +8,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - **Structured Memory Storage**: Memories stored with rich metadata — life stage, emotional tone, people, locations, timestamps, and temporal context (day of week, time of day, start/end time).
 - **Media Memory Service**: Attach photos, audio recordings, and video clips to memory entries.
 - **Timeline Engine**: Organize memories chronologically and by life stage (childhood, education, career, retirement).
+- **Episodic Memory System**: Groups related memories into meaningful life episodes using shared tags and time-period proximity.
 - **Semantic Search**: Vector embeddings enable natural-language queries to find the most relevant memories instantly.
 - **Life Story Generator**: Compiles chronological biographical narratives with key events, themes, and personality evolution.
 - **Conversation Engine**: Orchestrates memory retrieval and context building to generate personalized AI responses.
@@ -51,6 +52,29 @@ Memories now support richer temporal metadata in addition to the main timestamp:
 - `day_of_week`
 
 This temporal context helps the Timeline Engine and Life Story Generator build more natural narratives, such as describing recurring morning routines, weekend family rituals, or evening milestones. It also improves response quality in conversational prompts where users ask when events typically happened.
+
+## Episodic Memory System
+
+The platform now includes an **EpisodeService** that groups related memories into higher-level episodes representing meaningful life periods or events.
+
+Each episode stores:
+
+- `episode_id`
+- `title`
+- `life_stage`
+- `start_date`
+- `end_date`
+- `summary`
+- `related_memories`
+- `related_people`
+- `importance_score`
+
+Episode grouping works through two complementary paths:
+
+- **MemoryCaptureService integration**: newly created or updated memories are evaluated for similarity and can be auto-linked into an existing or new episode.
+- **TimelineEngine integration**: memories can be clustered into episodes when they share tags or occur within nearby time windows.
+
+The **LifeStoryGenerator** consumes episodes and appends an "Episodic Highlights" section so narratives include both fine-grained memory details and larger life chapters.
 
 ## Enhanced Questions System
 
@@ -127,7 +151,45 @@ Example memory payload:
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Family Interaction API → Structured Interview → Memory Capture → Person Profile System → Media Memory Service → Timeline Engine → Memory Embeddings → Vector Search → Life Story Generator → Conversation Engine → Knowledge Gap Detection → Enhanced Questions Widget → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
+**Family Interaction API → Structured Interview → Memory Capture → Person Profile System → Media Memory Service → Timeline Engine → Episodic Memory System → Memory Embeddings → Vector Search → Life Story Generator → Conversation Engine → Knowledge Gap Detection → Enhanced Questions Widget → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
+
+## System Architecture Diagram
+
+```mermaid
+flowchart LR
+    API[Family Interaction API]
+    INTERVIEW[Structured Interview]
+    MEMORY[MemoryCaptureService]
+    PROFILE[PersonProfileService]
+    MEDIA[MediaMemoryService]
+    TIMELINE[TimelineEngine]
+    EPISODE[EpisodeService]
+    EMBED[MemoryEmbeddingService]
+    VECTOR[Vector Search]
+    STORY[LifeStoryGenerator]
+    CONVO[ConversationEngine]
+    GAP[KnowledgeGapService]
+    WIDGET[Enhanced Questions Widget]
+    PERSONA[PersonalityModelService]
+    DISTILL[MemoryDistillationService]
+    ACCESS[LegacyAccessService]
+    MOD[ResponseModerationService]
+    RESPONSE[AI Response]
+
+    API --> INTERVIEW --> MEMORY
+    MEMORY --> PROFILE
+    MEMORY --> MEDIA
+    MEMORY --> TIMELINE --> EPISODE
+    EPISODE --> STORY
+    MEMORY --> EMBED --> VECTOR --> CONVO
+    STORY --> CONVO
+    CONVO --> GAP --> WIDGET
+    MEMORY --> PERSONA
+    MEMORY --> DISTILL
+    PERSONA --> CONVO
+    DISTILL --> CONVO
+    CONVO --> ACCESS --> MOD --> RESPONSE
+```
 
 ### Pipeline Components
 
@@ -137,23 +199,25 @@ The Legacy AI platform follows a comprehensive data processing pipeline that tra
 4. **Person Profile System**: Tracks people mentioned across memories and conversations, linking them into reusable entity profiles
 5. **Media Memory Service**: Handles upload and management of multimedia memories (photos, audio, video) linked to memory entries
 6. **Timeline Engine**: Organizes memories chronologically and by life stages for contextual understanding
-7. **Memory Embeddings**: Transforms memory text into vector representations for semantic search
-8. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
-9. **Life Story Generator**: Compiles chronological narratives from memories, creating cohesive life stories with key events and personality evolution
-10. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
-11. **Knowledge Gap Detection**: Identifies unknown people, incomplete memory fields, and missing context during open storytelling
-12. **Enhanced Questions Widget**: Displays pending follow-up prompts that users can answer asynchronously
-13. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
-14. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
-15. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
-16. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
-17. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
+7. **Episodic Memory System**: Groups related memories into meaningful episodes using shared tags and time proximity
+8. **Memory Embeddings**: Transforms memory text into vector representations for semantic search
+9. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
+10. **Life Story Generator**: Compiles chronological narratives from memories and episode summaries, creating cohesive life stories with key events and personality evolution
+11. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
+12. **Knowledge Gap Detection**: Identifies unknown people, incomplete memory fields, and missing context during open storytelling
+13. **Enhanced Questions Widget**: Displays pending follow-up prompts that users can answer asynchronously
+14. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
+15. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
+16. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
+17. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
+18. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
 
 ### Data Flow Integration
 
 - **Interview responses** automatically become **structured memories** with rich metadata, including temporal context for more natural storytelling
 - **Person profile tracking** connects recurring people across memories so relationship questions remain grounded in consistent entities
 - **Timeline context** enhances memory relevance by considering chronological relationships
+- **Episode grouping** adds higher-level life chapters by clustering memories with common tags and time windows
 - **Semantic embeddings** enable natural language queries to find relevant experiences
 - **Vector store** persists embeddings locally as JSON (development) or in a scalable vector database (production)
 - **Vector search** provides fast, accurate memory retrieval for conversational context
@@ -974,18 +1038,19 @@ Query → ConversationEngine
 |---|---|---|
 | `test_memory_capture_service.py` | MemoryCaptureService | 6 |
 | `test_person_profile_service.py` | PersonProfileService (+ memory/conversation entity sync) | 5 |
+| `test_episode_service.py` | EpisodeService (+ memory/timeline/life-story integration) | 6 |
 | `test_timeline_engine.py` | TimelineEngine | 5 |
 | `test_life_story_generator.py` | LifeStoryGenerator | 6 |
 | `test_knowledge_gap_service.py` | KnowledgeGapService (+ ConversationEngine trigger path) | 4 |
 | `test_legacy_access_service.py` | LegacyAccessService | 4 |
 | `test_response_moderation_service.py` | ResponseModerationService | 12 |
 
-**Total: 53 tests** (42 unit + 10 integration + 1 placeholder)
+**Total: 59 tests** (48 unit + 10 integration + 1 placeholder)
 
 ### Running Tests with Make
 
 ```bash
-make test        # Run all 53 tests with verbose output (uses pytest)
+make test        # Run all 59 tests with verbose output (uses pytest)
 make test-cov    # Run all tests with line-level coverage report
 ```
 
@@ -1110,6 +1175,9 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |       |   |-- life_story_generator.py
 |   |       |   |-- memory_distillation_service.py
 |   |       |   `-- personality_model_service.py
+|   |       |-- episode
+|   |       |   |-- __init__.py
+|   |       |   `-- episode_service.py
 |   |       |-- entity
 |   |       |   |-- __init__.py
 |   |       |   `-- person_profile_service.py
@@ -1136,6 +1204,7 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |   |-- test_legacy_access_service.py
 |   |   |-- test_life_story_generator.py
 |   |   |-- test_memory_capture_service.py
+|   |   |-- test_episode_service.py
 |   |   |-- test_person_profile_service.py
 |   |   |-- test_placeholder.py
 |   |   |-- test_response_moderation_service.py
@@ -1209,6 +1278,8 @@ Backend server code using Flask.
 - **app/services/ai/__init__.py**: Package initializer for AI services, exporting conversation, personality, distillation, life story, and knowledge gap services.
 - **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, person profiles, timeline, embedding, knowledge gap detection, personality, distillation, and access control services to generate personalized responses and enhanced follow-up questions based on stored memories.
 - **app/services/ai/knowledge_gap_service.py**: Knowledge gap detection service. Finds missing context in free-style conversation, generates follow-up prompts, stores pending/answered question records for the Enhanced Questions widget, and writes user answers back into linked memories.
+- **app/services/episode/__init__.py**: Package initializer for episodic services, exporting Episode and EpisodeService.
+- **app/services/episode/episode_service.py**: Episodic memory service. Creates episodes, links memories, tracks date spans and related people, generates episode summaries, computes importance scores, and supports grouping by shared tags or nearby time periods.
 - **app/services/entity/__init__.py**: Package initializer for entity services, exporting person profile tracking components.
 - **app/services/entity/person_profile_service.py**: Person profile service. Creates partial or fully enriched profiles for people mentioned in memories and conversations, links memories to recurring individuals, and improves relationship awareness across AI responses.
 - **app/services/ai/life_story_generator.py**: Life story generator service. Compiles chronological narratives from memories, creates life stage summaries, extracts key events and lessons learned, and traces personality evolution across the lifespan. Integrates with timeline, personality, and distillation services to generate coherent biographical narratives suitable for family preservation and storytelling.
@@ -1216,8 +1287,8 @@ Backend server code using Flask.
 - **app/services/ai/memory_distillation_service.py**: Memory distillation service. Extracts higher-level wisdom from memories including life lessons, advice, regrets, and guiding principles, providing distilled insights for wisdom-based conversations.
 - **app/services/interview/__init__.py**: Package initializer for interview services, exporting StructuredInterviewService.
 - **app/services/interview/structured_interview_service.py**: Structured interview service. Guides users through systematic interviews across life domains (childhood, education, career, relationships, failures, lessons, advice, beliefs) to capture comprehensive life experiences. Automatically converts responses to memory entries with interview metadata, improving personality modeling and memory distillation quality.
-- **app/services/memory_capture_service.py**: Memory capture service. Defines a Memory dataclass and MemoryCaptureService class for creating, updating, retrieving, and deleting memory entries with fields like title, description, timestamp, day_of_week, time_of_day, start_time, end_time, people_involved, location, emotions, and tags.
-- **app/services/timeline_engine.py**: Timeline engine. Organizes memories chronologically, groups them by life stages (childhood, education, career, retirement), and allows querying by date range or life stage using birth date for age calculations.
+- **app/services/memory_capture_service.py**: Memory capture service. Defines a Memory dataclass and MemoryCaptureService class for creating, updating, retrieving, and deleting memory entries with fields like title, description, timestamp, day_of_week, time_of_day, start_time, end_time, people_involved, location, emotions, and tags. It can also auto-group memories into episodes when correlations are detected.
+- **app/services/timeline_engine.py**: Timeline engine. Organizes memories chronologically, groups them by life stages (childhood, education, career, retirement), and allows querying by date range or life stage using birth date for age calculations. It can also cluster related memories into episodes.
 - **app/services/memory/__init__.py**: Package initializer for memory services, exporting MemoryEmbeddingService and VectorStore.
 - **app/services/memory/memory_embedding_service.py**: Semantic memory search service. Generates embeddings from memory text using a placeholder model, stores them in a vector store, and performs similarity search for retrieving relevant memories based on queries.
 - **app/services/memory/vector_store.py**: Simple vector store implementation with cosine similarity search. Stores embeddings in JSON for persistence; designed to be replaced with scalable vector databases like Pinecone or Weaviate in production.
@@ -1225,10 +1296,11 @@ Backend server code using Flask.
 - **app/services/security/legacy_access_service.py**: Legacy access control service. Manages posthumous access to memories with beneficiary registration, access levels (public, family, intimate), relationship verification, and authorization checks to ensure ethical memory sharing.
 - **app/services/security/response_moderation_service.py**: Response moderation service. Reviews all AI-generated responses before delivery to ensure appropriateness, safety, and respectfulness. Detects sensitive topics (violence, illegal activity, explicit content, self-harm), applies content filtering, and replaces inappropriate responses with safe alternatives. Designed for future integration with external AI moderation APIs.
 - **app/__init__.py**: Package initializer for the Flask app.
-- **app/main.py**: FastAPI application entry point. Loads environment variables, wires all platform services (MemoryCaptureService, PersonProfileService, TimelineEngine, MemoryEmbeddingService, KnowledgeGapService, ConversationEngine, LegacyAccessService, ResponseModerationService), mounts the Family Interaction API at `/api/v1`, and adds CORS middleware and a top-level `/health` endpoint. Consumed by `uvicorn backend.app.main:app --reload` locally and `uvicorn app.main:app` inside Docker.
+- **app/main.py**: FastAPI application entry point. Loads environment variables, wires all platform services (MemoryCaptureService, PersonProfileService, TimelineEngine, EpisodeService, MemoryEmbeddingService, KnowledgeGapService, ConversationEngine, LegacyAccessService, ResponseModerationService), mounts the Family Interaction API at `/api/v1`, and adds CORS middleware and a top-level `/health` endpoint. Consumed by `uvicorn backend.app.main:app --reload` locally and `uvicorn app.main:app` inside Docker.
 - **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
 - **tests/__init__.py**: Test package initializer.
 - **tests/test_memory_capture_service.py**: Unit tests for MemoryCaptureService (create, retrieve, update, delete, retrieve_all — 6 tests).
+- **tests/test_episode_service.py**: Unit tests for EpisodeService, including episode creation, memory linking, summary generation, timeline-based clustering, and life-story integration.
 - **tests/test_person_profile_service.py**: Unit tests for PersonProfileService, including partial profile creation, detail merging, memory linking, temporary conversation profiles, and entity-aware answer resolution.
 - **tests/test_timeline_engine.py**: Unit tests for TimelineEngine (chronological sort, life stage grouping, date range query, life stage filter — 5 tests).
 - **tests/test_life_story_generator.py**: Unit tests for LifeStoryGenerator (LifeStory object shape, narrative compilation, stage summaries — 6 tests).

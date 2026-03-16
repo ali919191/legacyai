@@ -25,6 +25,7 @@ from .api.family_interaction_api import create_family_interaction_api  # noqa: E
 from .services.ai.conversation_engine import ConversationEngine  # noqa: E402
 from .services.ai.knowledge_gap_service import KnowledgeGapService  # noqa: E402
 from .services.entity.person_profile_service import PersonProfileService  # noqa: E402
+from .services.episode.episode_service import EpisodeService  # noqa: E402
 from .services.memory_capture_service import MemoryCaptureService  # noqa: E402
 from .services.memory.memory_embedding_service import MemoryEmbeddingService  # noqa: E402
 from .services.security.legacy_access_service import LegacyAccessService  # noqa: E402
@@ -72,6 +73,12 @@ def _build_services() -> dict:
         memory_service=memory_service,
         birth_date=birth_date,
     )
+    episode_service = EpisodeService(
+        memory_service=memory_service,
+        timeline_engine=timeline_engine,
+    )
+    memory_service.set_episode_service(episode_service)
+    timeline_engine.set_episode_service(episode_service)
     embedding_service = MemoryEmbeddingService(vector_store_file=vector_store_file)
     knowledge_gap_service = KnowledgeGapService(
         memory_service=memory_service,
@@ -91,6 +98,7 @@ def _build_services() -> dict:
     return {
         "memory_service": memory_service,
         "person_profile_service": person_profile_service,
+        "episode_service": episode_service,
         "timeline_engine": timeline_engine,
         "conversation_engine": conversation_engine,
         "knowledge_gap_service": knowledge_gap_service,

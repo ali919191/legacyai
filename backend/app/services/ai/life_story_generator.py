@@ -92,7 +92,8 @@ class LifeStoryGenerator:
         memory_service: MemoryCaptureService,
         timeline_engine: TimelineEngine,
         personality_service: Optional[PersonalityModelService] = None,
-        distillation_service: Optional[MemoryDistillationService] = None
+        distillation_service: Optional[MemoryDistillationService] = None,
+        episode_service: Optional[Any] = None,
     ):
         """
         Initialize the Life Story Generator.
@@ -107,6 +108,7 @@ class LifeStoryGenerator:
         self.timeline_engine = timeline_engine
         self.personality_service = personality_service
         self.distillation_service = distillation_service
+        self.episode_service = episode_service
 
     def generate_life_story(self, user_id: str) -> LifeStory:
         """
@@ -160,6 +162,11 @@ class LifeStoryGenerator:
 
         # Compile the full chronological narrative
         full_narrative = self.compile_chronological_narrative(chronological_memories)
+
+        # Add higher-level episodic highlights when available.
+        episode_narrative = self._compile_episode_narrative()
+        if episode_narrative:
+            full_narrative = f"{full_narrative}\n\n{episode_narrative}"
         
         # Extract lessons learned
         lessons_learned = self._extract_lessons_learned()
@@ -621,3 +628,32 @@ As new memories are added, this life story continues to evolve, growing richer w
             segments.append(f"{top_day} appears most often in the remembered timeline.")
 
         return " ".join(segments)
+
+    def _compile_episode_narrative(self) -> str:
+        """Build an episodic highlights section from grouped memories."""
+        if not self.episode_service or not hasattr(self.episode_service, "list_episodes"):
+            return ""
+
+        episodes = self.episode_service.list_episodes()
+        if not episodes:
+            return ""
+
+        lines = ["## Episodic Highlights"]
+        for episode in episodes:
+            summary = episode.summary
+            if not summary and hasattr(self.episode_service, "generate_episode_summary"):
+                summary = self.episode_service.generate_episode_summary(episode.episode_id)
+
+            date_parts = []
+            if episode.start_date:
+                date_parts.append(episode.start_date.strftime("%Y-%m-%d"))
+            if episode.end_date:
+                date_parts.append(episode.end_date.strftime("%Y-%m-%d"))
+            period = " to ".join(date_parts) if date_parts else "unknown period"
+
+            lines.append(
+                f"- **{episode.title}** ({episode.life_stage}, {period}) — "
+                f"{summary if summary else 'Summary pending.'}"
+            )
+
+        return "\n".join(lines)

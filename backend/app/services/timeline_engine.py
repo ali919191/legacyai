@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from datetime import datetime, date
 from app.services.memory_capture_service import Memory, MemoryCaptureService
 
@@ -13,7 +13,12 @@ class TimelineEngine:
         'retirement': (65, 150)  # Assuming max age 150
     }
 
-    def __init__(self, memory_service: MemoryCaptureService, birth_date: date):
+    def __init__(
+        self,
+        memory_service: MemoryCaptureService,
+        birth_date: date,
+        episode_service: Optional[Any] = None,
+    ):
         """
         Initialize the timeline engine.
 
@@ -23,6 +28,11 @@ class TimelineEngine:
         """
         self.memory_service = memory_service
         self.birth_date = birth_date
+        self.episode_service = episode_service
+
+    def set_episode_service(self, episode_service: Any):
+        """Attach episode service used for higher-level memory period groupings."""
+        self.episode_service = episode_service
 
     def _calculate_age(self, timestamp: datetime) -> int:
         """Calculate age at the given timestamp."""
@@ -141,3 +151,74 @@ class TimelineEngine:
             if m.time_of_day and m.time_of_day.lower() == normalized
         ]
         return sorted(matches, key=lambda m: m.timestamp)
+
+    def group_related_memories_into_episodes(
+        self,
+        window_days: int = 45,
+        min_shared_tags: int = 1,
+    ) -> List[str]:
+        """Group related memories into episodes using common tags or close time periods."""
+        if not self.episode_service:
+            return []
+
+        created_episode_ids: List[str] = []
+        grouped_by_stage = self.group_by_life_stage()
+
+        for stage, memories in grouped_by_stage.items():
+            if len(memories) < 2:
+                continue
+
+            current_cluster: List[Memory] = []
+            cluster_tag_set: set[str] = set()
+
+            for memory in memories:
+                if not current_cluster:
+                    current_cluster = [memory]
+                    cluster_tag_set = set(tag.lower() for tag in memory.tags)
+                    continue
+
+                previous = current_cluster[-1]
+                memory_tags = set(tag.lower() for tag in memory.tags)
+                shared_tags = len(cluster_tag_set & memory_tags)
+                close_in_time = abs((memory.timestamp - previous.timestamp).days) <= window_days
+
+                if shared_tags >= min_shared_tags or close_in_time:
+                    current_cluster.append(memory)
+                    cluster_tag_set |= memory_tags
+                    continue
+
+                episode_id = self._create_episode_from_cluster(stage, current_cluster)
+                if episode_id:
+                    created_episode_ids.append(episode_id)
+
+                current_cluster = [memory]
+                cluster_tag_set = set(tag.lower() for tag in memory.tags)
+
+            episode_id = self._create_episode_from_cluster(stage, current_cluster)
+            if episode_id:
+                created_episode_ids.append(episode_id)
+
+        return created_episode_ids
+
+    def _create_episode_from_cluster(self, life_stage: str, cluster: List[Memory]) -> Optional[str]:
+        """Create and populate an episode from a memory cluster when meaningful."""
+        if not self.episode_service or len(cluster) < 2:
+            return None
+
+        memory_ids = [memory.id for memory in cluster]
+        if hasattr(self.episode_service, "find_episode_by_memory_cluster"):
+            existing = self.episode_service.find_episode_by_memory_cluster(memory_ids)
+            if existing:
+                return None
+
+        lead_memory = cluster[0]
+        dominant_tag = lead_memory.tags[0].title() if lead_memory.tags else "Life"
+        episode_title = f"{dominant_tag} Chapter ({lead_memory.timestamp.strftime('%Y')})"
+        episode_id = self.episode_service.create_episode(
+            title=episode_title,
+            life_stage=life_stage,
+        )
+        for memory in cluster:
+            self.episode_service.link_memory_to_episode(memory.id, episode_id)
+        self.episode_service.generate_episode_summary(episode_id)
+        return episode_id
