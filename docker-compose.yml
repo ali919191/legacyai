@@ -1,0 +1,70 @@
+version: '3.9'
+
+services:
+
+  # ── Backend API ────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: legacyai_backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URI=postgresql://${POSTGRES_USER:-legacyai}:${POSTGRES_PASSWORD:-legacyai_secret}@db:5432/${POSTGRES_DB:-legacyai}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-me-in-production}
+    volumes:
+      # Persist uploaded media files
+      - media_data:/app/data/media
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - legacyai_net
+
+  # ── PostgreSQL ─────────────────────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: legacyai_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-legacyai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-legacyai_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-legacyai}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-legacyai} -d ${POSTGRES_DB:-legacyai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - legacyai_net
+
+  # ── Qdrant (Vector Database) ───────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: legacyai_qdrant
+    restart: unless-stopped
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - legacyai_net
+
+# ── Named Volumes ──────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+  qdrant_data:
+  media_data:
+
+# ── Networks ───────────────────────────────────────────────────────────────
+networks:
+  legacyai_net:
+    driver: bridge

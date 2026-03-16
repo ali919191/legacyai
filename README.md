@@ -713,10 +713,13 @@ Code quality tool configurations are defined in `pyproject.toml`:
 
 ```
 .
+|-- .env.example
 |-- .github
 |   `-- workflows
 |       `-- ci.yml
+|-- .gitignore
 |-- README.md
+|-- docker-compose.yml
 |-- pyproject.toml
 |-- tests.log
 |-- ai
@@ -727,6 +730,8 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   `-- scripts
 |       `-- placeholder.py
 |-- backend
+|   |-- .dockerignore
+|   |-- Dockerfile
 |   |-- app
 |   |   |-- api
 |   |   |   |-- __init__.py
@@ -756,17 +761,15 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |       |   `-- media_memory_service.py
 |   |       |-- __init__.py
 |   |       |-- memory_capture_service.py
+|   |       `-- timeline_engine.py
+|   |-- config
+|   |   `-- __init__.py
 |   |-- tests
 |   |   |-- __init__.py
 |   |   |-- test_legacy_access_service.py
 |   |   |-- test_response_moderation_service.py
 |   |   `-- utils
 |   |       `-- test_logger.py
-```|   |       `-- timeline_engine.py
-|   |-- config
-|   |   `-- __init__.py
-|   |-- tests
-|   |   `-- test_placeholder.py
 |   |-- app.py
 |   `-- requirements.txt
 |-- data
@@ -795,7 +798,7 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   `-- test_placeholder.py
 `-- README.md
 
-29 directories, 36 files
+30 directories, 41 files
 ```
 
 ### Detailed Explanations
@@ -1446,13 +1449,103 @@ if not review_result['is_safe']:
 safe_response = moderation_service.adjust_response_if_needed("original response")
 ```
 
+## Running the Legacy AI Platform Locally
+
+The fastest way to run the full platform is with Docker Compose, which starts the backend API, PostgreSQL database, and Qdrant vector database with a single command.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) 20.10+
+- [Docker Compose](https://docs.docker.com/compose/install/) v2.0+
+
+### Quick Start
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/ali919191/legacyai.git
+cd legacyai
+
+# 2. Create your environment file from the template
+cp .env.example .env
+
+# 3. (Optional) Edit .env to set secrets and API keys
+#    At minimum, change JWT_SECRET_KEY and POSTGRES_PASSWORD
+nano .env
+
+# 4. Build and start all services
+docker-compose up --build
+```
+
+The backend API will be available at **http://localhost:5000**.
+
+### Services Started by Docker Compose
+
+| Service | URL / Port | Description |
+|---------|-----------|-------------|
+| Backend API | http://localhost:5000 | Flask REST API |
+| Health Check | http://localhost:5000/api/health | Service health endpoint |
+| PostgreSQL | localhost:5432 | Relational database |
+| Qdrant | http://localhost:6333 | Vector database for semantic search |
+
+### Common Docker Compose Commands
+
+```bash
+# Start all services in the background
+docker-compose up -d
+
+# View live logs for all services
+docker-compose logs -f
+
+# View logs for a specific service
+docker-compose logs -f backend
+
+# Stop all services
+docker-compose down
+
+# Stop and remove all volumes (resets databases)
+docker-compose down -v
+
+# Rebuild the backend image after code changes
+docker-compose up --build backend
+
+# Open a shell inside the running backend container
+docker-compose exec backend sh
+```
+
+### Environment Variables
+
+All configuration lives in `.env` (copied from `.env.example`). Key variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `JWT_SECRET_KEY` | `change-me-in-production` | Secret for JWT signing — **always change this** |
+| `POSTGRES_PASSWORD` | `legacyai_secret` | PostgreSQL password — **always change this** |
+| `POSTGRES_USER` | `legacyai` | PostgreSQL username |
+| `POSTGRES_DB` | `legacyai` | PostgreSQL database name |
+| `BACKEND_PORT` | `5000` | Host port the API is exposed on |
+| `QDRANT_PORT` | `6333` | Host port for Qdrant |
+| `OPENAI_API_KEY` | *(unset)* | OpenAI API key for LLM features |
+
+### Running Without Docker (Manual Setup)
+
+If you prefer to run services directly:
+
+```bash
+# Install backend dependencies
+cd backend
+pip install -r requirements.txt
+
+# Run the Flask development server
+python app.py
+```
+
 ## Getting Started
 
 ### Prerequisites
 
 - Python 3.8+
 - Node.js 14+
-- Docker (optional)
+- Docker 20.10+
 
 ### Installation
 

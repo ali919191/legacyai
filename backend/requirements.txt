@@ -12,6 +12,9 @@ numpy==1.24.3
 # Testing
 pytest==7.4.0
 
+# Server
+gunicorn==21.2.0
+
 # Code Quality
 black==23.9.1
 ruff==0.0.292

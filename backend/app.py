@@ -54,7 +54,12 @@ def add_memory():
     db.session.commit()
     return jsonify({'message': 'Memory added successfully'})
 
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'healthy', 'service': 'legacy-ai-backend'})
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=False)
