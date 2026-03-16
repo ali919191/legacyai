@@ -20,31 +20,67 @@ class TestLegacyAccessService(unittest.TestCase):
     def test_register_beneficiary_and_duplicate_registration(self):
         service = LegacyAccessService()
 
-        # Register a beneficiary and ensure it succeeds
-        result = service.register_beneficiary("user_1", Relationship.CHILD)
-        self.assertTrue(result)
+        try:
+            # Register a beneficiary and ensure it succeeds
+            result = service.register_beneficiary("user_1", Relationship.CHILD)
+            self.assertTrue(result)
 
-        # Registering the same user again should fail
-        result_duplicate = service.register_beneficiary("user_1", Relationship.CHILD)
-        self.assertFalse(result_duplicate)
+            # Registering the same user again should fail
+            result_duplicate = service.register_beneficiary("user_1", Relationship.CHILD)
+            self.assertFalse(result_duplicate)
+
+            test_logger.log_test_result(
+                test_name="LegacyAccessService.register_beneficiary_and_duplicate",
+                input_params={"user_id": "user_1", "relationship": "CHILD"},
+                expected_result={"first_registration": True, "duplicate_registration": False},
+                actual_result={"first_registration": result, "duplicate_registration": result_duplicate},
+                status="PASS"
+            )
+        except Exception as e:
+            test_logger.log_test_result(
+                test_name="LegacyAccessService.register_beneficiary_and_duplicate",
+                input_params={"user_id": "user_1", "relationship": "CHILD"},
+                expected_result={"first_registration": True, "duplicate_registration": False},
+                actual_result=f"Exception: {str(e)}",
+                status="FAIL"
+            )
+            raise
 
     def test_access_level_assignment_by_relationship(self):
         service = LegacyAccessService()
 
-        mapping = {
-            Relationship.CHILD: AccessLevel.FULL_ACCESS,
-            Relationship.SPOUSE: AccessLevel.FULL_ACCESS,
-            Relationship.PARENT: AccessLevel.LIMITED_ACCESS,
-            Relationship.SIBLING: AccessLevel.LIMITED_ACCESS,
-            Relationship.FRIEND: AccessLevel.RESTRICTED_ACCESS,
-            Relationship.OTHER: AccessLevel.RESTRICTED_ACCESS,
-        }
+        try:
+            mapping = {
+                Relationship.CHILD: AccessLevel.FULL_ACCESS,
+                Relationship.SPOUSE: AccessLevel.FULL_ACCESS,
+                Relationship.PARENT: AccessLevel.LIMITED_ACCESS,
+                Relationship.SIBLING: AccessLevel.LIMITED_ACCESS,
+                Relationship.FRIEND: AccessLevel.RESTRICTED_ACCESS,
+                Relationship.OTHER: AccessLevel.RESTRICTED_ACCESS,
+            }
 
-        for relationship, expected_level in mapping.items():
-            service = LegacyAccessService()
-            service.register_beneficiary("user_2", relationship)
-            service.verify_legacy_activation("deceased")
-            self.assertEqual(service.get_access_level("user_2"), expected_level)
+            for relationship, expected_level in mapping.items():
+                service = LegacyAccessService()
+                service.register_beneficiary("user_2", relationship)
+                service.verify_legacy_activation("deceased")
+                self.assertEqual(service.get_access_level("user_2"), expected_level)
+
+            test_logger.log_test_result(
+                test_name="LegacyAccessService.access_level_assignment_by_relationship",
+                input_params={"relationships_tested": list(mapping.keys())},
+                expected_result={"all_mappings_correct": True},
+                actual_result={"mappings": {str(k): str(v) for k, v in mapping.items()}},
+                status="PASS"
+            )
+        except Exception as e:
+            test_logger.log_test_result(
+                test_name="LegacyAccessService.access_level_assignment_by_relationship",
+                input_params={"relationships_tested": list(mapping.keys())},
+                expected_result={"all_mappings_correct": True},
+                actual_result=f"Exception: {str(e)}",
+                status="FAIL"
+            )
+            raise
 
     def test_authorize_memory_access_restrictions_and_allowances(self):
         service = LegacyAccessService()
