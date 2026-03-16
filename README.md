@@ -509,13 +509,86 @@ tail -50 tests.log
 - **Legacy Access Service**: Beneficiary registration, access level assignment, memory authorization
 - **Response Moderation Service**: Content filtering, safe response generation, pattern detection
 
+## Code Quality and Testing
+
+The Legacy AI platform maintains high code quality standards through automated linting, formatting, and type checking integrated into the development workflow.
+
+### Code Quality Tools
+
+The project uses the following tools for code quality:
+
+- **Black**: Opinionated code formatter ensuring consistent code style
+- **Ruff**: Fast Python linter for code quality issues
+- **MyPy**: Static type checker for catching type-related errors
+- **Pytest**: Modern testing framework with comprehensive test discovery
+
+### Running Code Quality Checks Locally
+
+Before committing code, ensure all checks pass:
+
+```bash
+# Install quality tools
+pip install -r backend/requirements.txt
+
+# Format code with black
+black backend/app backend/tests
+
+# Check code style with ruff
+ruff check backend/app backend/tests
+
+# Run type checking with mypy
+mypy backend/app backend/tests
+
+# Run all tests with pytest
+PYTHONPATH=backend pytest backend/tests -v
+
+# Run tests with unittest (legacy method)
+PYTHONPATH=backend python -m unittest discover -s backend/tests -p "test_*.py" -v
+```
+
+### Continuous Integration Pipeline
+
+The project uses GitHub Actions for automated CI/CD. The workflow (`.github/workflows/ci.yml`) runs on every push and pull request to:
+
+1. **Install Dependencies**: Set up Python environment with all required packages
+2. **Run Linting**: Check code quality with ruff
+3. **Check Formatting**: Verify code follows black style guide
+4. **Type Checking**: Validate type annotations with mypy
+5. **Run Tests**: Execute all tests with pytest
+6. **Test Coverage**: Multiple Python versions (3.9, 3.10, 3.11) tested in parallel
+
+#### CI Configuration
+
+Tests run against:
+- Python 3.9, 3.10, and 3.11
+- Linux environment (Ubuntu Latest)
+- All commits to main and develop branches
+- All pull requests regardless of target branch
+
+#### Workflow Status
+
+Each pull request will show the CI pipeline status. All checks must pass before merging to main branch.
+
+### Configuration
+
+Code quality tool configurations are defined in `pyproject.toml`:
+
+- **black**: Line length set to 100, targets Python 3.9+
+- **ruff**: Checks for common errors, imports, and best practices
+- **mypy**: Strict type checking with optional import handling
+- **pytest**: Configured to discover tests in backend/tests directory
+
 ## Project Structure
 
 ### Directory Tree
 
 ```
 .
+|-- .github
+|   `-- workflows
+|       `-- ci.yml
 |-- README.md
+|-- pyproject.toml
 |-- tests.log
 |-- ai
 |   |-- data
@@ -592,13 +665,16 @@ tail -50 tests.log
 |   `-- test_placeholder.py
 `-- README.md
 
-28 directories, 33 files
+29 directories, 35 files
 ```
 
 ### Detailed Explanations
 
 #### Root Level
+- **.github/workflows/**: GitHub Actions CI/CD configuration directory.
+  - **ci.yml**: Automated CI pipeline for linting, formatting, type checking, and testing.
 - **README.md**: This file, containing project overview, setup instructions, and detailed structure explanations.
+- **pyproject.toml**: Project configuration file with tool settings for black, ruff, mypy, and pytest.
 
 #### ai/
 AI-related components and resources.
