@@ -9,6 +9,7 @@ from .memory_distillation_service import MemoryDistillationService, DistilledIns
 from .life_story_generator import LifeStoryGenerator, LifeStory, LifeStageSummary
 from .knowledge_gap_service import KnowledgeGapService
 from .memory_priority_service import MemoryPriorityService
+from .memory_grounding_service import MemoryGroundingService
 
 __all__ = [
     'ConversationEngine',
@@ -21,4 +22,5 @@ __all__ = [
     'LifeStageSummary',
     'KnowledgeGapService',
     'MemoryPriorityService',
+    'MemoryGroundingService',
 ]

@@ -7,6 +7,7 @@ from ..entity.relationship_service import RelationshipService
 from .personality_model_service import PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
 from .knowledge_gap_service import KnowledgeGapService
+from .memory_grounding_service import MemoryGroundingService
 from .memory_priority_service import MemoryPriorityService
 from ..security.legacy_access_service import LegacyAccessService, MemoryMetadata
 from ..security.response_moderation_service import ResponseModerationService
@@ -37,6 +38,7 @@ class ConversationEngine:
         personality_profile: Optional[PersonalityProfile] = None,
         distillation_service: Optional[MemoryDistillationService] = None,
         knowledge_gap_service: Optional[KnowledgeGapService] = None,
+        memory_grounding_service: Optional[MemoryGroundingService] = None,
         memory_priority_service: Optional[MemoryPriorityService] = None,
         access_service: Optional[LegacyAccessService] = None,
         moderation_service: Optional[ResponseModerationService] = None
@@ -53,6 +55,7 @@ class ConversationEngine:
             personality_profile: Optional PersonalityProfile for personalized responses.
             distillation_service: Optional MemoryDistillationService for wisdom insights.
             knowledge_gap_service: Optional KnowledgeGapService for missing-context follow-up questions.
+            memory_grounding_service: Optional MemoryGroundingService for prompt grounding and source validation.
             memory_priority_service: Optional MemoryPriorityService for ranking retrieved memories.
             access_service: Optional LegacyAccessService for access control and privacy.
             moderation_service: Optional ResponseModerationService for response safety.
@@ -65,6 +68,7 @@ class ConversationEngine:
         self.personality_profile = personality_profile
         self.distillation_service = distillation_service
         self.knowledge_gap_service = knowledge_gap_service
+        self.memory_grounding_service = memory_grounding_service
         self.memory_priority_service = memory_priority_service
         self.access_service = access_service
         self.moderation_service = moderation_service
@@ -129,14 +133,30 @@ class ConversationEngine:
             memory_priority = self.memory_priority_service.rank_memories(relevant_memories)
             relevant_memories = [item["memory"] for item in memory_priority]
 
-        # Step 4: Add chronological context using TimelineEngine
+        # Step 4: Validate memories for grounding and keep ranking aligned.
+        grounded_memories = relevant_memories
+        if self.memory_grounding_service:
+            grounded_memories = self.memory_grounding_service.validate_memory_sources(relevant_memories)
+            grounded_ids = {memory.id for memory in grounded_memories}
+            if memory_priority:
+                memory_priority = [
+                    item for item in memory_priority if item["memory"].id in grounded_ids
+                ]
+            relevant_memories = grounded_memories
+
+        # Step 5: Add chronological context using TimelineEngine
         chronological_context = self.timeline_engine.get_chronological_timeline()
         # Filter chronological context to only include relevant memories
         prioritized_ids = [memory.id for memory in relevant_memories]
         relevant_chronological = [mem for mem in chronological_context if mem.id in prioritized_ids]
 
-        # Step 5: Build context object
+        # Step 6: Build context object
         context = self._build_context(relevant_memories, relevant_chronological, memory_priority)
+
+        if self.memory_grounding_service:
+            context["grounding_packet"] = self.memory_grounding_service.build_context_packet(
+                relevant_memories
+            )
 
         if self.person_profile_service:
             context["person_profiles"] = self._get_related_person_profiles(
@@ -151,13 +171,13 @@ class ConversationEngine:
             )
             self.relationship_service.detect_relationships_from_conversation(user_query)
 
-        # Step 6: Add distilled insights if service is available
+        # Step 7: Add distilled insights if service is available
         relevant_insights = []
         if self.distillation_service:
             relevant_insights = self._get_relevant_insights(user_query, relevant_memories)
             context['distilled_insights'] = [insight.to_dict() for insight in relevant_insights]
 
-        # Step 7: Detect knowledge gaps and create follow-up questions for widget display.
+        # Step 8: Detect knowledge gaps and create follow-up questions for widget display.
         generated_question_records = []
         if self.knowledge_gap_service:
             gap_context = self.knowledge_gap_service.detect_missing_context(user_query)
@@ -168,18 +188,27 @@ class ConversationEngine:
                     self.knowledge_gap_service.store_question(question)
                 )
 
-        # Step 8: Construct prompt and generate response
-        prompt = self._construct_prompt(user_query, context)
-        response = self._generate_ai_response(prompt)
+        # Step 9: Construct prompt and generate response
+        if not relevant_memories:
+            response = "I don't remember that clearly."
+        else:
+            if self.memory_grounding_service:
+                prompt = self.memory_grounding_service.generate_grounded_prompt(
+                    user_query,
+                    relevant_memories,
+                )
+            else:
+                prompt = self._construct_prompt(user_query, context)
+            response = self._generate_ai_response(prompt)
 
-        # Step 9: Review response through moderation layer (if available)
+        # Step 10: Review response through moderation layer (if available)
         moderation_result = None
         if self.moderation_service:
             moderated_response = self.moderation_service.adjust_response_if_needed(response)
             moderation_result = self.moderation_service.review_response(response)
             response = moderated_response
 
-        # Step 10: Calculate confidence based on similarity scores and insights
+        # Step 11: Calculate confidence based on similarity scores and insights
         confidence = self._calculate_confidence(similar_memories, relevant_insights)
 
         return {

@@ -13,6 +13,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - **Life Story Generator**: Compiles chronological biographical narratives with key events, themes, and personality evolution.
 - **Conversation Engine**: Orchestrates memory retrieval and context building to generate personalized AI responses.
 - **Memory Importance & Emotional Weighting**: Prioritizes retrieved memories using life importance, emotional intensity, and recency.
+- **Memory Grounding**: Forces responses to stay anchored to retrieved memory evidence and returns a safe fallback when evidence is missing.
 - **Knowledge Gap Detection**: Detects missing details during free-style storytelling and prepares follow-up prompts.
 - **Enhanced Questions Widget Support**: Stores pending follow-up questions users can answer later to enrich memory records.
 - **Person Profile System**: Tracks people mentioned in memories and conversations so the AI can reason about relationships over time.
@@ -98,6 +99,22 @@ priority_score =
 ```
 
 The **ConversationEngine** applies this ranking after semantic retrieval so the highest-priority memories are used first when building response context.
+
+## Memory Grounding
+
+The platform now includes a **MemoryGroundingService** that reduces hallucinations by constraining responses to validated memory evidence.
+
+The service provides:
+
+- `build_context_packet(memories)`: creates a structured evidence packet from retrieved memories
+- `validate_memory_sources(memories)`: filters and deduplicates memory sources before prompt construction
+- `generate_grounded_prompt(question, memories)`: builds a strict prompt that instructs the model to use only provided memory evidence
+
+ConversationEngine integration:
+
+- retrieved memories are passed through the grounding service before response generation
+- grounded prompts explicitly prohibit adding details not present in memory evidence
+- if no relevant validated memories are available, the system responds with: `"I don't remember that clearly."`
 
 ## Enhanced Questions System
 
@@ -202,7 +219,7 @@ Example memory payload:
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Family Interaction API → Structured Interview → Memory Capture → Person Profile System → Relationship Graph → Media Memory Service → Timeline Engine → Episodic Memory System → Memory Embeddings → Vector Search → Memory Importance & Emotional Weighting → Life Story Generator → Conversation Engine → Knowledge Gap Detection → Enhanced Questions Widget → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
+**Family Interaction API → Structured Interview → Memory Capture → Person Profile System → Relationship Graph → Media Memory Service → Timeline Engine → Episodic Memory System → Memory Embeddings → Vector Search → Memory Importance & Emotional Weighting → Memory Grounding → Life Story Generator → Conversation Engine → Knowledge Gap Detection → Enhanced Questions Widget → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
 
 ## System Architecture Diagram
 
@@ -219,6 +236,7 @@ flowchart LR
     EMBED[MemoryEmbeddingService]
     VECTOR[Vector Search]
     PRIORITY[MemoryPriorityService]
+    GROUNDING[MemoryGroundingService]
     STORY[LifeStoryGenerator]
     CONVO[ConversationEngine]
     GAP[KnowledgeGapService]
@@ -236,7 +254,7 @@ flowchart LR
     MEMORY --> MEDIA
     MEMORY --> TIMELINE --> EPISODE
     EPISODE --> STORY
-    MEMORY --> EMBED --> VECTOR --> PRIORITY --> CONVO
+    MEMORY --> EMBED --> VECTOR --> PRIORITY --> GROUNDING --> CONVO
     STORY --> CONVO
     CONVO --> GAP --> WIDGET
     MEMORY --> PERSONA
@@ -259,15 +277,16 @@ flowchart LR
 9. **Memory Embeddings**: Transforms memory text into vector representations for semantic search
 10. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
 11. **Memory Importance & Emotional Weighting**: Reorders retrieved memories by combining importance, emotional intensity, and recency
-12. **Life Story Generator**: Compiles chronological narratives from memories and episode summaries, creating cohesive life stories with key events and personality evolution
-13. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
-14. **Knowledge Gap Detection**: Identifies unknown people, incomplete memory fields, and missing context during open storytelling
-15. **Enhanced Questions Widget**: Displays pending follow-up prompts that users can answer asynchronously
-16. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
-17. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
-18. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
-19. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
-20. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
+12. **Memory Grounding**: Validates retrieved memory sources and creates strict evidence-bound prompts to reduce hallucinations
+13. **Life Story Generator**: Compiles chronological narratives from memories and episode summaries, creating cohesive life stories with key events and personality evolution
+14. **Conversation Engine**: Orchestrates memory retrieval, grounding, context building, and response generation
+15. **Knowledge Gap Detection**: Identifies unknown people, incomplete memory fields, and missing context during open storytelling
+16. **Enhanced Questions Widget**: Displays pending follow-up prompts that users can answer asynchronously
+17. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
+18. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
+19. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
+20. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
+21. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
 
 ### Data Flow Integration
 
@@ -278,6 +297,7 @@ flowchart LR
 - **Episode grouping** adds higher-level life chapters by clustering memories with common tags and time windows
 - **Semantic embeddings** enable natural language queries to find relevant experiences
 - **Memory priority ranking** promotes high-importance and emotionally significant memories before prompt construction
+- **Memory grounding** prevents unsupported details by constraining generation to validated memory packets
 - **Vector store** persists embeddings locally as JSON (development) or in a scalable vector database (production)
 - **Vector search** provides fast, accurate memory retrieval for conversational context
 - **Memory distillation** transforms raw memories into actionable wisdom and life lessons
@@ -1099,6 +1119,7 @@ Query → ConversationEngine
 | `test_person_profile_service.py` | PersonProfileService (+ memory/conversation entity sync) | 5 |
 | `test_relationship_service.py` | RelationshipService (+ memory/profile/conversation integrations) | 5 |
 | `test_episode_service.py` | EpisodeService (+ memory/timeline/life-story integration) | 6 |
+| `test_memory_grounding_service.py` | MemoryGroundingService (+ ConversationEngine fallback integration) | 4 |
 | `test_memory_priority_service.py` | MemoryPriorityService (+ ConversationEngine ranking integration) | 4 |
 | `test_timeline_engine.py` | TimelineEngine | 5 |
 | `test_life_story_generator.py` | LifeStoryGenerator | 6 |
@@ -1106,12 +1127,12 @@ Query → ConversationEngine
 | `test_legacy_access_service.py` | LegacyAccessService | 4 |
 | `test_response_moderation_service.py` | ResponseModerationService | 12 |
 
-**Total: 68 tests** (57 unit + 10 integration + 1 placeholder)
+**Total: 72 tests** (61 unit + 10 integration + 1 placeholder)
 
 ### Running Tests with Make
 
 ```bash
-make test        # Run all 68 tests with verbose output (uses pytest)
+make test        # Run all 72 tests with verbose output (uses pytest)
 make test-cov    # Run all tests with line-level coverage report
 ```
 
@@ -1233,6 +1254,7 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |       |   |-- __init__.py
 |   |       |   |-- conversation_engine.py
 |   |       |   |-- knowledge_gap_service.py
+|   |       |   |-- memory_grounding_service.py
 |   |       |   |-- life_story_generator.py
 |   |       |   |-- memory_priority_service.py
 |   |       |   |-- memory_distillation_service.py
@@ -1267,6 +1289,7 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |   |-- test_legacy_access_service.py
 |   |   |-- test_life_story_generator.py
 |   |   |-- test_memory_capture_service.py
+|   |   |-- test_memory_grounding_service.py
 |   |   |-- test_relationship_service.py
 |   |   |-- test_memory_priority_service.py
 |   |   |-- test_episode_service.py
@@ -1341,7 +1364,7 @@ Backend server code using Flask.
 - **app/models/__init__.py**: Data models module. Placeholder for SQLAlchemy models like User and Memory.
 - **app/services/__init__.py**: Business logic services. Includes a sample service function for shared logic.
 - **app/services/ai/__init__.py**: Package initializer for AI services, exporting conversation, personality, distillation, life story, and knowledge gap services.
-- **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, person profiles, timeline, embedding, memory priority ranking, knowledge gap detection, personality, distillation, and access control services to generate personalized responses and enhanced follow-up questions based on stored memories.
+- **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, person profiles, relationship graph, timeline, embedding, memory priority ranking, memory grounding, knowledge gap detection, personality, distillation, and access control services to generate personalized responses and enhanced follow-up questions based on stored memories.
 - **app/services/ai/knowledge_gap_service.py**: Knowledge gap detection service. Finds missing context in free-style conversation, generates follow-up prompts, stores pending/answered question records for the Enhanced Questions widget, and writes user answers back into linked memories.
 - **app/services/episode/__init__.py**: Package initializer for episodic services, exporting Episode and EpisodeService.
 - **app/services/episode/episode_service.py**: Episodic memory service. Creates episodes, links memories, tracks date spans and related people, generates episode summaries, computes importance scores, and supports grouping by shared tags or nearby time periods.
@@ -1350,6 +1373,7 @@ Backend server code using Flask.
 - **app/services/entity/relationship_service.py**: Relationship graph service. Creates and updates person-to-person edges, retrieves relationships per person, detects relationships from memories with co-mentioned people, and infers additional links from conversation context.
 - **app/services/ai/life_story_generator.py**: Life story generator service. Compiles chronological narratives from memories, creates life stage summaries, extracts key events and lessons learned, and traces personality evolution across the lifespan. Integrates with timeline, personality, and distillation services to generate coherent biographical narratives suitable for family preservation and storytelling.
 - **app/services/ai/memory_priority_service.py**: Memory priority service. Scores memories by life importance and emotional intensity, applies a recency factor, and ranks candidates before response generation.
+- **app/services/ai/memory_grounding_service.py**: Memory grounding service. Builds context packets, validates memory sources, and generates strict prompts that constrain responses to retrieved evidence and reduce hallucinations.
 - **app/services/ai/personality_model_service.py**: Personality modeling service. Analyzes memories to extract personality traits, beliefs, values, communication styles, and decision patterns, creating a comprehensive profile for authentic AI responses.
 - **app/services/ai/memory_distillation_service.py**: Memory distillation service. Extracts higher-level wisdom from memories including life lessons, advice, regrets, and guiding principles, providing distilled insights for wisdom-based conversations.
 - **app/services/interview/__init__.py**: Package initializer for interview services, exporting StructuredInterviewService.
@@ -1370,6 +1394,7 @@ Backend server code using Flask.
 - **tests/test_episode_service.py**: Unit tests for EpisodeService, including episode creation, memory linking, summary generation, timeline-based clustering, and life-story integration.
 - **tests/test_relationship_service.py**: Unit tests for RelationshipService, including relationship creation and updates, memory-based detection, per-person retrieval, and ConversationEngine integration for relationship inference.
 - **tests/test_memory_priority_service.py**: Unit tests for MemoryPriorityService, including importance scoring, emotional weighting, ranking formula behavior, and ConversationEngine retrieval ordering integration.
+- **tests/test_memory_grounding_service.py**: Unit tests for MemoryGroundingService, including context-packet construction, source validation, grounded prompt generation, and no-memory fallback behavior in ConversationEngine.
 - **tests/test_person_profile_service.py**: Unit tests for PersonProfileService, including partial profile creation, detail merging, memory linking, temporary conversation profiles, and entity-aware answer resolution.
 - **tests/test_timeline_engine.py**: Unit tests for TimelineEngine (chronological sort, life stage grouping, date range query, life stage filter — 5 tests).
 - **tests/test_life_story_generator.py**: Unit tests for LifeStoryGenerator (LifeStory object shape, narrative compilation, stage summaries — 6 tests).

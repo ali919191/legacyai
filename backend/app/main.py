@@ -24,6 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from .api.family_interaction_api import create_family_interaction_api  # noqa: E402
 from .services.ai.conversation_engine import ConversationEngine  # noqa: E402
 from .services.ai.knowledge_gap_service import KnowledgeGapService  # noqa: E402
+from .services.ai.memory_grounding_service import MemoryGroundingService  # noqa: E402
 from .services.ai.memory_priority_service import MemoryPriorityService  # noqa: E402
 from .services.entity.person_profile_service import PersonProfileService  # noqa: E402
 from .services.entity.relationship_service import RelationshipService  # noqa: E402
@@ -89,6 +90,7 @@ def _build_services() -> dict:
         memory_service=memory_service,
         person_profile_service=person_profile_service,
     )
+    memory_grounding_service = MemoryGroundingService()
     memory_priority_service = MemoryPriorityService()
     conversation_engine = ConversationEngine(
         memory_service=memory_service,
@@ -97,6 +99,7 @@ def _build_services() -> dict:
         person_profile_service=person_profile_service,
         relationship_service=relationship_service,
         knowledge_gap_service=knowledge_gap_service,
+        memory_grounding_service=memory_grounding_service,
         memory_priority_service=memory_priority_service,
     )
     access_service = LegacyAccessService()
@@ -111,6 +114,7 @@ def _build_services() -> dict:
         "timeline_engine": timeline_engine,
         "conversation_engine": conversation_engine,
         "knowledge_gap_service": knowledge_gap_service,
+        "memory_grounding_service": memory_grounding_service,
         "memory_priority_service": memory_priority_service,
         "access_service": access_service,
         "moderation_service": moderation_service,
