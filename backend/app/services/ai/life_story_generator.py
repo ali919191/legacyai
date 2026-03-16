@@ -280,8 +280,10 @@ class LifeStoryGenerator:
         if sorted_memories:
             start_date = sorted_memories[0].timestamp.year
             end_date = sorted_memories[-1].timestamp.year if sorted_memories[-1] else start_date
+            temporal_summary = self._summarize_temporal_patterns(sorted_memories)
             narrative_sections.append(
                 f"# Life Narrative ({start_date} - {end_date})\n"
+                f"{temporal_summary}"
             )
         
         # Compile memories into narrative sections
@@ -309,9 +311,11 @@ class LifeStoryGenerator:
             A formatted narrative section as a string.
         """
         timestamp_str = memory.timestamp.strftime("%B %d, %Y")
+        temporal_context = self.timeline_engine.format_temporal_context(memory)
         
         section = f"""## {sequence}. {memory.title}
 **Date:** {timestamp_str}
+**Temporal Context:** {temporal_context if temporal_context else "Not specified"}
 **Location:** {memory.location if memory.location else "Not specified"}
 **People Involved:** {', '.join(memory.people_involved) if memory.people_involved else "Not specified"}
 
@@ -367,6 +371,10 @@ class LifeStoryGenerator:
                 key_events.append({
                     'title': memory.title,
                     'date': memory.timestamp.isoformat(),
+                    'time_of_day': memory.time_of_day,
+                    'day_of_week': memory.day_of_week,
+                    'start_time': memory.start_time,
+                    'end_time': memory.end_time,
                     'significance': significance,
                     'primary_emotions': memory.emotions,
                     'location': memory.location,
@@ -589,3 +597,27 @@ but the essence of a life lived with meaning, connection, and purpose.
 As new memories are added, this life story continues to evolve, growing richer with each retelling."""
         
         return conclusion
+
+    def _summarize_temporal_patterns(self, memories: List[Memory]) -> str:
+        """Summarize dominant time-of-day and weekday patterns across memories."""
+        if not memories:
+            return ""
+
+        from collections import Counter
+
+        time_buckets = [m.time_of_day for m in memories if m.time_of_day]
+        weekdays = [m.day_of_week for m in memories if m.day_of_week]
+
+        if not time_buckets and not weekdays:
+            return ""
+
+        top_time = Counter(time_buckets).most_common(1)[0][0] if time_buckets else ""
+        top_day = Counter(weekdays).most_common(1)[0][0] if weekdays else ""
+
+        segments = []
+        if top_time:
+            segments.append(f"Many key memories happened in the {top_time}.")
+        if top_day:
+            segments.append(f"{top_day} appears most often in the remembered timeline.")
+
+        return " ".join(segments)

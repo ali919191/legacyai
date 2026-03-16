@@ -37,6 +37,17 @@ You can also point to a custom dataset path:
 LEGACY_SAMPLE_MEMORIES_FILE=backend/data/sample_memories.json pytest backend/tests/test_integration_pipeline.py -v
 ```
 
+## Memory Temporal Context
+
+Memories now support richer temporal metadata in addition to the main timestamp:
+
+- `time_of_day` (`morning`, `afternoon`, `evening`, `night`)
+- `start_time` (`HH:MM`)
+- `end_time` (`HH:MM`)
+- `day_of_week`
+
+This temporal context helps the Timeline Engine and Life Story Generator build more natural narratives, such as describing recurring morning routines, weekend family rituals, or evening milestones. It also improves response quality in conversational prompts where users ask when events typically happened.
+
 ## System Pipeline
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:

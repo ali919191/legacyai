@@ -109,3 +109,35 @@ class TimelineEngine:
         """
         grouped = self.group_by_life_stage()
         return {stage: len(memories) for stage, memories in grouped.items()}
+
+    def format_temporal_context(self, memory: Memory) -> str:
+        """Build a compact temporal phrase for narrative rendering."""
+        parts = []
+        if memory.day_of_week:
+            parts.append(memory.day_of_week)
+        if memory.time_of_day:
+            parts.append(memory.time_of_day)
+
+        if memory.start_time and memory.end_time and memory.start_time != memory.end_time:
+            parts.append(f"{memory.start_time}-{memory.end_time}")
+        elif memory.start_time:
+            parts.append(memory.start_time)
+
+        return ", ".join(parts)
+
+    def query_by_time_of_day(self, time_of_day: str) -> List[Memory]:
+        """
+        Query memories that occurred during a specific time-of-day bucket.
+
+        Args:
+            time_of_day: One of morning, afternoon, evening, night.
+
+        Returns:
+            List of matching memories sorted chronologically.
+        """
+        normalized = time_of_day.strip().lower()
+        matches = [
+            m for m in self.memory_service.retrieve_all_memories()
+            if m.time_of_day and m.time_of_day.lower() == normalized
+        ]
+        return sorted(matches, key=lambda m: m.timestamp)

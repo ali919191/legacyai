@@ -15,6 +15,10 @@ class Memory:
     location: str
     emotions: List[str]
     tags: List[str]
+    time_of_day: str = ""
+    start_time: str = ""
+    end_time: str = ""
+    day_of_week: str = ""
     sensitivity_tags: Optional[List[str]] = None  # For access control: 'public', 'personal', 'medical', 'financial', 'intimate'
 
 
@@ -25,6 +29,17 @@ class MemoryCaptureService:
         """Initialize the service with an in-memory storage for memories."""
         self.memories: dict[str, Memory] = {}
 
+    def _infer_time_of_day(self, timestamp: datetime) -> str:
+        """Infer a narrative-friendly time bucket from a timestamp hour."""
+        hour = timestamp.hour
+        if 5 <= hour < 12:
+            return "morning"
+        if 12 <= hour < 17:
+            return "afternoon"
+        if 17 <= hour < 21:
+            return "evening"
+        return "night"
+
     def create_memory(
         self,
         title: str,
@@ -34,6 +49,10 @@ class MemoryCaptureService:
         location: str = "",
         emotions: Optional[List[str]] = None,
         tags: Optional[List[str]] = None,
+        time_of_day: str = "",
+        start_time: str = "",
+        end_time: str = "",
+        day_of_week: str = "",
         sensitivity_tags: Optional[List[str]] = None
     ) -> str:
         """
@@ -47,6 +66,10 @@ class MemoryCaptureService:
             location: Where the memory took place.
             emotions: List of emotions associated with the memory.
             tags: List of tags for categorization.
+            time_of_day: Optional temporal bucket ('morning', 'afternoon', 'evening', 'night').
+            start_time: Optional memory start time in HH:MM format.
+            end_time: Optional memory end time in HH:MM format.
+            day_of_week: Optional day-of-week label (e.g., Monday).
             sensitivity_tags: Access control tags ('public', 'personal', 'medical', 'financial', 'intimate').
 
         Returns:
@@ -63,6 +86,15 @@ class MemoryCaptureService:
         if sensitivity_tags is None:
             sensitivity_tags = []
 
+        if not start_time:
+            start_time = timestamp.strftime("%H:%M")
+        if not end_time:
+            end_time = start_time
+        if not day_of_week:
+            day_of_week = timestamp.strftime("%A")
+        if not time_of_day:
+            time_of_day = self._infer_time_of_day(timestamp)
+
         memory_id = str(uuid.uuid4())
         memory = Memory(
             id=memory_id,
@@ -73,6 +105,10 @@ class MemoryCaptureService:
             location=location,
             emotions=emotions,
             tags=tags,
+            time_of_day=time_of_day,
+            start_time=start_time,
+            end_time=end_time,
+            day_of_week=day_of_week,
             sensitivity_tags=sensitivity_tags
         )
         self.memories[memory_id] = memory
@@ -88,6 +124,10 @@ class MemoryCaptureService:
         location: Optional[str] = None,
         emotions: Optional[List[str]] = None,
         tags: Optional[List[str]] = None,
+        time_of_day: Optional[str] = None,
+        start_time: Optional[str] = None,
+        end_time: Optional[str] = None,
+        day_of_week: Optional[str] = None,
         sensitivity_tags: Optional[List[str]] = None
     ) -> bool:
         """
@@ -118,8 +158,26 @@ class MemoryCaptureService:
             memory.emotions = emotions
         if tags is not None:
             memory.tags = tags
+        if time_of_day is not None:
+            memory.time_of_day = time_of_day
+        if start_time is not None:
+            memory.start_time = start_time
+        if end_time is not None:
+            memory.end_time = end_time
+        if day_of_week is not None:
+            memory.day_of_week = day_of_week
         if sensitivity_tags is not None:
             memory.sensitivity_tags = sensitivity_tags
+
+        if timestamp is not None:
+            if time_of_day is None:
+                memory.time_of_day = self._infer_time_of_day(timestamp)
+            if start_time is None:
+                memory.start_time = timestamp.strftime("%H:%M")
+            if end_time is None and not memory.end_time:
+                memory.end_time = memory.start_time
+            if day_of_week is None:
+                memory.day_of_week = timestamp.strftime("%A")
         return True
 
     def retrieve_memory(self, memory_id: str) -> Optional[Memory]:

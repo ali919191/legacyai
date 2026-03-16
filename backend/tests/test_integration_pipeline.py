@@ -187,6 +187,10 @@ def _load_seed_memories():
         "people_involved",
         "emotions",
         "tags",
+        "time_of_day",
+        "start_time",
+        "end_time",
+        "day_of_week",
     }
     for entry in loaded:
         missing_keys = required_keys - set(entry.keys())
@@ -202,6 +206,10 @@ def _load_seed_memories():
                 "location": entry.get("location", ""),
                 "emotions": entry.get("emotions", []),
                 "tags": entry.get("tags", []),
+                "time_of_day": entry.get("time_of_day", ""),
+                "start_time": entry.get("start_time", ""),
+                "end_time": entry.get("end_time", ""),
+                "day_of_week": entry.get("day_of_week", ""),
                 "sensitivity_tags": entry.get("sensitivity_tags", ["public"]),
             }
         )

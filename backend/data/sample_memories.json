@@ -4,449 +4,1209 @@
     "title": "Summer fishing with Dad",
     "description": "Dad woke me before sunrise and we walked to Miller Creek with borrowed rods. I caught a tiny trout and learned patience from the long quiet between bites.",
     "timestamp": "1952-06-18T05:45:00",
-    "people_involved": ["Dad"],
-    "emotions": ["calm", "pride", "curiosity"],
-    "tags": ["childhood", "family", "outdoors"]
+    "people_involved": [
+      "Dad"
+    ],
+    "emotions": [
+      "calm",
+      "pride",
+      "curiosity"
+    ],
+    "tags": [
+      "childhood",
+      "family",
+      "outdoors"
+    ],
+    "time_of_day": "morning",
+    "start_time": "05:45",
+    "end_time": "05:45",
+    "day_of_week": "Wednesday"
   },
   {
     "id": "mem_0002",
     "title": "Learning to read road signs",
     "description": "On bus rides home, Mom quizzed me on street names and shop signs. Reading felt practical for the first time, not just homework.",
     "timestamp": "1953-02-10T16:20:00",
-    "people_involved": ["Mom"],
-    "emotions": ["encouraged", "focused"],
-    "tags": ["childhood", "education", "family"]
+    "people_involved": [
+      "Mom"
+    ],
+    "emotions": [
+      "encouraged",
+      "focused"
+    ],
+    "tags": [
+      "childhood",
+      "education",
+      "family"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "16:20",
+    "end_time": "16:20",
+    "day_of_week": "Tuesday"
   },
   {
     "id": "mem_0003",
     "title": "The bicycle fall on Oak Street",
     "description": "I tried to race older kids downhill and slid hard on gravel. Mr. Hanley patched my knee and reminded me that speed means responsibility.",
     "timestamp": "1954-07-04T14:10:00",
-    "people_involved": ["Mr. Hanley", "neighborhood kids"],
-    "emotions": ["embarrassment", "pain", "gratitude"],
-    "tags": ["childhood", "failure", "lesson"]
+    "people_involved": [
+      "Mr. Hanley",
+      "neighborhood kids"
+    ],
+    "emotions": [
+      "embarrassment",
+      "pain",
+      "gratitude"
+    ],
+    "tags": [
+      "childhood",
+      "failure",
+      "lesson"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "14:10",
+    "end_time": "14:10",
+    "day_of_week": "Sunday"
   },
   {
     "id": "mem_0004",
     "title": "County fair talent night",
     "description": "I froze halfway through my harmonica song and forgot the tune. Grandmother applauded anyway and told me courage is showing up again next time.",
     "timestamp": "1955-09-22T19:30:00",
-    "people_involved": ["Grandmother"],
-    "emotions": ["fear", "shame", "comfort"],
-    "tags": ["childhood", "failure", "resilience"]
+    "people_involved": [
+      "Grandmother"
+    ],
+    "emotions": [
+      "fear",
+      "shame",
+      "comfort"
+    ],
+    "tags": [
+      "childhood",
+      "failure",
+      "resilience"
+    ],
+    "time_of_day": "evening",
+    "start_time": "19:30",
+    "end_time": "19:30",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0005",
     "title": "First paper route",
     "description": "At eleven I delivered morning papers in rain and snow. The route taught me reliability because every porch expected me, even in bad weather.",
     "timestamp": "1956-11-03T05:30:00",
-    "people_involved": ["route manager", "neighbors"],
-    "emotions": ["determination", "tired", "independence"],
-    "tags": ["childhood", "work ethic", "responsibility"]
+    "people_involved": [
+      "route manager",
+      "neighbors"
+    ],
+    "emotions": [
+      "determination",
+      "tired",
+      "independence"
+    ],
+    "tags": [
+      "childhood",
+      "work ethic",
+      "responsibility"
+    ],
+    "time_of_day": "morning",
+    "start_time": "05:30",
+    "end_time": "05:30",
+    "day_of_week": "Saturday"
   },
   {
     "id": "mem_0006",
     "title": "Woodshop birdhouse project",
     "description": "My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is more valuable than perfection.",
     "timestamp": "1957-03-14T10:15:00",
-    "people_involved": ["Mr. Lewis"],
-    "emotions": ["frustration", "pride", "motivation"],
-    "tags": ["childhood", "education", "lesson"]
+    "people_involved": [
+      "Mr. Lewis"
+    ],
+    "emotions": [
+      "frustration",
+      "pride",
+      "motivation"
+    ],
+    "tags": [
+      "childhood",
+      "education",
+      "lesson"
+    ],
+    "time_of_day": "morning",
+    "start_time": "10:15",
+    "end_time": "10:15",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0007",
     "title": "Helping Mom at the diner",
     "description": "I stacked pies and washed mugs after school at Mom's diner. Watching regulars share stories taught me how listening builds trust.",
     "timestamp": "1958-01-28T17:40:00",
-    "people_involved": ["Mom", "diner regulars"],
-    "emotions": ["busy", "connected", "useful"],
-    "tags": ["childhood", "family", "relationships"]
+    "people_involved": [
+      "Mom",
+      "diner regulars"
+    ],
+    "emotions": [
+      "busy",
+      "connected",
+      "useful"
+    ],
+    "tags": [
+      "childhood",
+      "family",
+      "relationships"
+    ],
+    "time_of_day": "evening",
+    "start_time": "17:40",
+    "end_time": "17:40",
+    "day_of_week": "Tuesday"
   },
   {
     "id": "mem_0008",
     "title": "Science fair volcano",
     "description": "My volcano erupted too early and soaked the display table in red foam. I rewrote the presentation overnight and still earned honorable mention.",
     "timestamp": "1959-04-09T13:00:00",
-    "people_involved": ["science teacher", "classmates"],
-    "emotions": ["panic", "relief", "confidence"],
-    "tags": ["childhood", "education", "failure", "lesson"]
+    "people_involved": [
+      "science teacher",
+      "classmates"
+    ],
+    "emotions": [
+      "panic",
+      "relief",
+      "confidence"
+    ],
+    "tags": [
+      "childhood",
+      "education",
+      "failure",
+      "lesson"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "13:00",
+    "end_time": "13:00",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0009",
     "title": "Quiet promise to my little sister",
     "description": "After kids teased my sister's stutter, we practiced breathing and reading together each evening. Protecting her taught me gentleness can be a form of strength.",
     "timestamp": "1960-05-16T20:10:00",
-    "people_involved": ["Lily"],
-    "emotions": ["protective", "tender", "hopeful"],
-    "tags": ["childhood", "family", "relationships"]
+    "people_involved": [
+      "Lily"
+    ],
+    "emotions": [
+      "protective",
+      "tender",
+      "hopeful"
+    ],
+    "tags": [
+      "childhood",
+      "family",
+      "relationships"
+    ],
+    "time_of_day": "evening",
+    "start_time": "20:10",
+    "end_time": "20:10",
+    "day_of_week": "Monday"
   },
   {
     "id": "mem_0010",
     "title": "Graduation handshake",
     "description": "As principal shook my hand, Dad cried openly in the front row. That moment made education feel like a family achievement, not just a personal one.",
     "timestamp": "1961-06-02T18:00:00",
-    "people_involved": ["Dad", "Mom", "Principal"],
-    "emotions": ["pride", "gratitude", "love"],
-    "tags": ["education", "family", "milestone"]
+    "people_involved": [
+      "Dad",
+      "Mom",
+      "Principal"
+    ],
+    "emotions": [
+      "pride",
+      "gratitude",
+      "love"
+    ],
+    "tags": [
+      "education",
+      "family",
+      "milestone"
+    ],
+    "time_of_day": "evening",
+    "start_time": "18:00",
+    "end_time": "18:00",
+    "day_of_week": "Friday"
   },
   {
     "id": "mem_0011",
     "title": "First week at state university",
     "description": "I arrived with one suitcase and no idea how to navigate campus buildings. Learning to ask for help quickly became my survival skill.",
     "timestamp": "1962-09-05T08:30:00",
-    "people_involved": ["roommate Ben"],
-    "emotions": ["anxious", "excited", "overwhelmed"],
-    "tags": ["education", "independence", "growth"]
+    "people_involved": [
+      "roommate Ben"
+    ],
+    "emotions": [
+      "anxious",
+      "excited",
+      "overwhelmed"
+    ],
+    "tags": [
+      "education",
+      "independence",
+      "growth"
+    ],
+    "time_of_day": "morning",
+    "start_time": "08:30",
+    "end_time": "08:30",
+    "day_of_week": "Wednesday"
   },
   {
     "id": "mem_0012",
     "title": "Calculus exam failure",
     "description": "I failed my first college calculus midterm after assuming high school habits would be enough. Office hours and study groups changed my entire approach.",
     "timestamp": "1962-10-21T15:00:00",
-    "people_involved": ["Professor Klein", "study group"],
-    "emotions": ["shock", "humility", "resolve"],
-    "tags": ["education", "failure", "lesson"]
+    "people_involved": [
+      "Professor Klein",
+      "study group"
+    ],
+    "emotions": [
+      "shock",
+      "humility",
+      "resolve"
+    ],
+    "tags": [
+      "education",
+      "failure",
+      "lesson"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "15:00",
+    "end_time": "15:00",
+    "day_of_week": "Sunday"
   },
   {
     "id": "mem_0013",
     "title": "Library night that changed my major",
     "description": "A senior showed me a systems design textbook and suddenly engineering felt alive. I switched majors two weeks later.",
     "timestamp": "1963-02-17T22:15:00",
-    "people_involved": ["Elaine"],
-    "emotions": ["inspired", "curious", "certain"],
-    "tags": ["education", "career", "decision"]
+    "people_involved": [
+      "Elaine"
+    ],
+    "emotions": [
+      "inspired",
+      "curious",
+      "certain"
+    ],
+    "tags": [
+      "education",
+      "career",
+      "decision"
+    ],
+    "time_of_day": "night",
+    "start_time": "22:15",
+    "end_time": "22:15",
+    "day_of_week": "Sunday"
   },
   {
     "id": "mem_0014",
     "title": "Debate team regional finals",
     "description": "Our team lost the regional final by one point, but our coach praised how respectfully we argued. I learned dignity matters even in defeat.",
     "timestamp": "1963-11-09T20:50:00",
-    "people_involved": ["Coach Rivera", "debate team"],
-    "emotions": ["disappointment", "respect", "maturity"],
-    "tags": ["education", "failure", "lesson", "communication"]
+    "people_involved": [
+      "Coach Rivera",
+      "debate team"
+    ],
+    "emotions": [
+      "disappointment",
+      "respect",
+      "maturity"
+    ],
+    "tags": [
+      "education",
+      "failure",
+      "lesson",
+      "communication"
+    ],
+    "time_of_day": "evening",
+    "start_time": "20:50",
+    "end_time": "20:50",
+    "day_of_week": "Saturday"
   },
   {
     "id": "mem_0015",
     "title": "Research lab assistantship",
     "description": "I spent weekends labeling circuit boards and logging test data for graduate students. Repetition taught me discipline and attention to detail.",
     "timestamp": "1964-03-12T09:20:00",
-    "people_involved": ["Dr. Patel", "lab team"],
-    "emotions": ["focused", "tired", "motivated"],
-    "tags": ["education", "career", "skills"]
+    "people_involved": [
+      "Dr. Patel",
+      "lab team"
+    ],
+    "emotions": [
+      "focused",
+      "tired",
+      "motivated"
+    ],
+    "tags": [
+      "education",
+      "career",
+      "skills"
+    ],
+    "time_of_day": "morning",
+    "start_time": "09:20",
+    "end_time": "09:20",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0016",
     "title": "Internship interview stumble",
     "description": "I rambled through technical questions and did not get the internship. Practicing clear answers taught me that communication can outweigh raw knowledge.",
     "timestamp": "1964-05-30T14:30:00",
-    "people_involved": ["hiring panel"],
-    "emotions": ["embarrassment", "determination"],
-    "tags": ["education", "career", "failure", "lesson"]
+    "people_involved": [
+      "hiring panel"
+    ],
+    "emotions": [
+      "embarrassment",
+      "determination"
+    ],
+    "tags": [
+      "education",
+      "career",
+      "failure",
+      "lesson"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "14:30",
+    "end_time": "14:30",
+    "day_of_week": "Saturday"
   },
   {
     "id": "mem_0017",
     "title": "Meeting Sarah in the reference aisle",
     "description": "I offered Sarah the last available statistics handbook and we ended up studying together until closing. Conversation with her felt effortless from the start.",
     "timestamp": "1965-01-19T18:10:00",
-    "people_involved": ["Sarah"],
-    "emotions": ["nervous", "spark", "joy"],
-    "tags": ["relationships", "education", "love"]
+    "people_involved": [
+      "Sarah"
+    ],
+    "emotions": [
+      "nervous",
+      "spark",
+      "joy"
+    ],
+    "tags": [
+      "relationships",
+      "education",
+      "love"
+    ],
+    "time_of_day": "evening",
+    "start_time": "18:10",
+    "end_time": "18:10",
+    "day_of_week": "Tuesday"
   },
   {
     "id": "mem_0018",
     "title": "Teaching my first tutoring session",
     "description": "Explaining algebra to first-year students showed me how much I had actually learned. Teaching gave me confidence that quiet people can still lead.",
     "timestamp": "1965-10-04T16:00:00",
-    "people_involved": ["tutoring group"],
-    "emotions": ["nervous", "confidence", "satisfaction"],
-    "tags": ["education", "leadership", "lesson"]
+    "people_involved": [
+      "tutoring group"
+    ],
+    "emotions": [
+      "nervous",
+      "confidence",
+      "satisfaction"
+    ],
+    "tags": [
+      "education",
+      "leadership",
+      "lesson"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "16:00",
+    "end_time": "16:00",
+    "day_of_week": "Monday"
   },
   {
     "id": "mem_0019",
     "title": "Graduating with honors",
     "description": "When my name was called for honors, I looked up and saw my parents standing in the back because seats were full. Their sacrifice carried me there.",
     "timestamp": "1966-06-11T17:45:00",
-    "people_involved": ["Mom", "Dad", "Sarah"],
-    "emotions": ["pride", "gratitude", "relief"],
-    "tags": ["education", "family", "milestone"]
+    "people_involved": [
+      "Mom",
+      "Dad",
+      "Sarah"
+    ],
+    "emotions": [
+      "pride",
+      "gratitude",
+      "relief"
+    ],
+    "tags": [
+      "education",
+      "family",
+      "milestone"
+    ],
+    "time_of_day": "evening",
+    "start_time": "17:45",
+    "end_time": "17:45",
+    "day_of_week": "Saturday"
   },
   {
     "id": "mem_0020",
     "title": "First day as junior engineer",
     "description": "I wore an oversized hard hat and barely spoke in meetings. A kind supervisor told me to bring one question to every meeting and ask it.",
     "timestamp": "1967-08-07T08:00:00",
-    "people_involved": ["Supervisor Tom", "engineering team"],
-    "emotions": ["intimidated", "grateful", "eager"],
-    "tags": ["career", "mentorship", "growth"]
+    "people_involved": [
+      "Supervisor Tom",
+      "engineering team"
+    ],
+    "emotions": [
+      "intimidated",
+      "grateful",
+      "eager"
+    ],
+    "tags": [
+      "career",
+      "mentorship",
+      "growth"
+    ],
+    "time_of_day": "morning",
+    "start_time": "08:00",
+    "end_time": "08:00",
+    "day_of_week": "Monday"
   },
   {
     "id": "mem_0021",
     "title": "Missed design deadline",
     "description": "I underestimated a systems integration task and missed a major deadline. Owning the mistake publicly rebuilt trust faster than excuses ever could.",
     "timestamp": "1968-03-26T19:10:00",
-    "people_involved": ["project manager", "team"],
-    "emotions": ["stress", "regret", "accountability"],
-    "tags": ["career", "failure", "lesson", "integrity"]
+    "people_involved": [
+      "project manager",
+      "team"
+    ],
+    "emotions": [
+      "stress",
+      "regret",
+      "accountability"
+    ],
+    "tags": [
+      "career",
+      "failure",
+      "lesson",
+      "integrity"
+    ],
+    "time_of_day": "evening",
+    "start_time": "19:10",
+    "end_time": "19:10",
+    "day_of_week": "Tuesday"
   },
   {
     "id": "mem_0022",
     "title": "Wedding in a small chapel",
     "description": "Sarah and I married in a simple chapel with homemade flowers and borrowed music. We started with little money but a lot of commitment.",
     "timestamp": "1968-09-14T14:00:00",
-    "people_involved": ["Sarah", "family", "friends"],
-    "emotions": ["love", "hope", "joy"],
-    "tags": ["relationships", "family", "milestone"]
+    "people_involved": [
+      "Sarah",
+      "family",
+      "friends"
+    ],
+    "emotions": [
+      "love",
+      "hope",
+      "joy"
+    ],
+    "tags": [
+      "relationships",
+      "family",
+      "milestone"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "14:00",
+    "end_time": "14:00",
+    "day_of_week": "Saturday"
   },
   {
     "id": "mem_0023",
     "title": "Turning down a higher-paying role",
     "description": "I declined a better salary in another city to stay close to aging parents. It taught me that values should guide decisions before ambition does.",
     "timestamp": "1970-01-12T11:45:00",
-    "people_involved": ["Sarah", "Dad", "Mom"],
-    "emotions": ["conflicted", "clear", "peaceful"],
-    "tags": ["career", "family", "decision", "values"]
+    "people_involved": [
+      "Sarah",
+      "Dad",
+      "Mom"
+    ],
+    "emotions": [
+      "conflicted",
+      "clear",
+      "peaceful"
+    ],
+    "tags": [
+      "career",
+      "family",
+      "decision",
+      "values"
+    ],
+    "time_of_day": "morning",
+    "start_time": "11:45",
+    "end_time": "11:45",
+    "day_of_week": "Monday"
   },
   {
     "id": "mem_0024",
     "title": "Becoming a father",
     "description": "Holding my son for the first time felt like my priorities rearranged in a minute. I promised to be present, not just successful.",
     "timestamp": "1971-07-02T03:20:00",
-    "people_involved": ["Sarah", "Michael"],
-    "emotions": ["awe", "fear", "love"],
-    "tags": ["relationships", "family", "parenthood"]
+    "people_involved": [
+      "Sarah",
+      "Michael"
+    ],
+    "emotions": [
+      "awe",
+      "fear",
+      "love"
+    ],
+    "tags": [
+      "relationships",
+      "family",
+      "parenthood"
+    ],
+    "time_of_day": "night",
+    "start_time": "03:20",
+    "end_time": "03:20",
+    "day_of_week": "Friday"
   },
   {
     "id": "mem_0025",
     "title": "Argument with Sarah about work hours",
     "description": "I missed three dinners in one week and Sarah finally said she felt like a single parent. We made a no-late-Wednesday rule and kept it for years.",
     "timestamp": "1972-10-03T21:15:00",
-    "people_involved": ["Sarah"],
-    "emotions": ["defensive", "guilty", "committed"],
-    "tags": ["relationships", "career", "lesson", "marriage"]
+    "people_involved": [
+      "Sarah"
+    ],
+    "emotions": [
+      "defensive",
+      "guilty",
+      "committed"
+    ],
+    "tags": [
+      "relationships",
+      "career",
+      "lesson",
+      "marriage"
+    ],
+    "time_of_day": "night",
+    "start_time": "21:15",
+    "end_time": "21:15",
+    "day_of_week": "Tuesday"
   },
   {
     "id": "mem_0026",
     "title": "First team lead assignment",
     "description": "Managing five engineers taught me quickly that authority without empathy fails. Listening before deciding improved every project review.",
     "timestamp": "1973-05-21T09:00:00",
-    "people_involved": ["engineering team"],
-    "emotions": ["pressure", "confidence", "respect"],
-    "tags": ["career", "leadership", "lesson"]
+    "people_involved": [
+      "engineering team"
+    ],
+    "emotions": [
+      "pressure",
+      "confidence",
+      "respect"
+    ],
+    "tags": [
+      "career",
+      "leadership",
+      "lesson"
+    ],
+    "time_of_day": "morning",
+    "start_time": "09:00",
+    "end_time": "09:00",
+    "day_of_week": "Monday"
   },
   {
     "id": "mem_0027",
     "title": "The product launch that failed",
     "description": "We launched a controller board with a known heat issue and paid for emergency replacements. Shortcuts looked efficient until they became expensive.",
     "timestamp": "1974-11-18T12:40:00",
-    "people_involved": ["quality team", "customers"],
-    "emotions": ["stress", "regret", "humility"],
-    "tags": ["career", "failure", "lesson", "quality"]
+    "people_involved": [
+      "quality team",
+      "customers"
+    ],
+    "emotions": [
+      "stress",
+      "regret",
+      "humility"
+    ],
+    "tags": [
+      "career",
+      "failure",
+      "lesson",
+      "quality"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "12:40",
+    "end_time": "12:40",
+    "day_of_week": "Monday"
   },
   {
     "id": "mem_0028",
     "title": "Coaching little league on weekends",
     "description": "I volunteered to coach because Michael was shy around other kids. Watching him celebrate teammates showed me confidence is contagious.",
     "timestamp": "1975-04-27T10:30:00",
-    "people_involved": ["Michael", "team parents", "players"],
-    "emotions": ["pride", "joy", "community"],
-    "tags": ["relationships", "family", "parenthood"]
+    "people_involved": [
+      "Michael",
+      "team parents",
+      "players"
+    ],
+    "emotions": [
+      "pride",
+      "joy",
+      "community"
+    ],
+    "tags": [
+      "relationships",
+      "family",
+      "parenthood"
+    ],
+    "time_of_day": "morning",
+    "start_time": "10:30",
+    "end_time": "10:30",
+    "day_of_week": "Sunday"
   },
   {
     "id": "mem_0029",
     "title": "Mentor who challenged my blind spots",
     "description": "My mentor asked why I promoted only people who worked like me. It pushed me to value different working styles and made me a better manager.",
     "timestamp": "1976-08-09T15:25:00",
-    "people_involved": ["Mentor Grace"],
-    "emotions": ["defensive", "reflective", "grateful"],
-    "tags": ["career", "leadership", "lesson", "inclusion"]
+    "people_involved": [
+      "Mentor Grace"
+    ],
+    "emotions": [
+      "defensive",
+      "reflective",
+      "grateful"
+    ],
+    "tags": [
+      "career",
+      "leadership",
+      "lesson",
+      "inclusion"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "15:25",
+    "end_time": "15:25",
+    "day_of_week": "Monday"
   },
   {
     "id": "mem_0030",
     "title": "Daughter's school recital",
     "description": "I arrived just before curtains and still caught Anna's solo. Her face in the spotlight reminded me that small attendance moments become lifelong memories.",
     "timestamp": "1977-12-15T19:00:00",
-    "people_involved": ["Anna", "Sarah"],
-    "emotions": ["relief", "pride", "love"],
-    "tags": ["relationships", "family", "parenthood"]
+    "people_involved": [
+      "Anna",
+      "Sarah"
+    ],
+    "emotions": [
+      "relief",
+      "pride",
+      "love"
+    ],
+    "tags": [
+      "relationships",
+      "family",
+      "parenthood"
+    ],
+    "time_of_day": "evening",
+    "start_time": "19:00",
+    "end_time": "19:00",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0031",
     "title": "Passed over for promotion",
     "description": "I expected a director role and watched it go to someone else with less tenure. The feedback was blunt: I needed to communicate strategy, not just execution.",
     "timestamp": "1978-11-03T17:10:00",
-    "people_involved": ["division head"],
-    "emotions": ["hurt", "anger", "determination"],
-    "tags": ["career", "failure", "lesson", "growth"]
+    "people_involved": [
+      "division head"
+    ],
+    "emotions": [
+      "hurt",
+      "anger",
+      "determination"
+    ],
+    "tags": [
+      "career",
+      "failure",
+      "lesson",
+      "growth"
+    ],
+    "time_of_day": "evening",
+    "start_time": "17:10",
+    "end_time": "17:10",
+    "day_of_week": "Friday"
   },
   {
     "id": "mem_0032",
     "title": "Returning to school at night",
     "description": "I enrolled in evening management classes while working full time. Learning again in my thirties proved reinvention has no age limit.",
     "timestamp": "1980-02-05T20:45:00",
-    "people_involved": ["class cohort"],
-    "emotions": ["exhausted", "motivated", "hopeful"],
-    "tags": ["education", "career", "growth"]
+    "people_involved": [
+      "class cohort"
+    ],
+    "emotions": [
+      "exhausted",
+      "motivated",
+      "hopeful"
+    ],
+    "tags": [
+      "education",
+      "career",
+      "growth"
+    ],
+    "time_of_day": "evening",
+    "start_time": "20:45",
+    "end_time": "20:45",
+    "day_of_week": "Tuesday"
   },
   {
     "id": "mem_0033",
     "title": "Taking the family on a road trip",
     "description": "Our station wagon broke down outside Amarillo and we spent the night in a cheap motel playing cards. The kids still call it the best trip ever.",
     "timestamp": "1981-07-19T23:10:00",
-    "people_involved": ["Sarah", "Michael", "Anna"],
-    "emotions": ["frustration", "laughter", "togetherness"],
-    "tags": ["relationships", "family", "resilience"]
+    "people_involved": [
+      "Sarah",
+      "Michael",
+      "Anna"
+    ],
+    "emotions": [
+      "frustration",
+      "laughter",
+      "togetherness"
+    ],
+    "tags": [
+      "relationships",
+      "family",
+      "resilience"
+    ],
+    "time_of_day": "night",
+    "start_time": "23:10",
+    "end_time": "23:10",
+    "day_of_week": "Sunday"
   },
   {
     "id": "mem_0034",
     "title": "Apology to a direct report",
     "description": "I dismissed an analyst's concern in a meeting, then realized she was right. Apologizing publicly taught the team accountability starts at the top.",
     "timestamp": "1982-04-08T13:20:00",
-    "people_involved": ["Analyst Priya", "project team"],
-    "emotions": ["shame", "respect", "trust"],
-    "tags": ["career", "leadership", "lesson", "relationships"]
+    "people_involved": [
+      "Analyst Priya",
+      "project team"
+    ],
+    "emotions": [
+      "shame",
+      "respect",
+      "trust"
+    ],
+    "tags": [
+      "career",
+      "leadership",
+      "lesson",
+      "relationships"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "13:20",
+    "end_time": "13:20",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0035",
     "title": "Dad's final advice",
     "description": "At the hospital Dad squeezed my hand and said, 'Be kind before you are right.' That sentence has corrected me more than any management book.",
     "timestamp": "1983-01-26T06:50:00",
-    "people_involved": ["Dad"],
-    "emotions": ["grief", "love", "clarity"],
-    "tags": ["relationships", "family", "advice", "legacy"]
+    "people_involved": [
+      "Dad"
+    ],
+    "emotions": [
+      "grief",
+      "love",
+      "clarity"
+    ],
+    "tags": [
+      "relationships",
+      "family",
+      "advice",
+      "legacy"
+    ],
+    "time_of_day": "morning",
+    "start_time": "06:50",
+    "end_time": "06:50",
+    "day_of_week": "Wednesday"
   },
   {
     "id": "mem_0036",
     "title": "Burnout warning signs",
     "description": "I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest is a responsibility, not a reward.",
     "timestamp": "1984-09-13T21:30:00",
-    "people_involved": ["Sarah", "Dr. Mendez"],
-    "emotions": ["anxiety", "relief", "acceptance"],
-    "tags": ["career", "health", "failure", "lesson"]
+    "people_involved": [
+      "Sarah",
+      "Dr. Mendez"
+    ],
+    "emotions": [
+      "anxiety",
+      "relief",
+      "acceptance"
+    ],
+    "tags": [
+      "career",
+      "health",
+      "failure",
+      "lesson"
+    ],
+    "time_of_day": "night",
+    "start_time": "21:30",
+    "end_time": "21:30",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0037",
     "title": "Promotion to engineering director",
     "description": "After years of learning to communicate broader vision, I was finally promoted. The title mattered less than feeling ready for it.",
     "timestamp": "1986-03-03T10:00:00",
-    "people_involved": ["executive team", "Sarah"],
-    "emotions": ["pride", "gratitude", "responsibility"],
-    "tags": ["career", "milestone", "leadership"]
+    "people_involved": [
+      "executive team",
+      "Sarah"
+    ],
+    "emotions": [
+      "pride",
+      "gratitude",
+      "responsibility"
+    ],
+    "tags": [
+      "career",
+      "milestone",
+      "leadership"
+    ],
+    "time_of_day": "morning",
+    "start_time": "10:00",
+    "end_time": "10:00",
+    "day_of_week": "Monday"
   },
   {
     "id": "mem_0038",
     "title": "Conflict with teenage son",
     "description": "Michael wanted to quit piano and I insisted he continue, turning practice into daily arguments. Listening to his reasons helped us choose music on his terms.",
     "timestamp": "1987-10-11T20:05:00",
-    "people_involved": ["Michael"],
-    "emotions": ["frustration", "concern", "understanding"],
-    "tags": ["relationships", "parenthood", "lesson", "communication"]
+    "people_involved": [
+      "Michael"
+    ],
+    "emotions": [
+      "frustration",
+      "concern",
+      "understanding"
+    ],
+    "tags": [
+      "relationships",
+      "parenthood",
+      "lesson",
+      "communication"
+    ],
+    "time_of_day": "evening",
+    "start_time": "20:05",
+    "end_time": "20:05",
+    "day_of_week": "Sunday"
   },
   {
     "id": "mem_0039",
     "title": "Hiring someone better than me",
     "description": "I recruited a systems architect whose expertise surpassed mine in several domains. Letting go of ego accelerated the whole department.",
     "timestamp": "1989-06-29T11:35:00",
-    "people_involved": ["Nora", "hiring committee"],
-    "emotions": ["insecurity", "relief", "respect"],
-    "tags": ["career", "leadership", "lesson"]
+    "people_involved": [
+      "Nora",
+      "hiring committee"
+    ],
+    "emotions": [
+      "insecurity",
+      "relief",
+      "respect"
+    ],
+    "tags": [
+      "career",
+      "leadership",
+      "lesson"
+    ],
+    "time_of_day": "morning",
+    "start_time": "11:35",
+    "end_time": "11:35",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0040",
     "title": "Anna leaves for college",
     "description": "We unpacked her dorm room and then sat in silence on the drive home. Parenting suddenly became advice by phone instead of help in person.",
     "timestamp": "1990-08-23T18:15:00",
-    "people_involved": ["Anna", "Sarah"],
-    "emotions": ["pride", "sadness", "hope"],
-    "tags": ["relationships", "family", "parenthood", "education"]
+    "people_involved": [
+      "Anna",
+      "Sarah"
+    ],
+    "emotions": [
+      "pride",
+      "sadness",
+      "hope"
+    ],
+    "tags": [
+      "relationships",
+      "family",
+      "parenthood",
+      "education"
+    ],
+    "time_of_day": "evening",
+    "start_time": "18:15",
+    "end_time": "18:15",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0041",
     "title": "Company merger turbulence",
     "description": "The merger brought layoffs and uncertainty, and I had to deliver hard news to good people. Transparency did not remove pain, but it preserved dignity.",
     "timestamp": "1992-02-14T16:40:00",
-    "people_involved": ["staff", "executives"],
-    "emotions": ["stress", "sorrow", "resolve"],
-    "tags": ["career", "leadership", "failure", "lesson"]
+    "people_involved": [
+      "staff",
+      "executives"
+    ],
+    "emotions": [
+      "stress",
+      "sorrow",
+      "resolve"
+    ],
+    "tags": [
+      "career",
+      "leadership",
+      "failure",
+      "lesson"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "16:40",
+    "end_time": "16:40",
+    "day_of_week": "Friday"
   },
   {
     "id": "mem_0042",
     "title": "Sunday dinners become sacred",
     "description": "With everyone busy, we protected Sunday dinner as non-negotiable family time. Consistency built closeness more than occasional grand gestures.",
     "timestamp": "1993-05-02T18:30:00",
-    "people_involved": ["Sarah", "Michael", "Anna", "extended family"],
-    "emotions": ["warmth", "belonging", "gratitude"],
-    "tags": ["relationships", "family", "advice", "tradition"]
+    "people_involved": [
+      "Sarah",
+      "Michael",
+      "Anna",
+      "extended family"
+    ],
+    "emotions": [
+      "warmth",
+      "belonging",
+      "gratitude"
+    ],
+    "tags": [
+      "relationships",
+      "family",
+      "advice",
+      "tradition"
+    ],
+    "time_of_day": "evening",
+    "start_time": "18:30",
+    "end_time": "18:30",
+    "day_of_week": "Sunday"
   },
   {
     "id": "mem_0043",
     "title": "Public speaking breakthrough",
     "description": "After years of avoiding large audiences, I delivered the annual technical keynote calmly. Preparation and storytelling finally overcame fear.",
     "timestamp": "1995-09-07T09:10:00",
-    "people_involved": ["conference attendees"],
-    "emotions": ["fear", "focus", "confidence"],
-    "tags": ["career", "growth", "lesson", "communication"]
+    "people_involved": [
+      "conference attendees"
+    ],
+    "emotions": [
+      "fear",
+      "focus",
+      "confidence"
+    ],
+    "tags": [
+      "career",
+      "growth",
+      "lesson",
+      "communication"
+    ],
+    "time_of_day": "morning",
+    "start_time": "09:10",
+    "end_time": "09:10",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0044",
     "title": "Caring for Mom after surgery",
     "description": "For six weeks I drove Mom to appointments before work and back home after. Slowing down for caregivers taught me what real gratitude looks like.",
     "timestamp": "1997-01-18T07:20:00",
-    "people_involved": ["Mom", "Sarah"],
-    "emotions": ["fatigue", "devotion", "gratitude"],
-    "tags": ["relationships", "family", "responsibility"]
+    "people_involved": [
+      "Mom",
+      "Sarah"
+    ],
+    "emotions": [
+      "fatigue",
+      "devotion",
+      "gratitude"
+    ],
+    "tags": [
+      "relationships",
+      "family",
+      "responsibility"
+    ],
+    "time_of_day": "morning",
+    "start_time": "07:20",
+    "end_time": "07:20",
+    "day_of_week": "Saturday"
   },
   {
     "id": "mem_0045",
     "title": "Financial mistake in investment",
     "description": "I chased a 'sure thing' stock tip and lost a year of savings. It reminded me that discipline beats excitement in money decisions.",
     "timestamp": "1998-06-16T12:55:00",
-    "people_involved": ["Sarah"],
-    "emotions": ["regret", "shame", "prudence"],
-    "tags": ["failure", "lesson", "finance", "advice"]
+    "people_involved": [
+      "Sarah"
+    ],
+    "emotions": [
+      "regret",
+      "shame",
+      "prudence"
+    ],
+    "tags": [
+      "failure",
+      "lesson",
+      "finance",
+      "advice"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "12:55",
+    "end_time": "12:55",
+    "day_of_week": "Tuesday"
   },
   {
     "id": "mem_0046",
     "title": "Becoming a grandfather",
     "description": "When I held my first grandchild, every old worry about legacy softened. Love suddenly felt both familiar and brand new.",
     "timestamp": "2000-04-04T02:40:00",
-    "people_involved": ["Anna", "baby Emma", "Sarah"],
-    "emotions": ["awe", "joy", "tenderness"],
-    "tags": ["relationships", "family", "grandparenthood"]
+    "people_involved": [
+      "Anna",
+      "baby Emma",
+      "Sarah"
+    ],
+    "emotions": [
+      "awe",
+      "joy",
+      "tenderness"
+    ],
+    "tags": [
+      "relationships",
+      "family",
+      "grandparenthood"
+    ],
+    "time_of_day": "night",
+    "start_time": "02:40",
+    "end_time": "02:40",
+    "day_of_week": "Tuesday"
   },
   {
     "id": "mem_0047",
     "title": "Retirement planning conversation",
     "description": "Sarah asked what we were retiring to, not just from. We listed purpose, service, and family before any travel plans.",
     "timestamp": "2002-11-01T20:10:00",
-    "people_involved": ["Sarah"],
-    "emotions": ["reflective", "peaceful", "hopeful"],
-    "tags": ["career", "relationships", "advice", "retirement"]
+    "people_involved": [
+      "Sarah"
+    ],
+    "emotions": [
+      "reflective",
+      "peaceful",
+      "hopeful"
+    ],
+    "tags": [
+      "career",
+      "relationships",
+      "advice",
+      "retirement"
+    ],
+    "time_of_day": "evening",
+    "start_time": "20:10",
+    "end_time": "20:10",
+    "day_of_week": "Friday"
   },
   {
     "id": "mem_0048",
     "title": "Farewell party at headquarters",
     "description": "Colleagues shared stories about projects and difficult years we survived together. I realized impact is measured in people, not awards.",
     "timestamp": "2005-04-28T17:30:00",
-    "people_involved": ["colleagues", "Sarah", "children"],
-    "emotions": ["nostalgia", "pride", "gratitude"],
-    "tags": ["career", "retirement", "lesson", "relationships"]
+    "people_involved": [
+      "colleagues",
+      "Sarah",
+      "children"
+    ],
+    "emotions": [
+      "nostalgia",
+      "pride",
+      "gratitude"
+    ],
+    "tags": [
+      "career",
+      "retirement",
+      "lesson",
+      "relationships"
+    ],
+    "time_of_day": "evening",
+    "start_time": "17:30",
+    "end_time": "17:30",
+    "day_of_week": "Thursday"
   },
   {
     "id": "mem_0049",
     "title": "Volunteering at the literacy center",
     "description": "Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement feel meaningful and connected.",
     "timestamp": "2006-09-12T15:00:00",
-    "people_involved": ["adult learners", "volunteer team"],
-    "emotions": ["purpose", "humility", "joy"],
-    "tags": ["education", "advice", "community", "retirement"]
+    "people_involved": [
+      "adult learners",
+      "volunteer team"
+    ],
+    "emotions": [
+      "purpose",
+      "humility",
+      "joy"
+    ],
+    "tags": [
+      "education",
+      "advice",
+      "community",
+      "retirement"
+    ],
+    "time_of_day": "afternoon",
+    "start_time": "15:00",
+    "end_time": "15:00",
+    "day_of_week": "Tuesday"
   },
   {
     "id": "mem_0050",
     "title": "Letter to my children about life lessons",
     "description": "I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken.",
     "timestamp": "2008-12-24T21:50:00",
-    "people_involved": ["Michael", "Anna"],
-    "emotions": ["love", "clarity", "gratitude"],
-    "tags": ["advice to children", "family", "legacy", "life lessons"]
+    "people_involved": [
+      "Michael",
+      "Anna"
+    ],
+    "emotions": [
+      "love",
+      "clarity",
+      "gratitude"
+    ],
+    "tags": [
+      "advice to children",
+      "family",
+      "legacy",
+      "life lessons"
+    ],
+    "time_of_day": "night",
+    "start_time": "21:50",
+    "end_time": "21:50",
+    "day_of_week": "Wednesday"
   }
 ]
