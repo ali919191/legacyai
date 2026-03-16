@@ -29,6 +29,54 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - **Containerised Deployment**: Docker Compose setup with PostgreSQL and Qdrant vector database for one-command local deployment.
 - **CI/CD Pipeline**: GitHub Actions runs black, ruff, mypy, and pytest across Python 3.9 / 3.10 / 3.11 on every push.
 
+## Current Implementation Status
+
+This repository is in an active build phase: the architecture is documented in detail, and a growing subset of services is already implemented and wired together.
+
+### What Is Already Implemented (Operational)
+
+- Core conversation path is active through `ConversationEngine` with semantic retrieval, timeline context, and response assembly.
+- Memory ranking and grounding are implemented via `MemoryPriorityService` and `MemoryGroundingService`.
+- Advice generation pipeline is implemented via `MemoryDistillationService` + `WisdomEngine`.
+- Recipient-aware response adaptation is implemented via `RecipientContextService` (age + relationship context).
+- Entity tracking is implemented through `PersonProfileService` and `RelationshipService`.
+- Episode clustering is implemented through `EpisodeService` and integrated into timeline/life-story workflows.
+- Access control and response moderation are implemented through `LegacyAccessService` and `ResponseModerationService`.
+- Integration and unit tests are present for these components under `backend/tests/`.
+
+### What Is Still Evolving
+
+- Some modules remain early-stage or placeholder-oriented (for example, portions of training/model asset folders and upcoming components listed later in this README).
+- LLM response generation is still intentionally simple in places and designed for future model-provider integration.
+- Additional API surface and frontend UX refinement are ongoing.
+
+## Recent Implementation Changes (What Was Actually Added)
+
+This section summarizes concrete code changes already landed, beyond architecture planning.
+
+1. **Memory Grounding Layer**
+- Added `backend/app/services/ai/memory_grounding_service.py`.
+- Added source validation and strict grounding prompt flow in `backend/app/services/ai/conversation_engine.py`.
+- Added deterministic fallback when evidence is missing: `"I don't remember that clearly."`.
+- Added tests in `backend/tests/test_memory_grounding_service.py`.
+
+2. **Wisdom Advice Pipeline**
+- Added `backend/app/services/ai/wisdom_engine.py` with lesson extraction, pattern detection, principle generation, and advice generation.
+- Integrated wisdom extraction into `backend/app/services/ai/memory_distillation_service.py`.
+- Integrated advice-oriented query handling into `backend/app/services/ai/conversation_engine.py`.
+- Added tests in `backend/tests/test_wisdom_engine.py`.
+
+3. **Recipient Context Adaptation**
+- Added `backend/app/services/ai/recipient_context_service.py` for recipient profile CRUD + maturity-level detection.
+- Integrated recipient context into conversation prompts and response safety handling in `backend/app/services/ai/conversation_engine.py`.
+- Added child/teen-safe simplification behavior for sensitive topics.
+- Added tests in `backend/tests/test_recipient_context_service.py`.
+
+4. **Operational Wiring**
+- Updated `backend/app/main.py` to instantiate and wire new AI services into runtime execution.
+- Updated exports in `backend/app/services/ai/__init__.py`.
+- Updated integration tests to keep end-to-end behavior validated as features were added.
+
 ## Sample Memory Dataset
 
 The repository includes a realistic seed dataset at `backend/data/sample_memories.json` with 50 memories spanning childhood, education, career, relationships, failures and lessons, and advice to children.
@@ -418,6 +466,7 @@ response = conversation_engine.generate_response("What was your favorite family 
 
 ### Workflow
 
+Backend service layer (FastAPI application path plus a legacy Flask app entrypoint retained for compatibility).
 1. **Semantic Search**: Finds top 5 most similar memories using vector embeddings
 2. **Memory Retrieval**: Fetches full memory details for relevant memories
 3. **Context Building**: Constructs chronological and thematic context from memories
@@ -427,20 +476,26 @@ response = conversation_engine.generate_response("What was your favorite family 
 7. **Confidence Calculation**: Computes response confidence based on similarity scores and insight quality
 
 ### Integration Points
+|   |       |   |-- recipient_context_service.py
+|   |       |   |-- wisdom_engine.py
 
 - **MemoryCaptureService**: Retrieves stored memory objects
 - **TimelineEngine**: Provides chronological organization and life stage grouping
+|   |   |-- test_recipient_context_service.py
 - **MemoryEmbeddingService**: Performs semantic similarity search using vector embeddings
 - **MemoryDistillationService**: Extracts wisdom, life lessons, and guidance from memories
 - **PersonalityModelService**: Provides personality profiles for authentic responses
 
 ## Personality Modeling Engine
+|   |   |-- test_wisdom_engine.py
 
 The Personality Modeling Engine analyzes stored memories to build comprehensive personality profiles that capture the authentic character, values, and behavioral patterns of the individual. This enables the Conversation Engine to generate responses that reflect the person's true personality.
 
+- **app/services/ai/recipient_context_service.py**: Recipient context service. Stores recipient profiles (name, relationship, age, maturity level, topic preferences) so responses can be tailored to who is asking and how mature the explanation should be.
 ### Key Features
 
 - **Trait Analysis**: Identifies personality traits through keyword analysis and pattern recognition
+- **app/services/ai/wisdom_engine.py**: Wisdom engine service. Converts emotional experiences, failures, successes, and major life events into lessons, recurring principles, and practical advice.
 - **Value Extraction**: Discovers core values and life principles from memory content
 - **Communication Style Analysis**: Determines formality, emotional expression, and interaction patterns
 - **Decision Pattern Recognition**: Identifies decision-making heuristics and approaches
@@ -1335,6 +1390,8 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |       |   |-- life_story_generator.py
 |   |       |   |-- memory_priority_service.py
 |   |       |   |-- memory_distillation_service.py
+|   |       |   |-- recipient_context_service.py
+|   |       |   |-- wisdom_engine.py
 |   |       |   `-- personality_model_service.py
 |   |       |-- episode
 |   |       |   |-- __init__.py
@@ -1374,6 +1431,8 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |   |-- test_placeholder.py
 |   |   |-- test_response_moderation_service.py
 |   |   |-- test_timeline_engine.py
+|   |   |-- test_recipient_context_service.py
+|   |   |-- test_wisdom_engine.py
 |   |   `-- utils
 |   |       |-- __init__.py
 |   |       `-- test_logger.py
@@ -1433,16 +1492,17 @@ AI-related components and resources.
 - **scripts/placeholder.py**: Sample Python script for AI workflows, such as data preprocessing or model training.
 
 #### backend/
-Backend server code using Flask.
+Backend service layer using FastAPI as the main runtime path, with a legacy Flask entrypoint retained for compatibility.
 - **app.py**: Main Flask application file with routes for login, memories, and database setup.
 - **requirements.txt**: Python dependencies for the backend.
 - **app/api/__init__.py**: API endpoints module. Contains a sample health check route and setup for additional Blueprints.
 - **app/api/family_interaction_api.py**: Family interaction API using FastAPI. Provides REST endpoints for asking questions to Legacy AI (`/ask`), browsing memories (`/memories`), exploring timelines (`/timeline`), listing pending enhanced questions, answering follow-up prompts, and running health checks. Integrates with ConversationEngine, KnowledgeGapService, LegacyAccessService, and ResponseModerationService for secure, moderated AI interactions.
 - **app/models/__init__.py**: Data models module. Placeholder for SQLAlchemy models like User and Memory.
 - **app/services/__init__.py**: Business logic services. Includes a sample service function for shared logic.
-- **app/services/ai/__init__.py**: Package initializer for AI services, exporting conversation, personality, distillation, life story, and knowledge gap services.
-- **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, person profiles, relationship graph, timeline, embedding, memory priority ranking, memory grounding, knowledge gap detection, personality, distillation, and access control services to generate personalized responses and enhanced follow-up questions based on stored memories.
+- **app/services/ai/__init__.py**: Package initializer for AI services, exporting conversation, personality, distillation, life story, knowledge-gap, wisdom, grounding, priority, and recipient-context services.
+- **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, person profiles, relationship graph, timeline, embedding, memory priority ranking, memory grounding, knowledge-gap detection, wisdom/distillation, recipient context, personality, and access control services to generate personalized responses and enhanced follow-up questions based on stored memories.
 - **app/services/ai/knowledge_gap_service.py**: Knowledge gap detection service. Finds missing context in free-style conversation, generates follow-up prompts, stores pending/answered question records for the Enhanced Questions widget, and writes user answers back into linked memories.
+- **app/services/ai/recipient_context_service.py**: Recipient context service. Creates and updates recipient profiles (relationship, age, maturity level, topic preferences) so answers can be adapted to who is asking.
 - **app/services/episode/__init__.py**: Package initializer for episodic services, exporting Episode and EpisodeService.
 - **app/services/episode/episode_service.py**: Episodic memory service. Creates episodes, links memories, tracks date spans and related people, generates episode summaries, computes importance scores, and supports grouping by shared tags or nearby time periods.
 - **app/services/entity/__init__.py**: Package initializer for entity services, exporting person profile tracking components.
@@ -1451,6 +1511,7 @@ Backend server code using Flask.
 - **app/services/ai/life_story_generator.py**: Life story generator service. Compiles chronological narratives from memories, creates life stage summaries, extracts key events and lessons learned, and traces personality evolution across the lifespan. Integrates with timeline, personality, and distillation services to generate coherent biographical narratives suitable for family preservation and storytelling.
 - **app/services/ai/memory_priority_service.py**: Memory priority service. Scores memories by life importance and emotional intensity, applies a recency factor, and ranks candidates before response generation.
 - **app/services/ai/memory_grounding_service.py**: Memory grounding service. Builds context packets, validates memory sources, and generates strict prompts that constrain responses to retrieved evidence and reduce hallucinations.
+- **app/services/ai/wisdom_engine.py**: Wisdom engine service. Derives lessons from emotional experiences, failures, successes, and major events; identifies recurring patterns; and generates principles/advice.
 - **app/services/ai/personality_model_service.py**: Personality modeling service. Analyzes memories to extract personality traits, beliefs, values, communication styles, and decision patterns, creating a comprehensive profile for authentic AI responses.
 - **app/services/ai/memory_distillation_service.py**: Memory distillation service. Extracts higher-level wisdom from memories including life lessons, advice, regrets, and guiding principles, providing distilled insights for wisdom-based conversations.
 - **app/services/interview/__init__.py**: Package initializer for interview services, exporting StructuredInterviewService.
@@ -1464,7 +1525,7 @@ Backend server code using Flask.
 - **app/services/security/legacy_access_service.py**: Legacy access control service. Manages posthumous access to memories with beneficiary registration, access levels (public, family, intimate), relationship verification, and authorization checks to ensure ethical memory sharing.
 - **app/services/security/response_moderation_service.py**: Response moderation service. Reviews all AI-generated responses before delivery to ensure appropriateness, safety, and respectfulness. Detects sensitive topics (violence, illegal activity, explicit content, self-harm), applies content filtering, and replaces inappropriate responses with safe alternatives. Designed for future integration with external AI moderation APIs.
 - **app/__init__.py**: Package initializer for the Flask app.
-- **app/main.py**: FastAPI application entry point. Loads environment variables, wires all platform services (MemoryCaptureService, PersonProfileService, RelationshipService, TimelineEngine, EpisodeService, MemoryEmbeddingService, KnowledgeGapService, ConversationEngine, LegacyAccessService, ResponseModerationService), mounts the Family Interaction API at `/api/v1`, and adds CORS middleware and a top-level `/health` endpoint. Consumed by `uvicorn backend.app.main:app --reload` locally and `uvicorn app.main:app` inside Docker.
+- **app/main.py**: FastAPI application entry point. Loads environment variables, wires all platform services (MemoryCaptureService, PersonProfileService, RelationshipService, TimelineEngine, EpisodeService, MemoryEmbeddingService, KnowledgeGapService, RecipientContextService, WisdomEngine, MemoryDistillationService, MemoryPriorityService, MemoryGroundingService, ConversationEngine, LegacyAccessService, ResponseModerationService), mounts the Family Interaction API at `/api/v1`, and adds CORS middleware and a top-level `/health` endpoint. Consumed by `uvicorn backend.app.main:app --reload` locally and `uvicorn app.main:app` inside Docker.
 - **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
 - **tests/__init__.py**: Test package initializer.
 - **tests/test_memory_capture_service.py**: Unit tests for MemoryCaptureService (create, retrieve, update, delete, retrieve_all — 6 tests).
@@ -1472,10 +1533,12 @@ Backend server code using Flask.
 - **tests/test_relationship_service.py**: Unit tests for RelationshipService, including relationship creation and updates, memory-based detection, per-person retrieval, and ConversationEngine integration for relationship inference.
 - **tests/test_memory_priority_service.py**: Unit tests for MemoryPriorityService, including importance scoring, emotional weighting, ranking formula behavior, and ConversationEngine retrieval ordering integration.
 - **tests/test_memory_grounding_service.py**: Unit tests for MemoryGroundingService, including context-packet construction, source validation, grounded prompt generation, and no-memory fallback behavior in ConversationEngine.
+- **tests/test_recipient_context_service.py**: Unit tests for RecipientContextService, including profile create/update/retrieve, maturity-level calculation, and ConversationEngine child-safe response adaptation.
 - **tests/test_person_profile_service.py**: Unit tests for PersonProfileService, including partial profile creation, detail merging, memory linking, temporary conversation profiles, and entity-aware answer resolution.
 - **tests/test_timeline_engine.py**: Unit tests for TimelineEngine (chronological sort, life stage grouping, date range query, life stage filter — 5 tests).
 - **tests/test_life_story_generator.py**: Unit tests for LifeStoryGenerator (LifeStory object shape, narrative compilation, stage summaries — 6 tests).
 - **tests/test_knowledge_gap_service.py**: Unit tests for KnowledgeGapService, including detection, question lifecycle, memory enrichment, and ConversationEngine trigger integration.
+- **tests/test_wisdom_engine.py**: Unit tests for WisdomEngine, including lesson extraction, pattern identification, principle generation, and advice-path integration in ConversationEngine.
 - **tests/test_legacy_access_service.py**: Unit tests for LegacyAccessService (4 tests).
 - **tests/test_response_moderation_service.py**: Unit tests for ResponseModerationService (12 tests).
 - **tests/test_placeholder.py**: Placeholder test file for backend unit tests.
