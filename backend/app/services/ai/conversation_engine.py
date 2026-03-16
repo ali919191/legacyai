@@ -6,6 +6,7 @@ from ..entity.person_profile_service import PersonProfileService
 from .personality_model_service import PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
 from .knowledge_gap_service import KnowledgeGapService
+from .memory_priority_service import MemoryPriorityService
 from ..security.legacy_access_service import LegacyAccessService, MemoryMetadata
 from ..security.response_moderation_service import ResponseModerationService
 
@@ -34,6 +35,7 @@ class ConversationEngine:
         personality_profile: Optional[PersonalityProfile] = None,
         distillation_service: Optional[MemoryDistillationService] = None,
         knowledge_gap_service: Optional[KnowledgeGapService] = None,
+        memory_priority_service: Optional[MemoryPriorityService] = None,
         access_service: Optional[LegacyAccessService] = None,
         moderation_service: Optional[ResponseModerationService] = None
     ):
@@ -48,6 +50,7 @@ class ConversationEngine:
             personality_profile: Optional PersonalityProfile for personalized responses.
             distillation_service: Optional MemoryDistillationService for wisdom insights.
             knowledge_gap_service: Optional KnowledgeGapService for missing-context follow-up questions.
+            memory_priority_service: Optional MemoryPriorityService for ranking retrieved memories.
             access_service: Optional LegacyAccessService for access control and privacy.
             moderation_service: Optional ResponseModerationService for response safety.
         """
@@ -58,6 +61,7 @@ class ConversationEngine:
         self.personality_profile = personality_profile
         self.distillation_service = distillation_service
         self.knowledge_gap_service = knowledge_gap_service
+        self.memory_priority_service = memory_priority_service
         self.access_service = access_service
         self.moderation_service = moderation_service
 
@@ -115,13 +119,20 @@ class ConversationEngine:
                     # No access control, include all memories
                     relevant_memories.append(memory)
 
-        # Step 3: Add chronological context using TimelineEngine
+        # Step 3: Re-rank memories by importance and emotional weight when available.
+        memory_priority = []
+        if self.memory_priority_service and relevant_memories:
+            memory_priority = self.memory_priority_service.rank_memories(relevant_memories)
+            relevant_memories = [item["memory"] for item in memory_priority]
+
+        # Step 4: Add chronological context using TimelineEngine
         chronological_context = self.timeline_engine.get_chronological_timeline()
         # Filter chronological context to only include relevant memories
-        relevant_chronological = [mem for mem in chronological_context if mem.id in memory_ids]
+        prioritized_ids = [memory.id for memory in relevant_memories]
+        relevant_chronological = [mem for mem in chronological_context if mem.id in prioritized_ids]
 
-        # Step 4: Build context object
-        context = self._build_context(relevant_memories, relevant_chronological)
+        # Step 5: Build context object
+        context = self._build_context(relevant_memories, relevant_chronological, memory_priority)
 
         if self.person_profile_service:
             context["person_profiles"] = self._get_related_person_profiles(
@@ -129,13 +140,13 @@ class ConversationEngine:
                 relevant_memories=relevant_memories,
             )
 
-        # Step 5: Add distilled insights if service is available
+        # Step 6: Add distilled insights if service is available
         relevant_insights = []
         if self.distillation_service:
             relevant_insights = self._get_relevant_insights(user_query, relevant_memories)
             context['distilled_insights'] = [insight.to_dict() for insight in relevant_insights]
 
-        # Step 6: Detect knowledge gaps and create follow-up questions for widget display.
+        # Step 7: Detect knowledge gaps and create follow-up questions for widget display.
         generated_question_records = []
         if self.knowledge_gap_service:
             gap_context = self.knowledge_gap_service.detect_missing_context(user_query)
@@ -146,18 +157,18 @@ class ConversationEngine:
                     self.knowledge_gap_service.store_question(question)
                 )
 
-        # Step 7: Construct prompt and generate response
+        # Step 8: Construct prompt and generate response
         prompt = self._construct_prompt(user_query, context)
         response = self._generate_ai_response(prompt)
 
-        # Step 8: Review response through moderation layer (if available)
+        # Step 9: Review response through moderation layer (if available)
         moderation_result = None
         if self.moderation_service:
             moderated_response = self.moderation_service.adjust_response_if_needed(response)
             moderation_result = self.moderation_service.review_response(response)
             response = moderated_response
 
-        # Step 9: Calculate confidence based on similarity scores and insights
+        # Step 10: Calculate confidence based on similarity scores and insights
         confidence = self._calculate_confidence(similar_memories, relevant_insights)
 
         return {
@@ -187,7 +198,12 @@ class ConversationEngine:
             person_updates=person_updates,
         )
 
-    def _build_context(self, memories: List[Memory], chronological: List[Memory]) -> Dict[str, Any]:
+    def _build_context(
+        self,
+        memories: List[Memory],
+        chronological: List[Memory],
+        memory_priority: Optional[List[Dict[str, Any]]] = None,
+    ) -> Dict[str, Any]:
         """
         Build a context object from relevant memories.
 
@@ -205,7 +221,20 @@ class ConversationEngine:
             'tags': set(),
             'time_range': {},
             'person_profiles': [],
+            'memory_priority': [],
         }
+
+        priority_lookup: Dict[str, Dict[str, Any]] = {}
+        if memory_priority:
+            priority_lookup = {
+                item["memory"].id: {
+                    "importance_score": item["importance_score"],
+                    "emotional_weight": item["emotional_weight"],
+                    "recency_factor": item["recency_factor"],
+                    "priority_score": item["priority_score"],
+                }
+                for item in memory_priority
+            }
 
         for memory in memories:
             memory_info = {
@@ -221,6 +250,14 @@ class ConversationEngine:
             context['memories'].append(memory_info)
             context['emotions'].update(memory.emotions)
             context['tags'].update(memory.tags)
+
+            if memory.id in priority_lookup:
+                context['memory_priority'].append(
+                    {
+                        'id': memory.id,
+                        **priority_lookup[memory.id],
+                    }
+                )
 
         # Chronological order
         context['chronological_order'] = [
