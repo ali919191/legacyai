@@ -13,16 +13,17 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Family Interaction API → Structured Interview → Memory Capture → Timeline Engine → Memory Embeddings → Vector Search → Conversation Engine → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
+**Family Interaction API → Structured Interview → Memory Capture → Media Memory Service → Timeline Engine → Memory Embeddings → Vector Search → Conversation Engine → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
 
 ### Pipeline Components
 
 1. **Family Interaction API**: REST endpoints allowing beneficiaries to ask questions, browse memories, and explore timelines
 2. **Structured Interview**: Guided question sets across life domains capture comprehensive personal experiences
 3. **Memory Capture**: Converts interview responses and stories into structured memory entries with metadata
-4. **Timeline Engine**: Organizes memories chronologically and by life stages for contextual understanding
-5. **Memory Embeddings**: Transforms memory text into vector representations for semantic search
-6. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
+4. **Media Memory Service**: Handles upload and management of multimedia memories (photos, audio, video) linked to memory entries
+5. **Timeline Engine**: Organizes memories chronologically and by life stages for contextual understanding
+6. **Memory Embeddings**: Transforms memory text into vector representations for semantic search
+7. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
 7. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
 7. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
 8. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
@@ -547,6 +548,9 @@ tail -50 tests.log
 |   |       |   |-- __init__.py
 |   |       |   |-- legacy_access_service.py
 |   |       |   `-- response_moderation_service.py
+|   |       |-- media
+|   |       |   |-- __init__.py
+|   |       |   `-- media_memory_service.py
 |   |       |-- __init__.py
 |   |       |-- memory_capture_service.py
 |   |-- tests
@@ -588,7 +592,7 @@ tail -50 tests.log
 |   `-- test_placeholder.py
 `-- README.md
 
-27 directories, 31 files
+28 directories, 33 files
 ```
 
 ### Detailed Explanations
@@ -713,6 +717,79 @@ response_id = interview_service.record_interview_response(
     response="My favorite childhood memory was building treehouses with my brother..."
 )
 ```
+
+## Media Memory Service
+
+The Media Memory Service enables users to upload and manage multimedia memories including photos, audio recordings, and videos that are associated with structured memory entries. This service provides a foundation for rich, multimodal memory experiences that enhance the emotional impact and authenticity of Legacy AI interactions.
+
+### Supported Media Types
+
+- **Images**: JPG, PNG, GIF, BMP, TIFF, WebP (max 10MB)
+- **Audio**: MP3, WAV, FLAC, AAC, OGG, M4A (max 50MB)
+- **Video**: MP4, AVI, MOV, MKV, WMV, FLV, WebM (max 100MB)
+
+### Integration with Memory Capture
+
+The Media Memory Service is tightly integrated with the MemoryCaptureService to ensure data consistency:
+
+1. **Memory-First Approach**: Media files can only be uploaded after a memory entry exists
+2. **Metadata Linking**: Each media file is linked to a specific memory with rich metadata
+3. **Access Control**: Media files inherit access controls from their associated memories
+4. **Timeline Integration**: Media files appear in chronological timelines alongside text memories
+
+### Cloud Storage Ready
+
+The service is designed for seamless migration to cloud storage:
+
+```python
+# Current: Local file storage
+media_service = MediaMemoryService(memory_service, "media_uploads")
+
+# Future: Cloud storage integration
+media_service.migrate_to_cloud_storage(s3_service)
+```
+
+### Usage Examples
+
+```python
+from app.services.media.media_memory_service import MediaMemoryService
+from app.services.memory_capture_service import MemoryCaptureService
+
+# Initialize services
+memory_service = MemoryCaptureService()
+media_service = MediaMemoryService(memory_service)
+
+# Create a memory first
+memory_id = memory_service.create_memory(
+    title="Family Vacation 1995",
+    description="Our wonderful trip to Hawaii with the whole family",
+    tags=["vacation", "family", "hawaii"]
+)
+
+# Upload associated media
+with open("family_photo.jpg", "rb") as f:
+    media_id = media_service.upload_media(
+        user_id="user123",
+        memory_id=memory_id,
+        file=f,
+        filename="family_photo.jpg",
+        description="Family photo at the beach"
+    )
+
+# List all media for a memory
+media_files = media_service.list_media_for_memory(memory_id)
+
+# Get media file path for serving
+file_path = media_service.get_media_file_path(media_id)
+```
+
+### Benefits for Legacy AI
+
+- **Emotional Depth**: Visual and audio memories create more immersive experiences
+- **Memory Triggers**: Media files serve as powerful emotional and contextual cues
+- **Authenticity**: Multimedia content provides richer, more authentic AI responses
+- **Accessibility**: Supports various media formats for different user preferences
+- **Scalability**: Cloud-ready architecture supports growing media collections
 
 ## Family Interaction API
 
