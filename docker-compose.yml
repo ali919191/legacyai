@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
 
-  # ── Backend API ────────────────────────────────────────────────────────────
+  # ── Backend API (FastAPI / uvicorn) ───────────────────────────────────────
   backend:
     build:
       context: ./backend
@@ -10,12 +10,15 @@ services:
     container_name: legacyai_backend
     restart: unless-stopped
     ports:
-      - "${BACKEND_PORT:-5000}:5000"
+      - "${BACKEND_PORT:-8000}:8000"
     env_file:
       - .env
     environment:
       - DATABASE_URI=postgresql://${POSTGRES_USER:-legacyai}:${POSTGRES_PASSWORD:-legacyai_secret}@db:5432/${POSTGRES_DB:-legacyai}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-me-in-production}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - VECTOR_STORE_TYPE=${VECTOR_STORE_TYPE:-local}
+      - MEDIA_STORAGE_PATH=${MEDIA_STORAGE_PATH:-/app/data/media}
     volumes:
       # Persist uploaded media files
       - media_data:/app/data/media

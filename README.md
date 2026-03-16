@@ -944,6 +944,7 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |-- Dockerfile
 |   |-- app
 |   |   |-- __init__.py
+|   |   |-- main.py
 |   |   |-- api
 |   |   |   |-- __init__.py
 |   |   |   `-- family_interaction_api.py
@@ -1057,6 +1058,7 @@ Backend server code using Flask.
 - **app/services/security/legacy_access_service.py**: Legacy access control service. Manages posthumous access to memories with beneficiary registration, access levels (public, family, intimate), relationship verification, and authorization checks to ensure ethical memory sharing.
 - **app/services/security/response_moderation_service.py**: Response moderation service. Reviews all AI-generated responses before delivery to ensure appropriateness, safety, and respectfulness. Detects sensitive topics (violence, illegal activity, explicit content, self-harm), applies content filtering, and replaces inappropriate responses with safe alternatives. Designed for future integration with external AI moderation APIs.
 - **app/__init__.py**: Package initializer for the Flask app.
+- **app/main.py**: FastAPI application entry point. Loads environment variables, wires all platform services (MemoryCaptureService, TimelineEngine, MemoryEmbeddingService, ConversationEngine, LegacyAccessService, ResponseModerationService), mounts the Family Interaction API at `/api/v1`, and adds CORS middleware and a top-level `/health` endpoint. Consumed by `uvicorn backend.app.main:app --reload` locally and `uvicorn app.main:app` inside Docker.
 - **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
 - **tests/__init__.py**: Test package initializer.
 - **tests/test_memory_capture_service.py**: Unit tests for MemoryCaptureService (create, retrieve, update, delete, retrieve_all — 6 tests).
@@ -1316,41 +1318,63 @@ memories = requests.get("http://localhost:8000/memories", params={
   }
 ]
 ```
-## Running the Legacy AI Platform Locally
+## Running the Legacy AI Platform
 
-The fastest way to run the full platform is with Docker Compose, which starts the backend API, PostgreSQL database, and Qdrant vector database with a single command.
+The platform exposes a FastAPI application defined in `backend/app/main.py` and can be started either locally with uvicorn or as a full stack with Docker Compose.
 
-### Prerequisites
-
-- [Docker](https://docs.docker.com/get-docker/) 20.10+
-- [Docker Compose](https://docs.docker.com/compose/install/) v2.0+
-
-### Quick Start
+### Local Startup (uvicorn)
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/ali919191/legacyai.git
 cd legacyai
 
-# 2. Create your environment file from the template
+# 2. Create and populate your environment file
 cp .env.example .env
+#    Edit at minimum: JWT_SECRET_KEY, POSTGRES_PASSWORD, PERSONA_BIRTH_DATE
 
-# 3. (Optional) Edit .env to set secrets and API keys
-#    At minimum, change JWT_SECRET_KEY and POSTGRES_PASSWORD
-nano .env
+# 3. Install backend dependencies
+pip install -r backend/requirements.txt
 
-# 4. Build and start all services
-make up         # or: docker compose up -d --build
+# 4. Start the API server (auto-reloads on file changes)
+uvicorn backend.app.main:app --reload
 ```
 
-The backend API will be available at **http://localhost:5000**.
+The API will be available at **http://localhost:8000**.
+
+| Endpoint | Description |
+|---|---|
+| `GET  http://localhost:8000/health` | Top-level liveness probe |
+| `GET  http://localhost:8000/api/v1/health` | Service-level health with dependency status |
+| `POST http://localhost:8000/api/v1/ask` | Ask a question to the Legacy AI persona |
+| `GET  http://localhost:8000/api/v1/memories` | Browse accessible memories (paginated) |
+| `GET  http://localhost:8000/api/v1/timeline` | Explore the chronological life timeline |
+| `GET  http://localhost:8000/docs` | Interactive OpenAPI / Swagger UI |
+| `GET  http://localhost:8000/redoc` | ReDoc API documentation |
+
+### Docker Startup
+
+Docker Compose starts the FastAPI backend, PostgreSQL 15, and Qdrant vector database together:
+
+```bash
+# Prerequisites: Docker 20.10+ and Docker Compose v2.0+
+
+# 1. Create your environment file
+cp .env.example .env
+
+# 2. Build and start all services in the background
+make up         # equivalent to: docker compose up -d --build
+```
+
+The backend API will be available at **http://localhost:8000**.
 
 ### Services Started by Docker Compose
 
 | Service | URL / Port | Description |
 |---------|-----------|-------------|
-| Backend API | http://localhost:5000 | Flask REST API |
-| Health Check | http://localhost:5000/api/health | Service health endpoint |
+| Backend API | http://localhost:8000 | FastAPI/uvicorn REST API |
+| Health Check | http://localhost:8000/health | Liveness probe used by Docker |
+| API Docs | http://localhost:8000/docs | Swagger UI |
 | PostgreSQL | localhost:5432 | Relational database |
 | Qdrant | http://localhost:6333 | Vector database for semantic search |
 
@@ -1379,22 +1403,14 @@ All configuration lives in `.env` (copied from `.env.example`). Key variables:
 | `POSTGRES_PASSWORD` | `legacyai_secret` | PostgreSQL password — **always change this** |
 | `POSTGRES_USER` | `legacyai` | PostgreSQL username |
 | `POSTGRES_DB` | `legacyai` | PostgreSQL database name |
-| `BACKEND_PORT` | `5000` | Host port the API is exposed on |
+| `BACKEND_PORT` | `8000` | Host port the API is exposed on |
 | `QDRANT_PORT` | `6333` | Host port for Qdrant |
-| `OPENAI_API_KEY` | *(unset)* | OpenAI API key for LLM features |
-
-### Running Without Docker (Manual Setup)
-
-If you prefer to run services directly:
-
-```bash
-# Install backend dependencies
-cd backend
-pip install -r requirements.txt
-
-# Run the Flask development server
-python app.py
-```
+| `OPENAI_API_KEY` | *(unset)* | OpenAI API key for LLM and embedding features |
+| `VECTOR_STORE_TYPE` | `local` | Embedding backend: `local`, `pgvector`, `pinecone`, `weaviate` |
+| `VECTOR_STORE_FILE` | `memory_embeddings.json` | Path to local JSON vector store |
+| `LOG_LEVEL` | `INFO` | Logging verbosity: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `PERSONA_BIRTH_DATE` | `1950-01-01` | Birth date (ISO) for life-stage age calculations |
+| `MEDIA_STORAGE_PATH` | `/app/data/media` | Path inside the container for uploaded media |
 
 ## Getting Started
 
