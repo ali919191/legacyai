@@ -446,15 +446,63 @@ The following systems are planned for future development to enhance the Legacy A
 
 ## Testing
 
-The project includes unit tests for key services. Run the test suite using:
+The Legacy AI platform includes comprehensive unit tests to ensure system reliability and behavior verification.
 
-```bash
-PYTHONPATH=backend python -m unittest discover -s backend/tests -p "test_*.py"
+### Test Logging System
+
+All unit tests generate human-readable summaries in `tests.log` located in the repository root. This log helps monitor AI system behavior and provides detailed test results for analysis.
+
+#### Log Format
+
+Each test entry includes:
+- **Test Name**: Identifier for the test method
+- **Timestamp**: When the test was executed
+- **Input Parameters**: Parameters used in the test
+- **Expected Result**: What the test expected
+- **Actual Result**: What was actually returned
+- **Status**: PASS or FAIL
+
+Example log entry:
+```
+TEST: LegacyAccessService authorization
+Timestamp: 2026-03-16 14:30:25
+Input: user_role=child, memory_tag=sensitive
+Expected: restricted
+Actual: restricted
+Status: PASS
+---
 ```
 
-Current coverage includes:
+#### Benefits of Test Logging
 
-- Access control logic for beneficiaries and sensitive memories (LegacyAccessService)
+The `tests.log` file serves several important purposes:
+
+1. **Behavior Monitoring**: Track how the AI system responds to different inputs over time
+2. **Regression Detection**: Identify when system behavior changes unexpectedly
+3. **Debugging Support**: Detailed input/output information for troubleshooting
+4. **Compliance Verification**: Ensure AI responses meet safety and appropriateness standards
+5. **Audit Trail**: Maintain a record of system testing for quality assurance
+
+### Running Tests
+
+```bash
+# Run all tests (generates tests.log)
+PYTHONPATH=backend python -m unittest discover -s backend/tests -p "test_*.py"
+
+# Run specific test file
+PYTHONPATH=backend python -m unittest backend.tests.test_legacy_access_service
+
+# Run with verbose output
+PYTHONPATH=backend python -m unittest discover -s backend/tests -p "test_*.py" -v
+
+# View recent test results
+tail -50 tests.log
+```
+
+### Test Coverage
+
+- **Legacy Access Service**: Beneficiary registration, access level assignment, memory authorization
+- **Response Moderation Service**: Content filtering, safe response generation, pattern detection
 
 ## Project Structure
 
@@ -462,6 +510,8 @@ Current coverage includes:
 
 ```
 .
+|-- README.md
+|-- tests.log
 |-- ai
 |   |-- data
 |   |   `-- README.md
@@ -496,7 +546,10 @@ Current coverage includes:
 |   |       |-- memory_capture_service.py
 |   |-- tests
 |   |   |-- __init__.py
-|   |   `-- test_legacy_access_service.py
+|   |   |-- test_legacy_access_service.py
+|   |   |-- test_response_moderation_service.py
+|   |   `-- utils
+|   |       `-- test_logger.py
 ```|   |       `-- timeline_engine.py
 |   |-- config
 |   |   `-- __init__.py
