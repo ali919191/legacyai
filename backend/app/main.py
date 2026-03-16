@@ -24,8 +24,10 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from .api.family_interaction_api import create_family_interaction_api  # noqa: E402
 from .services.ai.conversation_engine import ConversationEngine  # noqa: E402
 from .services.ai.knowledge_gap_service import KnowledgeGapService  # noqa: E402
+from .services.ai.memory_distillation_service import MemoryDistillationService  # noqa: E402
 from .services.ai.memory_grounding_service import MemoryGroundingService  # noqa: E402
 from .services.ai.memory_priority_service import MemoryPriorityService  # noqa: E402
+from .services.ai.wisdom_engine import WisdomEngine  # noqa: E402
 from .services.entity.person_profile_service import PersonProfileService  # noqa: E402
 from .services.entity.relationship_service import RelationshipService  # noqa: E402
 from .services.episode.episode_service import EpisodeService  # noqa: E402
@@ -90,6 +92,13 @@ def _build_services() -> dict:
         memory_service=memory_service,
         person_profile_service=person_profile_service,
     )
+    wisdom_engine = WisdomEngine()
+    distillation_service = MemoryDistillationService(
+        memory_service=memory_service,
+        timeline_engine=timeline_engine,
+        embedding_service=embedding_service,
+        wisdom_engine=wisdom_engine,
+    )
     memory_grounding_service = MemoryGroundingService()
     memory_priority_service = MemoryPriorityService()
     conversation_engine = ConversationEngine(
@@ -98,6 +107,7 @@ def _build_services() -> dict:
         embedding_service=embedding_service,
         person_profile_service=person_profile_service,
         relationship_service=relationship_service,
+        distillation_service=distillation_service,
         knowledge_gap_service=knowledge_gap_service,
         memory_grounding_service=memory_grounding_service,
         memory_priority_service=memory_priority_service,
@@ -114,6 +124,8 @@ def _build_services() -> dict:
         "timeline_engine": timeline_engine,
         "conversation_engine": conversation_engine,
         "knowledge_gap_service": knowledge_gap_service,
+        "distillation_service": distillation_service,
+        "wisdom_engine": wisdom_engine,
         "memory_grounding_service": memory_grounding_service,
         "memory_priority_service": memory_priority_service,
         "access_service": access_service,

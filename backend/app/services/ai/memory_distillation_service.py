@@ -4,6 +4,7 @@ from ..memory_capture_service import MemoryCaptureService, Memory
 from ..timeline_engine import TimelineEngine
 from ..memory.memory_embedding_service import MemoryEmbeddingService
 from .personality_model_service import PersonalityModelService, PersonalityProfile
+from .wisdom_engine import WisdomEngine
 import re
 from collections import Counter, defaultdict
 
@@ -62,7 +63,8 @@ class MemoryDistillationService:
         memory_service: MemoryCaptureService,
         timeline_engine: TimelineEngine,
         embedding_service: MemoryEmbeddingService,
-        personality_service: Optional[PersonalityModelService] = None
+        personality_service: Optional[PersonalityModelService] = None,
+        wisdom_engine: Optional[WisdomEngine] = None,
     ):
         """
         Initialize the Memory Distillation Service.
@@ -77,6 +79,7 @@ class MemoryDistillationService:
         self.timeline_engine = timeline_engine
         self.embedding_service = embedding_service
         self.personality_service = personality_service
+        self.wisdom_engine = wisdom_engine or WisdomEngine()
 
         # Keywords and patterns for different insight categories
         self.lesson_patterns = [
@@ -116,6 +119,34 @@ class MemoryDistillationService:
         self.advice_keywords = ['should', 'recommend', 'suggest', 'don\'t', 'avoid', 'better', 'remember']
         self.regret_keywords = ['regret', 'wish', 'should have', 'if only', 'missed', 'never got']
         self.principle_keywords = ['always', 'never', 'principle', 'belief', 'value', 'philosophy']
+
+    def extract_wisdom_lessons(self, memories: Optional[List[Memory]] = None) -> List[Dict[str, Any]]:
+        """Extract wisdom-oriented lessons from memories using the WisdomEngine."""
+        if memories is None:
+            memories = self.memory_service.retrieve_all_memories()
+
+        return [self.wisdom_engine.extract_lesson(memory) for memory in memories]
+
+    def generate_advice_from_experiences(
+        self,
+        question: str,
+        memories: Optional[List[Memory]] = None,
+    ) -> Dict[str, Any]:
+        """Generate advice from memories by distilling lessons into principles."""
+        if memories is None:
+            memories = self.memory_service.retrieve_all_memories()
+
+        lessons = self.extract_wisdom_lessons(memories)
+        principles = self.wisdom_engine.generate_principle(lessons)
+        advice = self.wisdom_engine.generate_advice(question, principles)
+        patterns = self.wisdom_engine.identify_patterns(memories)
+
+        return {
+            "lessons": lessons,
+            "patterns": patterns,
+            "principles": principles,
+            "advice": advice,
+        }
 
     def distill_life_lessons(self, memories: Optional[List[Memory]] = None) -> List[DistilledInsight]:
         """

@@ -10,6 +10,7 @@ from .life_story_generator import LifeStoryGenerator, LifeStory, LifeStageSummar
 from .knowledge_gap_service import KnowledgeGapService
 from .memory_priority_service import MemoryPriorityService
 from .memory_grounding_service import MemoryGroundingService
+from .wisdom_engine import WisdomEngine
 
 __all__ = [
     'ConversationEngine',
@@ -23,4 +24,5 @@ __all__ = [
     'KnowledgeGapService',
     'MemoryPriorityService',
     'MemoryGroundingService',
+    'WisdomEngine',
 ]

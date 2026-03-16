@@ -177,7 +177,16 @@ class ConversationEngine:
             relevant_insights = self._get_relevant_insights(user_query, relevant_memories)
             context['distilled_insights'] = [insight.to_dict() for insight in relevant_insights]
 
-        # Step 8: Detect knowledge gaps and create follow-up questions for widget display.
+        # Step 8: If this is an advice-oriented question, build wisdom from lived experience.
+        wisdom_context: Dict[str, Any] = {}
+        if self._is_advice_oriented_query(user_query) and self.distillation_service and relevant_memories:
+            wisdom_context = self.distillation_service.generate_advice_from_experiences(
+                user_query,
+                relevant_memories,
+            )
+            context['wisdom'] = wisdom_context
+
+        # Step 9: Detect knowledge gaps and create follow-up questions for widget display.
         generated_question_records = []
         if self.knowledge_gap_service:
             gap_context = self.knowledge_gap_service.detect_missing_context(user_query)
@@ -188,9 +197,11 @@ class ConversationEngine:
                     self.knowledge_gap_service.store_question(question)
                 )
 
-        # Step 9: Construct prompt and generate response
+        # Step 10: Construct prompt and generate response
         if not relevant_memories:
             response = "I don't remember that clearly."
+        elif wisdom_context.get("advice"):
+            response = wisdom_context["advice"]
         else:
             if self.memory_grounding_service:
                 prompt = self.memory_grounding_service.generate_grounded_prompt(
@@ -201,15 +212,19 @@ class ConversationEngine:
                 prompt = self._construct_prompt(user_query, context)
             response = self._generate_ai_response(prompt)
 
-        # Step 10: Review response through moderation layer (if available)
+        # Step 11: Review response through moderation layer (if available)
         moderation_result = None
         if self.moderation_service:
             moderated_response = self.moderation_service.adjust_response_if_needed(response)
             moderation_result = self.moderation_service.review_response(response)
             response = moderated_response
 
-        # Step 11: Calculate confidence based on similarity scores and insights
+        # Step 12: Calculate confidence based on similarity scores and insights
         confidence = self._calculate_confidence(similar_memories, relevant_insights)
+
+        wisdom_lessons = [item.get("lesson", "") for item in wisdom_context.get("lessons", [])]
+        wisdom_principles = wisdom_context.get("principles", [])
+        combined_insights = [insight.insight_text for insight in relevant_insights] + wisdom_principles
 
         return {
             'generated_answer': response,
@@ -224,12 +239,30 @@ class ConversationEngine:
                 }
                 for item in memory_priority
             ],
-            'insights_used': [insight.insight_text for insight in relevant_insights],
+            'insights_used': combined_insights,
+            'lessons_used': wisdom_lessons,
+            'wisdom_principles': wisdom_principles,
             'confidence_score': confidence,
             'access_denied': access_denied,
             'moderation': moderation_result,
             'enhanced_questions': generated_question_records,
         }
+
+    def _is_advice_oriented_query(self, user_query: str) -> bool:
+        """Return True when the query asks for advice, lessons, or guidance."""
+        advice_triggers = {
+            "advice",
+            "what should",
+            "what would you do",
+            "how should",
+            "guidance",
+            "lesson",
+            "recommend",
+            "best way",
+            "tell me what to do",
+        }
+        query_lower = user_query.lower()
+        return any(trigger in query_lower for trigger in advice_triggers)
 
     def answer_enhanced_question(
         self,
