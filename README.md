@@ -19,6 +19,24 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - **Containerised Deployment**: Docker Compose setup with PostgreSQL and Qdrant vector database for one-command local deployment.
 - **CI/CD Pipeline**: GitHub Actions runs black, ruff, mypy, and pytest across Python 3.9 / 3.10 / 3.11 on every push.
 
+## Sample Memory Dataset
+
+The repository includes a realistic seed dataset at `backend/data/sample_memories.json` with 50 memories spanning childhood, education, career, relationships, failures and lessons, and advice to children.
+
+This dataset is used for testing and demos by letting integration tests seed the memory pipeline from JSON instead of only using the in-file fixture.
+
+To enable dataset loading in the integration suite:
+
+```bash
+LEGACY_SAMPLE_MEMORIES_FILE=true pytest backend/tests/test_integration_pipeline.py -v
+```
+
+You can also point to a custom dataset path:
+
+```bash
+LEGACY_SAMPLE_MEMORIES_FILE=backend/data/sample_memories.json pytest backend/tests/test_integration_pipeline.py -v
+```
+
 ## System Pipeline
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:

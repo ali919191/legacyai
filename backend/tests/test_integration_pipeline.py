@@ -27,7 +27,11 @@ or
 import os
 import sys
 import unittest
+import json
+import tempfile
+import uuid
 from datetime import date, datetime
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Path setup — mirror the pattern used by all other test modules
@@ -59,6 +63,8 @@ from utils.test_logger import test_logger  # noqa: E402
 # ---------------------------------------------------------------------------
 
 BIRTH_DATE = date(1945, 6, 15)
+DEFAULT_SAMPLE_DATASET = Path(ROOT_DIR) / "data" / "sample_memories.json"
+SAMPLE_DATASET_ENV_VAR = "LEGACY_SAMPLE_MEMORIES_FILE"
 
 # A set of realistic memories used across the integration suite
 SEED_MEMORIES = [
@@ -135,6 +141,74 @@ SEED_MEMORIES = [
 ]
 
 
+def _parse_memory_timestamp(value):
+    """Parse timestamp values from JSON into datetime objects."""
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        return datetime.fromisoformat(value)
+    raise ValueError(f"Unsupported timestamp format: {type(value).__name__}")
+
+
+def _load_seed_memories():
+    """
+    Load seed memories from JSON when requested via env var, otherwise use default fixture.
+
+    If LEGACY_SAMPLE_MEMORIES_FILE is set to a valid path, this helper uses that dataset.
+    If the env var is set to "1" or "true", it uses backend/data/sample_memories.json.
+    """
+    selector = os.getenv(SAMPLE_DATASET_ENV_VAR)
+    if not selector:
+        return SEED_MEMORIES
+
+    if selector.lower() in {"1", "true", "yes", "on"}:
+        dataset_path = DEFAULT_SAMPLE_DATASET
+    else:
+        dataset_path = Path(selector).expanduser()
+        if not dataset_path.is_absolute():
+            dataset_path = Path(ROOT_DIR) / dataset_path
+
+    if not dataset_path.exists():
+        raise FileNotFoundError(
+            f"Sample dataset file not found: {dataset_path} (from {SAMPLE_DATASET_ENV_VAR})"
+        )
+
+    with dataset_path.open("r", encoding="utf-8") as fp:
+        loaded = json.load(fp)
+
+    if not isinstance(loaded, list):
+        raise ValueError("Sample memory dataset must be a JSON array")
+
+    normalized = []
+    required_keys = {
+        "title",
+        "description",
+        "timestamp",
+        "people_involved",
+        "emotions",
+        "tags",
+    }
+    for entry in loaded:
+        missing_keys = required_keys - set(entry.keys())
+        if missing_keys:
+            raise ValueError(f"Sample memory entry missing keys: {sorted(missing_keys)}")
+
+        normalized.append(
+            {
+                "title": entry["title"],
+                "description": entry["description"],
+                "timestamp": _parse_memory_timestamp(entry["timestamp"]),
+                "people_involved": entry.get("people_involved", []),
+                "location": entry.get("location", ""),
+                "emotions": entry.get("emotions", []),
+                "tags": entry.get("tags", []),
+                "sensitivity_tags": entry.get("sensitivity_tags", ["public"]),
+            }
+        )
+
+    return normalized
+
+
 def _build_pipeline(with_personality: bool = False, with_distillation: bool = False):
     """
     Create a fully wired service stack pre-loaded with SEED_MEMORIES.
@@ -144,11 +218,15 @@ def _build_pipeline(with_personality: bool = False, with_distillation: bool = Fa
     """
     memory_service = MemoryCaptureService()
     timeline_engine = TimelineEngine(memory_service, BIRTH_DATE)
-    embedding_service = MemoryEmbeddingService(vector_store_file=":memory_test:")
+    vector_store_file = os.path.join(
+        tempfile.gettempdir(), f"legacyai_memory_test_{uuid.uuid4().hex}.json"
+    )
+    embedding_service = MemoryEmbeddingService(vector_store_file=vector_store_file)
 
-    # Seed memories
+    # Seed memories from either hardcoded fixture or optional JSON dataset.
+    seed_memories = _load_seed_memories()
     memory_ids = []
-    for m in SEED_MEMORIES:
+    for m in seed_memories:
         mid = memory_service.create_memory(**m)
         embedding_service.store_memory_embedding(
             mid, m["title"] + " " + m["description"]
@@ -551,7 +629,10 @@ class TestIntegrationPipeline(unittest.TestCase):
         memory_service = MemoryCaptureService()
         birth_date = date(1950, 1, 1)
         timeline_engine = TimelineEngine(memory_service, birth_date)
-        embedding_service = MemoryEmbeddingService(vector_store_file=":memory_empty_test:")
+        vector_store_file = os.path.join(
+            tempfile.gettempdir(), f"legacyai_memory_empty_test_{uuid.uuid4().hex}.json"
+        )
+        embedding_service = MemoryEmbeddingService(vector_store_file=vector_store_file)
 
         engine = ConversationEngine(
             memory_service=memory_service,
@@ -607,8 +688,9 @@ class TestIntegrationPipeline(unittest.TestCase):
 
         try:
             timeline = timeline_engine.get_chronological_timeline()
+            expected_seed_count = len(_load_seed_memories())
 
-            self.assertEqual(len(timeline), len(SEED_MEMORIES))
+            self.assertEqual(len(timeline), expected_seed_count)
 
             timestamps = [m.timestamp for m in timeline]
             self.assertEqual(
@@ -619,7 +701,7 @@ class TestIntegrationPipeline(unittest.TestCase):
 
             test_logger.log_test_result(
                 test_name=test_name,
-                input_params={"seeded_memories": len(SEED_MEMORIES)},
+                input_params={"seeded_memories": expected_seed_count},
                 expected_result={"memories_sorted_ascending": True},
                 actual_result={
                     "timeline_length": len(timeline),
@@ -631,7 +713,7 @@ class TestIntegrationPipeline(unittest.TestCase):
         except Exception as exc:
             test_logger.log_test_result(
                 test_name=test_name,
-                input_params={"seeded_memories": len(SEED_MEMORIES)},
+                input_params={"seeded_memories": "dynamic"},
                 expected_result={"memories_sorted_ascending": True},
                 actual_result=f"Exception: {exc}",
                 status="FAIL",
