@@ -11,6 +11,7 @@ from .knowledge_gap_service import KnowledgeGapService
 from .memory_priority_service import MemoryPriorityService
 from .memory_grounding_service import MemoryGroundingService
 from .wisdom_engine import WisdomEngine
+from .recipient_context_service import RecipientContextService
 
 __all__ = [
     'ConversationEngine',
@@ -25,4 +26,5 @@ __all__ = [
     'MemoryPriorityService',
     'MemoryGroundingService',
     'WisdomEngine',
+    'RecipientContextService',
 ]

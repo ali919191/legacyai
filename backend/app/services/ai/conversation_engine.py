@@ -9,6 +9,7 @@ from .memory_distillation_service import MemoryDistillationService, DistilledIns
 from .knowledge_gap_service import KnowledgeGapService
 from .memory_grounding_service import MemoryGroundingService
 from .memory_priority_service import MemoryPriorityService
+from .recipient_context_service import RecipientContextService
 from ..security.legacy_access_service import LegacyAccessService, MemoryMetadata
 from ..security.response_moderation_service import ResponseModerationService
 
@@ -40,6 +41,7 @@ class ConversationEngine:
         knowledge_gap_service: Optional[KnowledgeGapService] = None,
         memory_grounding_service: Optional[MemoryGroundingService] = None,
         memory_priority_service: Optional[MemoryPriorityService] = None,
+        recipient_context_service: Optional[RecipientContextService] = None,
         access_service: Optional[LegacyAccessService] = None,
         moderation_service: Optional[ResponseModerationService] = None
     ):
@@ -70,6 +72,7 @@ class ConversationEngine:
         self.knowledge_gap_service = knowledge_gap_service
         self.memory_grounding_service = memory_grounding_service
         self.memory_priority_service = memory_priority_service
+        self.recipient_context_service = recipient_context_service
         self.access_service = access_service
         self.moderation_service = moderation_service
 
@@ -133,6 +136,10 @@ class ConversationEngine:
             memory_priority = self.memory_priority_service.rank_memories(relevant_memories)
             relevant_memories = [item["memory"] for item in memory_priority]
 
+        # Step 3b: Resolve recipient context so every response is recipient-aware.
+        recipient_profile = self._resolve_recipient_profile(user_id)
+        recipient_context_text = self._build_recipient_context_text(recipient_profile)
+
         # Step 4: Validate memories for grounding and keep ranking aligned.
         grounded_memories = relevant_memories
         if self.memory_grounding_service:
@@ -157,6 +164,8 @@ class ConversationEngine:
             context["grounding_packet"] = self.memory_grounding_service.build_context_packet(
                 relevant_memories
             )
+
+        context["recipient_profile"] = recipient_profile
 
         if self.person_profile_service:
             context["person_profiles"] = self._get_related_person_profiles(
@@ -205,12 +214,15 @@ class ConversationEngine:
         else:
             if self.memory_grounding_service:
                 prompt = self.memory_grounding_service.generate_grounded_prompt(
-                    user_query,
+                    f"{user_query}\n\n{recipient_context_text}",
                     relevant_memories,
                 )
             else:
                 prompt = self._construct_prompt(user_query, context)
             response = self._generate_ai_response(prompt)
+
+        # Step 10b: Adjust for recipient age/relationship on sensitive topics.
+        response = self._apply_recipient_safety(response, recipient_profile, relevant_memories)
 
         # Step 11: Review response through moderation layer (if available)
         moderation_result = None
@@ -246,6 +258,7 @@ class ConversationEngine:
             'access_denied': access_denied,
             'moderation': moderation_result,
             'enhanced_questions': generated_question_records,
+            'recipient_context': recipient_profile,
         }
 
     def _is_advice_oriented_query(self, user_query: str) -> bool:
@@ -400,7 +413,14 @@ Respond in a way that reflects these personality characteristics."""
                 for profile in context["person_profiles"]
             ])
 
-        prompt = f"""You are an AI representation of a person built from their life memories. Use the memories below to answer the user's question.{personality_text}{person_profile_text}
+        recipient_text = ""
+        if context.get("recipient_profile"):
+            recipient_text = (
+                "\nRecipient context: "
+                + self._build_recipient_context_text(context["recipient_profile"])
+            )
+
+        prompt = f"""You are an AI representation of a person built from their life memories. Use the memories below to answer the user's question.{personality_text}{person_profile_text}{recipient_text}
 
 User's question: {user_query}
 
@@ -552,3 +572,60 @@ Please answer the question using these memories. Be conversational and authentic
 
         confidence = base_confidence + insight_boost
         return min(confidence, 1.0)
+
+    def _resolve_recipient_profile(self, user_id: Optional[str]) -> Dict[str, Any]:
+        """Resolve recipient profile or provide a safe default context."""
+        if user_id and self.recipient_context_service:
+            profile = self.recipient_context_service.retrieve_recipient_profile(user_id)
+            if profile:
+                return profile
+        return {
+            "user_id": user_id or "unknown",
+            "name": "recipient",
+            "relationship": "unknown",
+            "age": 30,
+            "maturity_level": "adult",
+            "topic_preferences": [],
+        }
+
+    def _build_recipient_context_text(self, recipient_profile: Dict[str, Any]) -> str:
+        """Build prompt instruction with recipient relationship and maturity context."""
+        relationship = recipient_profile.get("relationship", "unknown")
+        age = recipient_profile.get("age", "unknown")
+        maturity = recipient_profile.get("maturity_level", "adult")
+        return (
+            f"The question is asked by the user's {relationship} who is {age} years old "
+            f"(maturity level: {maturity}). Adjust explanations accordingly."
+        )
+
+    def _apply_recipient_safety(
+        self,
+        response: str,
+        recipient_profile: Dict[str, Any],
+        relevant_memories: List[Memory],
+    ) -> str:
+        """Simplify or filter sensitive topics for younger recipients."""
+        maturity_level = recipient_profile.get("maturity_level", "adult")
+        is_young = maturity_level in {"child", "teen"}
+        if not is_young:
+            return response
+
+        sensitive_tags = {"medical", "financial", "intimate"}
+        has_sensitive_memory = any(
+            bool(set(memory.sensitivity_tags or []) & sensitive_tags)
+            for memory in relevant_memories
+        )
+
+        if maturity_level == "child" and has_sensitive_memory:
+            return (
+                "I'll keep this simple and safe: this topic is important, but some details are best "
+                "shared when you're older."
+            )
+
+        if maturity_level == "child":
+            return "Here is a simple version: " + response
+
+        if maturity_level == "teen" and has_sensitive_memory:
+            return "Here is a careful summary: " + response
+
+        return response

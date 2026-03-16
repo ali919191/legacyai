@@ -15,6 +15,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - **Memory Importance & Emotional Weighting**: Prioritizes retrieved memories using life importance, emotional intensity, and recency.
 - **Memory Grounding**: Forces responses to stay anchored to retrieved memory evidence and returns a safe fallback when evidence is missing.
 - **Wisdom Engine**: Converts lived experiences into lessons, recurring principles, and practical advice for guidance-oriented questions.
+- **Recipient Context Engine**: Tailors responses using recipient relationship and age to provide maturity-appropriate explanations.
 - **Knowledge Gap Detection**: Detects missing details during free-style storytelling and prepares follow-up prompts.
 - **Enhanced Questions Widget Support**: Stores pending follow-up questions users can answer later to enrich memory records.
 - **Person Profile System**: Tracks people mentioned in memories and conversations so the AI can reason about relationships over time.
@@ -134,6 +135,32 @@ Integration behavior:
 - **ConversationEngine** detects advice-oriented questions and switches to wisdom-based advice generation when relevant memories exist
 - if no relevant memories are available, the grounding fallback still applies: `"I don't remember that clearly."`
 
+## Recipient Context Engine
+
+The platform now includes a **RecipientContextService** so responses can adapt to who is asking the question.
+
+Recipient profile fields:
+
+- `user_id`
+- `name`
+- `relationship` (`son`, `daughter`, `friend`, `spouse`)
+- `age`
+- `maturity_level`
+- `topic_preferences`
+
+Core methods:
+
+- `create_recipient_profile(user_id, name, relationship, age)`
+- `update_recipient_profile(user_id, details)`
+- `retrieve_recipient_profile(user_id)`
+- `determine_maturity_level(age)`
+
+Conversation integration behavior:
+
+- every question now includes recipient context in prompt construction
+- example context: "The question is asked by the user's son who is 10 years old. Adjust explanations accordingly."
+- for younger recipients (`child` / `teen`), sensitive topics are simplified; for children with sensitive memories, details are filtered into a safe high-level summary
+
 ## Enhanced Questions System
 
 The AI now includes a Knowledge Gap Detection workflow that analyzes free-style storytelling for missing context without interrupting the user.
@@ -237,7 +264,7 @@ Example memory payload:
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Family Interaction API → Structured Interview → Memory Capture → Person Profile System → Relationship Graph → Media Memory Service → Timeline Engine → Episodic Memory System → Memory Embeddings → Vector Search → Memory Importance & Emotional Weighting → Memory Grounding → Personality Model → Memory Distillation → Wisdom Engine → Conversation Engine → Life Story Generator → Knowledge Gap Detection → Enhanced Questions Widget → Legacy Access Control → Response Moderation → AI Response**
+**Family Interaction API → Structured Interview → Memory Capture → Person Profile System → Relationship Graph → Media Memory Service → Timeline Engine → Episodic Memory System → Memory Embeddings → Vector Search → Memory Importance & Emotional Weighting → Memory Grounding → Recipient Context Engine → Personality Model → Memory Distillation → Wisdom Engine → Conversation Engine → Life Story Generator → Knowledge Gap Detection → Enhanced Questions Widget → Legacy Access Control → Response Moderation → AI Response**
 
 ## System Architecture Diagram
 
@@ -255,6 +282,7 @@ flowchart LR
     VECTOR[Vector Search]
     PRIORITY[MemoryPriorityService]
     GROUNDING[MemoryGroundingService]
+    RECIPIENT[RecipientContextService]
     WISDOM[WisdomEngine]
     STORY[LifeStoryGenerator]
     CONVO[ConversationEngine]
@@ -274,6 +302,7 @@ flowchart LR
     MEMORY --> TIMELINE --> EPISODE
     EPISODE --> STORY
     MEMORY --> EMBED --> VECTOR --> PRIORITY --> GROUNDING --> CONVO
+    RECIPIENT --> CONVO
     STORY --> CONVO
     CONVO --> GAP --> WIDGET
     MEMORY --> PERSONA
@@ -296,16 +325,17 @@ flowchart LR
 10. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
 11. **Memory Importance & Emotional Weighting**: Reorders retrieved memories by combining importance, emotional intensity, and recency
 12. **Memory Grounding**: Validates retrieved memory sources and creates strict evidence-bound prompts to reduce hallucinations
-13. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
-14. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
-15. **Wisdom Engine**: Identifies repeated life patterns and transforms lessons into actionable principles and advice
-16. **Conversation Engine**: Orchestrates memory retrieval, grounding, context building, and response generation
-17. **Life Story Generator**: Compiles chronological narratives from memories and episode summaries, creating cohesive life stories with key events and personality evolution
-18. **Knowledge Gap Detection**: Identifies unknown people, incomplete memory fields, and missing context during open storytelling
-19. **Enhanced Questions Widget**: Displays pending follow-up prompts that users can answer asynchronously
-20. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
-21. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
-22. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
+13. **Recipient Context Engine**: Models recipient age and relationship to tailor explanation depth and phrasing
+14. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
+15. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
+16. **Wisdom Engine**: Identifies repeated life patterns and transforms lessons into actionable principles and advice
+17. **Conversation Engine**: Orchestrates memory retrieval, grounding, context building, recipient adaptation, and response generation
+18. **Life Story Generator**: Compiles chronological narratives from memories and episode summaries, creating cohesive life stories with key events and personality evolution
+19. **Knowledge Gap Detection**: Identifies unknown people, incomplete memory fields, and missing context during open storytelling
+20. **Enhanced Questions Widget**: Displays pending follow-up prompts that users can answer asynchronously
+21. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
+22. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
+23. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
 
 ### Data Flow Integration
 
@@ -317,6 +347,7 @@ flowchart LR
 - **Semantic embeddings** enable natural language queries to find relevant experiences
 - **Memory priority ranking** promotes high-importance and emotionally significant memories before prompt construction
 - **Memory grounding** prevents unsupported details by constraining generation to validated memory packets
+- **Recipient context adaptation** adjusts detail depth and safety handling based on recipient age and relationship
 - **Wisdom extraction** turns concrete experiences into reusable principles for advice-oriented responses
 - **Vector store** persists embeddings locally as JSON (development) or in a scalable vector database (production)
 - **Vector search** provides fast, accurate memory retrieval for conversational context
@@ -336,6 +367,7 @@ backend/
             ai/
                 conversation_engine.py
                 memory_distillation_service.py
+                recipient_context_service.py
                 wisdom_engine.py
             entity/
             episode/
@@ -1165,18 +1197,19 @@ Query → ConversationEngine
 | `test_memory_grounding_service.py` | MemoryGroundingService (+ ConversationEngine fallback integration) | 4 |
 | `test_memory_priority_service.py` | MemoryPriorityService (+ ConversationEngine ranking integration) | 4 |
 | `test_wisdom_engine.py` | WisdomEngine (+ MemoryDistillationService and ConversationEngine advice integration) | 4 |
+| `test_recipient_context_service.py` | RecipientContextService (+ ConversationEngine age-aware filtering integration) | 4 |
 | `test_timeline_engine.py` | TimelineEngine | 5 |
 | `test_life_story_generator.py` | LifeStoryGenerator | 6 |
 | `test_knowledge_gap_service.py` | KnowledgeGapService (+ ConversationEngine trigger path) | 4 |
 | `test_legacy_access_service.py` | LegacyAccessService | 4 |
 | `test_response_moderation_service.py` | ResponseModerationService | 12 |
 
-**Total: 76 tests** (65 unit + 10 integration + 1 placeholder)
+**Total: 80 tests** (69 unit + 10 integration + 1 placeholder)
 
 ### Running Tests with Make
 
 ```bash
-make test        # Run all 76 tests with verbose output (uses pytest)
+make test        # Run all 80 tests with verbose output (uses pytest)
 make test-cov    # Run all tests with line-level coverage report
 ```
 

@@ -27,6 +27,7 @@ from .services.ai.knowledge_gap_service import KnowledgeGapService  # noqa: E402
 from .services.ai.memory_distillation_service import MemoryDistillationService  # noqa: E402
 from .services.ai.memory_grounding_service import MemoryGroundingService  # noqa: E402
 from .services.ai.memory_priority_service import MemoryPriorityService  # noqa: E402
+from .services.ai.recipient_context_service import RecipientContextService  # noqa: E402
 from .services.ai.wisdom_engine import WisdomEngine  # noqa: E402
 from .services.entity.person_profile_service import PersonProfileService  # noqa: E402
 from .services.entity.relationship_service import RelationshipService  # noqa: E402
@@ -92,6 +93,7 @@ def _build_services() -> dict:
         memory_service=memory_service,
         person_profile_service=person_profile_service,
     )
+    recipient_context_service = RecipientContextService()
     wisdom_engine = WisdomEngine()
     distillation_service = MemoryDistillationService(
         memory_service=memory_service,
@@ -111,6 +113,7 @@ def _build_services() -> dict:
         knowledge_gap_service=knowledge_gap_service,
         memory_grounding_service=memory_grounding_service,
         memory_priority_service=memory_priority_service,
+        recipient_context_service=recipient_context_service,
     )
     access_service = LegacyAccessService()
     moderation_service = ResponseModerationService()
@@ -124,6 +127,7 @@ def _build_services() -> dict:
         "timeline_engine": timeline_engine,
         "conversation_engine": conversation_engine,
         "knowledge_gap_service": knowledge_gap_service,
+        "recipient_context_service": recipient_context_service,
         "distillation_service": distillation_service,
         "wisdom_engine": wisdom_engine,
         "memory_grounding_service": memory_grounding_service,
