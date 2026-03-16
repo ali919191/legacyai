@@ -3,6 +3,8 @@ from typing import Any, List, Optional
 from datetime import datetime
 import uuid
 
+from .storage.hybrid_storage import DocumentBackend, InMemoryDocumentBackend
+
 
 @dataclass
 class Memory:
@@ -30,12 +32,50 @@ class MemoryCaptureService:
         person_profile_service: Optional[Any] = None,
         episode_service: Optional[Any] = None,
         relationship_service: Optional[Any] = None,
+        document_backend: Optional[DocumentBackend] = None,
     ):
         """Initialize the service with an in-memory storage for memories."""
+        self.document_backend = document_backend or InMemoryDocumentBackend()
         self.memories: dict[str, Memory] = {}
         self.person_profile_service = person_profile_service
         self.episode_service = episode_service
         self.relationship_service = relationship_service
+
+    def _memory_to_document(self, memory: Memory) -> dict[str, Any]:
+        """Serialize Memory dataclass to document payload."""
+        return {
+            "id": memory.id,
+            "title": memory.title,
+            "description": memory.description,
+            "timestamp": memory.timestamp.isoformat(),
+            "people_involved": list(memory.people_involved),
+            "location": memory.location,
+            "emotions": list(memory.emotions),
+            "tags": list(memory.tags),
+            "time_of_day": memory.time_of_day,
+            "start_time": memory.start_time,
+            "end_time": memory.end_time,
+            "day_of_week": memory.day_of_week,
+            "sensitivity_tags": list(memory.sensitivity_tags or []),
+        }
+
+    def _document_to_memory(self, payload: dict[str, Any]) -> Memory:
+        """Deserialize document payload into Memory dataclass."""
+        return Memory(
+            id=payload["id"],
+            title=payload.get("title", ""),
+            description=payload.get("description", ""),
+            timestamp=datetime.fromisoformat(payload["timestamp"]),
+            people_involved=payload.get("people_involved", []),
+            location=payload.get("location", ""),
+            emotions=payload.get("emotions", []),
+            tags=payload.get("tags", []),
+            time_of_day=payload.get("time_of_day", ""),
+            start_time=payload.get("start_time", ""),
+            end_time=payload.get("end_time", ""),
+            day_of_week=payload.get("day_of_week", ""),
+            sensitivity_tags=payload.get("sensitivity_tags", []),
+        )
 
     def set_person_profile_service(self, person_profile_service: Any):
         """Attach a profile service used for entity sync from memory mentions."""
@@ -149,6 +189,7 @@ class MemoryCaptureService:
             sensitivity_tags=sensitivity_tags
         )
         self.memories[memory_id] = memory
+        self.document_backend.create_document(memory_id, self._memory_to_document(memory))
         self._sync_person_profiles_from_memory(memory)
         self._sync_episode_grouping_from_memory(memory_id)
         self._sync_relationships_from_memory(memory)
@@ -222,6 +263,7 @@ class MemoryCaptureService:
         self._sync_person_profiles_from_memory(memory)
         self._sync_episode_grouping_from_memory(memory_id)
         self._sync_relationships_from_memory(memory)
+        self.document_backend.update_document(memory_id, self._memory_to_document(memory))
         return True
 
     def retrieve_memory(self, memory_id: str) -> Optional[Memory]:
@@ -234,7 +276,16 @@ class MemoryCaptureService:
         Returns:
             The Memory object if found, None otherwise.
         """
-        return self.memories.get(memory_id)
+        memory = self.memories.get(memory_id)
+        if memory:
+            return memory
+
+        payload = self.document_backend.get_document(memory_id)
+        if not payload:
+            return None
+        hydrated = self._document_to_memory(payload)
+        self.memories[memory_id] = hydrated
+        return hydrated
 
     def retrieve_all_memories(self) -> List[Memory]:
         """
@@ -243,6 +294,13 @@ class MemoryCaptureService:
         Returns:
             List of all Memory objects.
         """
+        if self.memories:
+            return list(self.memories.values())
+
+        documents = self.document_backend.list_documents()
+        for payload in documents:
+            memory = self._document_to_memory(payload)
+            self.memories[memory.id] = memory
         return list(self.memories.values())
 
     def delete_memory(self, memory_id: str) -> bool:
@@ -257,5 +315,5 @@ class MemoryCaptureService:
         """
         if memory_id in self.memories:
             del self.memories[memory_id]
-            return True
-        return False
+            return self.document_backend.delete_document(memory_id)
+        return self.document_backend.delete_document(memory_id)

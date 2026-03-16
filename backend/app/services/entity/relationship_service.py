@@ -6,6 +6,8 @@ from itertools import combinations
 from typing import Any, Dict, List, Optional
 import uuid
 
+from ..storage.hybrid_storage import GraphBackend, InMemoryGraphBackend
+
 
 @dataclass
 class Relationship:
@@ -40,8 +42,13 @@ class RelationshipService:
         "family_of",
     }
 
-    def __init__(self, person_profile_service: Optional[Any] = None):
+    def __init__(
+        self,
+        person_profile_service: Optional[Any] = None,
+        graph_backend: Optional[GraphBackend] = None,
+    ):
         self.person_profile_service = person_profile_service
+        self.graph_backend = graph_backend or InMemoryGraphBackend()
         self._relationships: Dict[str, Relationship] = {}
 
     def create_relationship(
@@ -77,6 +84,7 @@ class RelationshipService:
             timestamp=timestamp or datetime.now(),
         )
         self._relationships[relationship_id] = relationship
+        self.graph_backend.upsert_relationship(relationship_id, relationship.to_dict())
         return relationship.to_dict()
 
     def update_relationship(self, relationship_id: str, details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -104,6 +112,7 @@ class RelationshipService:
         else:
             relationship.timestamp = datetime.now()
 
+        self.graph_backend.upsert_relationship(relationship_id, relationship.to_dict())
         return relationship.to_dict()
 
     def retrieve_relationships_for_person(self, person_id: str) -> List[Dict[str, Any]]:
@@ -114,6 +123,8 @@ class RelationshipService:
             for relationship in self._relationships.values()
             if relationship.person_a == resolved or relationship.person_b == resolved
         ]
+        if not matches:
+            matches = self.graph_backend.get_relationships_for_person(resolved)
         return sorted(matches, key=lambda rel: rel["timestamp"])
 
     def detect_relationships_from_memory(self, memory: Any) -> List[Dict[str, Any]]:

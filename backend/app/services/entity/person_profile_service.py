@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Optional
 import re
 import uuid
 
+from ..storage.hybrid_storage import GraphBackend, InMemoryGraphBackend
+
 
 @dataclass
 class PersonProfile:
@@ -39,8 +41,9 @@ class PersonProfile:
 class PersonProfileService:
     """Track and enrich entity profiles for people mentioned across memories."""
 
-    def __init__(self, memory_service=None):
+    def __init__(self, memory_service=None, graph_backend: Optional[GraphBackend] = None):
         self.memory_service = memory_service
+        self.graph_backend = graph_backend or InMemoryGraphBackend()
         self._profiles: Dict[str, PersonProfile] = {}
         self._name_index: Dict[str, str] = {}
         self.relationship_service: Optional[Any] = None
@@ -62,6 +65,7 @@ class PersonProfileService:
         profile = PersonProfile(person_id=person_id, name=name.strip())
         self._profiles[person_id] = profile
         self._name_index[normalized] = person_id
+        self.graph_backend.upsert_person(person_id, profile.to_dict())
         return profile.to_dict()
 
     def update_person_profile(self, person_id: str, details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -104,6 +108,7 @@ class PersonProfileService:
         else:
             profile.confidence_score = min(profile.confidence_score + 0.1, 1.0)
 
+        self.graph_backend.upsert_person(person_id, profile.to_dict())
         return profile.to_dict()
 
     def retrieve_person_profile(self, person_id: str) -> Optional[Dict[str, Any]]:
@@ -127,6 +132,7 @@ class PersonProfileService:
         if memory_id not in profile.connected_memories:
             profile.connected_memories.append(memory_id)
             profile.confidence_score = min(profile.confidence_score + 0.1, 1.0)
+            self.graph_backend.upsert_person(person_id, profile.to_dict())
         return True
 
     def search_person_by_name(self, name: str) -> List[Dict[str, Any]]:

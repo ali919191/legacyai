@@ -448,7 +448,7 @@ Example memory payload:
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Family Interaction API → Structured Interview → Memory Capture → Person Profile System → Relationship Graph → Media Memory Service → Timeline Engine → Episodic Memory System → Memory Embeddings → Vector Search → Memory Importance & Emotional Weighting → Memory Grounding → Recipient Context & Age Buckets → Personality Model → Memory Distillation → Wisdom Engine → Conversation Engine → Life Story Generator → Knowledge Gap Detection → Enhanced Questions Widget → Legacy Access Control → Response Moderation → AI Response**
+**Family Interaction API → Structured Interview → Memory Capture → Document Storage (PostgreSQL JSONB) → Person Profile System → Relationship Graph → Graph Storage (Neo4j) → Media Memory Service → Timeline Engine → Episodic Memory System → Memory Embeddings → Vector Storage (pgvector/Pinecone) → Vector Search → Memory Importance & Emotional Weighting → Memory Grounding → Recipient Context & Age Buckets → Personality Model → Memory Distillation → Wisdom Engine → Conversation Engine → Life Story Generator → Knowledge Gap Detection → Enhanced Questions Widget → Legacy Access Control → Response Moderation → AI Response**
 
 ## System Architecture Diagram
 
@@ -459,10 +459,13 @@ flowchart LR
     MEMORY[MemoryCaptureService]
     PROFILE[PersonProfileService]
     RELATIONSHIP[RelationshipService]
+    GRAPHDB[Neo4j Graph Storage]
     MEDIA[MediaMemoryService]
     TIMELINE[TimelineEngine]
     EPISODE[EpisodeService]
+    DOCDB[PostgreSQL JSONB Document Storage]
     EMBED[MemoryEmbeddingService]
+    VECTORDB[pgvector / Pinecone]
     VECTOR[Vector Search]
     PRIORITY[MemoryPriorityService]
     GROUNDING[MemoryGroundingService]
@@ -479,13 +482,16 @@ flowchart LR
     RESPONSE[AI Response]
 
     API --> INTERVIEW --> MEMORY
+    MEMORY --> DOCDB
     MEMORY --> PROFILE
     MEMORY --> RELATIONSHIP
     PROFILE --> RELATIONSHIP
+    PROFILE --> GRAPHDB
+    RELATIONSHIP --> GRAPHDB
     MEMORY --> MEDIA
     MEMORY --> TIMELINE --> EPISODE
     EPISODE --> STORY
-    MEMORY --> EMBED --> VECTOR --> PRIORITY --> GROUNDING --> CONVO
+    MEMORY --> EMBED --> VECTORDB --> VECTOR --> PRIORITY --> GROUNDING --> CONVO
     RECIPIENT --> CONVO
     STORY --> CONVO
     CONVO --> GAP --> WIDGET
@@ -533,6 +539,7 @@ flowchart LR
 - **Memory grounding** prevents unsupported details by constraining generation to validated memory packets
 - **Recipient context adaptation** adjusts detail depth and safety handling based on recipient age, relationship, and age bucket
 - **Wisdom extraction** turns concrete experiences into reusable principles for advice-oriented responses
+- **Hybrid storage layering** separates full records (document DB), semantic vectors (vector DB), and relationships (graph DB) for independent scaling paths
 - **Vector store** persists embeddings locally as JSON (development) or in a scalable vector database (production)
 - **Vector search** provides fast, accurate memory retrieval for conversational context
 - **Memory distillation** transforms raw memories into actionable wisdom and life lessons
@@ -540,6 +547,39 @@ flowchart LR
 - **Knowledge gap detection** creates follow-up questions for the Enhanced Questions widget without interrupting active storytelling
 - **Legacy access control** ensures privacy protection and authorized beneficiary access
 - **Response moderation** filters and adjusts AI responses for safety and appropriateness
+
+## Scalable Memory Storage Architecture
+
+Legacy AI now supports a hybrid storage model designed for growth from thousands to millions of memories by splitting responsibilities into independent persistence layers:
+
+1. **Document Layer (System of Record)**
+- Service: `MemoryCaptureService`
+- Backends: in-memory (default), PostgreSQL JSONB
+- Stores complete memory payloads (title, description, timestamps, people, tags, emotions, sensitivity, temporal metadata)
+
+2. **Vector Layer (Semantic Retrieval)**
+- Service: `MemoryEmbeddingService`
+- Backends: local JSON vector store (default), pgvector, Pinecone
+- Stores dense embeddings and serves top-k nearest-neighbor recall for conversational search
+
+3. **Graph Layer (People + Relationships)**
+- Services: `PersonProfileService`, `RelationshipService`
+- Backends: in-memory (default), Neo4j
+- Stores person nodes and relationship edges for cross-memory social reasoning
+
+Configuration is centralized in `backend/config/database_config.py` and controlled via environment variables:
+
+- `VECTOR_DB_PROVIDER=local|pgvector|pinecone`
+- `GRAPH_DB_PROVIDER=inmemory|neo4j`
+- `DOCUMENT_DB_PROVIDER=inmemory|postgres_jsonb`
+
+This architecture scales because each layer can be tuned independently:
+
+- move document writes to PostgreSQL JSONB for transactional durability
+- move semantic retrieval to pgvector or Pinecone for high-cardinality ANN workloads
+- move relationship reasoning to Neo4j for graph traversals and family-network queries
+
+The service abstraction layer is implemented in `backend/app/services/storage/hybrid_storage.py`, allowing provider swaps with minimal application-level code changes.
 
 ## Repository Directory Tree
 
@@ -555,6 +595,8 @@ backend/
                 memory_distillation_service.py
                 recipient_context_service.py
                 wisdom_engine.py
+            storage/
+                hybrid_storage.py
             entity/
             episode/
             memory/
@@ -1553,8 +1595,12 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |           |-- __init__.py
 |   |           |-- legacy_access_service.py
 |   |           `-- response_moderation_service.py
+|   |       |-- storage
+|   |       |   |-- __init__.py
+|   |       |   `-- hybrid_storage.py
 |   |-- config
 |   |   `-- __init__.py
+|   |   `-- database_config.py
 |   |-- tests
 |   |   |-- __init__.py
 |   |   |-- test_integration_pipeline.py
@@ -1664,9 +1710,11 @@ Backend service layer using FastAPI as the main runtime path, with a legacy Flas
 - **app/services/security/__init__.py**: Package initializer for security services, exporting LegacyAccessService and related enums.
 - **app/services/security/legacy_access_service.py**: Legacy access control service. Manages posthumous access to memories with beneficiary registration, access levels (public, family, intimate), relationship verification, and authorization checks to ensure ethical memory sharing.
 - **app/services/security/response_moderation_service.py**: Response moderation service. Reviews all AI-generated responses before delivery to ensure appropriateness, safety, and respectfulness. Detects sensitive topics (violence, illegal activity, explicit content, self-harm), applies content filtering, and replaces inappropriate responses with safe alternatives. Designed for future integration with external AI moderation APIs.
+- **app/services/storage/hybrid_storage.py**: Hybrid storage adapters for vector, graph, and document layers. Includes in-memory backends and production adapters for pgvector, Pinecone, Neo4j, and PostgreSQL JSONB.
 - **app/__init__.py**: Package initializer for the Flask app.
 - **app/main.py**: FastAPI application entry point. Loads environment variables, wires all platform services (MemoryCaptureService, PersonProfileService, RelationshipService, TimelineEngine, EpisodeService, MemoryEmbeddingService, KnowledgeGapService, RecipientContextService, WisdomEngine, MemoryDistillationService, MemoryPriorityService, MemoryGroundingService, ConversationEngine, LegacyAccessService, ResponseModerationService), mounts the Family Interaction API at `/api/v1`, and adds CORS middleware and a top-level `/health` endpoint. Consumed by `uvicorn backend.app.main:app --reload` locally and `uvicorn app.main:app` inside Docker.
 - **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
+- **config/database_config.py**: Hybrid database configuration for selecting providers and connection settings across vector, graph, and document storage layers.
 - **tests/__init__.py**: Test package initializer.
 - **tests/test_memory_capture_service.py**: Unit tests for MemoryCaptureService (create, retrieve, update, delete, retrieve_all — 6 tests).
 - **tests/test_episode_service.py**: Unit tests for EpisodeService, including episode creation, memory linking, summary generation, timeline-based clustering, and life-story integration.

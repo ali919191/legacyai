@@ -37,6 +37,13 @@ from .services.memory.memory_embedding_service import MemoryEmbeddingService  # 
 from .services.security.legacy_access_service import LegacyAccessService  # noqa: E402
 from .services.security.response_moderation_service import ResponseModerationService  # noqa: E402
 from .services.timeline_engine import TimelineEngine  # noqa: E402
+from ..config.database_config import load_database_config  # noqa: E402
+from .services.storage.hybrid_storage import (  # noqa: E402
+    InMemoryDocumentBackend,
+    InMemoryGraphBackend,
+    Neo4jGraphBackend,
+    PostgresJsonbDocumentBackend,
+)
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 
@@ -71,10 +78,32 @@ def _build_services() -> dict:
     """Instantiate and wire all platform services."""
     vector_store_file = os.getenv("VECTOR_STORE_FILE", "memory_embeddings.json")
     birth_date = _parse_birth_date()
+    db_config = load_database_config()
 
-    memory_service = MemoryCaptureService()
-    person_profile_service = PersonProfileService(memory_service=memory_service)
-    relationship_service = RelationshipService(person_profile_service=person_profile_service)
+    graph_backend = InMemoryGraphBackend()
+    if db_config.graph_provider == "neo4j":
+        graph_backend = Neo4jGraphBackend(
+            uri=db_config.graph_neo4j_uri,
+            user=db_config.graph_neo4j_user,
+            password=db_config.graph_neo4j_password,
+        )
+
+    document_backend = InMemoryDocumentBackend()
+    if db_config.document_provider == "postgres_jsonb":
+        document_backend = PostgresJsonbDocumentBackend(
+            dsn=db_config.document_pg_dsn,
+            table_name=db_config.document_pg_table,
+        )
+
+    memory_service = MemoryCaptureService(document_backend=document_backend)
+    person_profile_service = PersonProfileService(
+        memory_service=memory_service,
+        graph_backend=graph_backend,
+    )
+    relationship_service = RelationshipService(
+        person_profile_service=person_profile_service,
+        graph_backend=graph_backend,
+    )
     person_profile_service.set_relationship_service(relationship_service)
     memory_service.set_person_profile_service(person_profile_service)
     memory_service.set_relationship_service(relationship_service)
@@ -88,7 +117,17 @@ def _build_services() -> dict:
     )
     memory_service.set_episode_service(episode_service)
     timeline_engine.set_episode_service(episode_service)
-    embedding_service = MemoryEmbeddingService(vector_store_file=vector_store_file)
+    vector_config = {
+        "dsn": db_config.vector_pg_dsn,
+        "table_name": db_config.vector_pg_table,
+        "api_key": db_config.vector_pinecone_api_key,
+        "index_name": db_config.vector_pinecone_index,
+    }
+    embedding_service = MemoryEmbeddingService(
+        vector_store_file=vector_store_file,
+        vector_provider=db_config.vector_provider,
+        vector_config=vector_config,
+    )
     knowledge_gap_service = KnowledgeGapService(
         memory_service=memory_service,
         person_profile_service=person_profile_service,
@@ -121,6 +160,8 @@ def _build_services() -> dict:
     logger.info("All platform services initialised (birth_date=%s).", birth_date)
     return {
         "memory_service": memory_service,
+        "document_backend": document_backend,
+        "graph_backend": graph_backend,
         "person_profile_service": person_profile_service,
         "relationship_service": relationship_service,
         "episode_service": episode_service,

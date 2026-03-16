@@ -1,6 +1,12 @@
 import random
 from typing import List, Tuple
 from .vector_store import VectorStore
+from ..storage.hybrid_storage import (
+    LocalVectorBackend,
+    PgVectorBackend,
+    PineconeVectorBackend,
+    VectorBackend,
+)
 
 
 class MemoryEmbeddingService:
@@ -16,7 +22,13 @@ class MemoryEmbeddingService:
 
     EMBEDDING_DIMENSION = 384  # Common dimension for embeddings like BERT-based models
 
-    def __init__(self, vector_store_file: str = "memory_embeddings.json"):
+    def __init__(
+        self,
+        vector_store_file: str = "memory_embeddings.json",
+        vector_backend: VectorBackend | None = None,
+        vector_provider: str = "local",
+        vector_config: dict | None = None,
+    ):
         """
         Initialize the embedding service.
 
@@ -24,6 +36,31 @@ class MemoryEmbeddingService:
             vector_store_file: Path to the vector store JSON file.
         """
         self.vector_store = VectorStore(vector_store_file)
+        self.vector_backend = vector_backend or self._build_vector_backend(
+            vector_provider=vector_provider,
+            vector_store_file=vector_store_file,
+            vector_config=vector_config or {},
+        )
+
+    def _build_vector_backend(
+        self,
+        vector_provider: str,
+        vector_store_file: str,
+        vector_config: dict,
+    ) -> VectorBackend:
+        """Build a vector backend adapter from provider configuration."""
+        provider = (vector_provider or "local").lower()
+        if provider == "pgvector":
+            return PgVectorBackend(
+                dsn=vector_config.get("dsn", ""),
+                table_name=vector_config.get("table_name", "memory_vectors"),
+            )
+        if provider == "pinecone":
+            return PineconeVectorBackend(
+                api_key=vector_config.get("api_key", ""),
+                index_name=vector_config.get("index_name", "legacyai-memory-vectors"),
+            )
+        return LocalVectorBackend(vector_store_file)
 
     def generate_embedding(self, text: str) -> List[float]:
         """
@@ -60,7 +97,7 @@ class MemoryEmbeddingService:
             text: The memory text to embed (e.g., title + description).
         """
         embedding = self.generate_embedding(text)
-        self.vector_store.add_embedding(memory_id, embedding)
+        self.vector_backend.add_embedding(memory_id, embedding)
 
     def search_similar_memories(self, query: str, top_k: int = 5) -> List[Tuple[str, float]]:
         """
@@ -74,7 +111,7 @@ class MemoryEmbeddingService:
             List of tuples (memory_id, similarity_score) sorted by similarity descending.
         """
         query_embedding = self.generate_embedding(query)
-        return self.vector_store.search(query_embedding, top_k)
+        return self.vector_backend.search(query_embedding, top_k)
 
     def update_memory_embedding(self, memory_id: str, new_text: str):
         """
@@ -93,4 +130,4 @@ class MemoryEmbeddingService:
         Args:
             memory_id: The memory ID to remove.
         """
-        self.vector_store.remove_embedding(memory_id)
+        self.vector_backend.remove_embedding(memory_id)
