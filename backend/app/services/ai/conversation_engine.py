@@ -174,6 +174,16 @@ class ConversationEngine:
         return {
             'generated_answer': response,
             'memories_used': [mem.id for mem in relevant_memories],  # Use actual memories used after filtering
+            'memory_priority': [
+                {
+                    'memory_id': item['memory'].id,
+                    'importance_score': item['importance_score'],
+                    'emotional_weight': item['emotional_weight'],
+                    'recency_factor': item['recency_factor'],
+                    'priority_score': item['priority_score'],
+                }
+                for item in memory_priority
+            ],
             'insights_used': [insight.insight_text for insight in relevant_insights],
             'confidence_score': confidence,
             'access_denied': access_denied,

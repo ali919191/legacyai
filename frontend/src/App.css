@@ -263,6 +263,16 @@ textarea {
   color: var(--muted);
 }
 
+.priority-metrics {
+  margin-top: 12px;
+}
+
+.priority-line {
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
 .panel-heading h2 {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;

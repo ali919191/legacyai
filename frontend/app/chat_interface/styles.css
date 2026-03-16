@@ -111,6 +111,12 @@ button.ghost {
   background: rgba(181, 82, 47, 0.08);
 }
 
+.memory-priority p {
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+  color: #5d6864;
+}
+
 .error-message {
   min-height: 20px;
   color: #7f2d1b;

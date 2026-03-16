@@ -42,6 +42,7 @@ export default function HomePage() {
           question: trimmedQuestion,
           answer: result.answer,
           memoriesUsed: result.memories_used || [],
+          memoryPriority: result.memory_priority || [],
         },
       ]);
       if (Array.isArray(result.enhanced_questions) && result.enhanced_questions.length) {

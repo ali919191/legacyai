@@ -29,6 +29,7 @@ askButton.addEventListener('click', async () => {
       question: query,
       answer: response.answer,
       memories_used: response.memories_used || [],
+      memory_priority: response.memory_priority || [],
     });
     if (Array.isArray(response.enhanced_questions)) {
       pendingQuestions = mergeQuestions(pendingQuestions, response.enhanced_questions);
@@ -76,6 +77,18 @@ function renderHistory() {
               ? entry.memories_used.map((memoryId) => `<span class="memory-tag">${escapeHtml(memoryId)}</span>`).join('')
               : '<span class="memory-tag">No memories referenced</span>'}
           </div>
+          ${entry.memory_priority?.length
+            ? `<div class="memory-priority">
+                 <div class="message-label">Priority Ranking</div>
+                 ${entry.memory_priority
+                   .slice(0, 3)
+                   .map(
+                     (item) =>
+                       `<p>${escapeHtml(item.memory_id)} - score ${Number(item.priority_score).toFixed(3)}</p>`,
+                   )
+                   .join('')}
+               </div>`
+            : ''}
         </article>
       `,
     )

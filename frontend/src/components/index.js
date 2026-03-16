@@ -26,6 +26,16 @@ export function ConversationHistory({ history }) {
               ))}
               {!entry.memoriesUsed?.length && <span className="memory-chip muted">No memories referenced</span>}
             </div>
+            {!!entry.memoryPriority?.length && (
+              <div className="priority-metrics">
+                <span className="message-label">Priority Ranking</span>
+                {entry.memoryPriority.slice(0, 3).map((item) => (
+                  <p className="priority-line" key={item.memory_id}>
+                    {item.memory_id} - score {Number(item.priority_score).toFixed(3)}
+                  </p>
+                ))}
+              </div>
+            )}
           </div>
         </article>
       ))}
