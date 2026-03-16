@@ -1,0 +1,369 @@
+:root {
+  --page-bg: linear-gradient(180deg, #f7f0e4 0%, #efe5d0 100%);
+  --ink: #1f2a2b;
+  --muted: #5d6864;
+  --card: rgba(255, 250, 242, 0.88);
+  --card-border: rgba(86, 72, 42, 0.14);
+  --accent: #b5522f;
+  --accent-deep: #7f2d1b;
+  --secondary: #2f6b64;
+  --warning: #b5852b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--ink);
+  font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.chat-shell {
+  min-height: 100vh;
+  padding: 32px;
+  background:
+    radial-gradient(circle at top right, rgba(181, 82, 47, 0.18), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(47, 107, 100, 0.16), transparent 26%),
+    var(--page-bg);
+}
+
+.hero-card,
+.composer-card,
+.conversation-card,
+.enhanced-panel,
+.question-card {
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 44px rgba(70, 50, 24, 0.08);
+}
+
+.hero-card {
+  display: grid;
+  grid-template-columns: 1.6fr 0.9fr;
+  gap: 24px;
+  border-radius: 28px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  font-size: 0.74rem;
+}
+
+.hero-card h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  line-height: 0.95;
+}
+
+.hero-copy {
+  max-width: 62ch;
+  margin: 14px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-self: end;
+}
+
+.stat-tile {
+  border-radius: 22px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.stat-tile.accent {
+  background: linear-gradient(135deg, rgba(181, 82, 47, 0.95), rgba(127, 45, 27, 0.95));
+  color: #fffaf3;
+}
+
+.stat-tile span {
+  display: block;
+  font-size: 0.84rem;
+  color: inherit;
+  opacity: 0.78;
+}
+
+.stat-tile strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 2rem;
+}
+
+.workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.95fr);
+  gap: 24px;
+}
+
+.chat-column,
+.sidebar-column {
+  min-width: 0;
+}
+
+.composer-card,
+.enhanced-panel {
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.field-row label {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.field-row input,
+.field-row textarea,
+.answer-box {
+  width: 100%;
+  border: 1px solid rgba(56, 48, 34, 0.14);
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+}
+
+.field-row textarea,
+.answer-box {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.action-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.primary-action,
+.ghost-action,
+.secondary-action {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.primary-action {
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: #fffaf4;
+}
+
+.ghost-action {
+  background: rgba(47, 107, 100, 0.12);
+  color: var(--secondary);
+}
+
+.secondary-action {
+  background: rgba(181, 82, 47, 0.12);
+  color: var(--accent-deep);
+}
+
+.primary-action:hover,
+.ghost-action:hover,
+.secondary-action:hover {
+  transform: translateY(-1px);
+}
+
+.primary-action:disabled,
+.ghost-action:disabled,
+.secondary-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-banner {
+  margin: 14px 0 0;
+  color: var(--accent-deep);
+}
+
+.conversation-history {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.conversation-card {
+  border-radius: 24px;
+  padding: 18px;
+}
+
+.message-bubble {
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.message-bubble-user {
+  background: rgba(47, 107, 100, 0.1);
+}
+
+.message-bubble-ai {
+  background: rgba(181, 82, 47, 0.08);
+  margin-top: 12px;
+}
+
+.message-bubble p,
+.question-card p {
+  margin: 8px 0 0;
+  line-height: 1.6;
+}
+
+.message-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.memory-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.memory-chip {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 0.82rem;
+}
+
+.memory-chip.muted {
+  color: var(--muted);
+}
+
+.panel-heading h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.7rem;
+}
+
+.panel-heading p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.question-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.question-card {
+  border-radius: 22px;
+  padding: 18px;
+}
+
+.question-card h3 {
+  margin: 10px 0 0;
+  font-size: 1.05rem;
+}
+
+.question-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.priority-pill,
+.question-status {
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.priority-low {
+  background: rgba(47, 107, 100, 0.12);
+  color: var(--secondary);
+}
+
+.priority-medium {
+  background: rgba(181, 133, 43, 0.14);
+  color: var(--warning);
+}
+
+.priority-high {
+  background: rgba(181, 82, 47, 0.14);
+  color: var(--accent-deep);
+}
+
+.question-status {
+  background: rgba(31, 42, 43, 0.08);
+  color: var(--muted);
+}
+
+.empty-state {
+  border: 1px dashed rgba(56, 48, 34, 0.18);
+  border-radius: 24px;
+  padding: 24px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.46);
+}
+
+.empty-state.compact {
+  margin-top: 18px;
+}
+
+@media (max-width: 960px) {
+  .chat-shell {
+    padding: 18px;
+  }
+
+  .hero-card,
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .action-row,
+  .hero-stats {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .primary-action,
+  .ghost-action,
+  .secondary-action {
+    width: 100%;
+  }
+}

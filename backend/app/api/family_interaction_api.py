@@ -40,10 +40,33 @@ class AskResponse(BaseModel):
     answer: str
     memories_used: List[str]
     insights_used: List[str]
+    enhanced_questions: List[Dict[str, Any]]
     confidence_score: float
     access_denied: bool
     moderation_applied: bool
     timestamp: datetime
+
+
+class EnhancedQuestionResponse(BaseModel):
+    """Response model for pending or answered enhanced questions."""
+    question_id: str
+    question: str
+    related_memory_id: str
+    source_conversation_timestamp: str
+    context_description: str
+    priority: str
+    status: str
+    user_id: str
+    person_id: Optional[str] = None
+    answer: Optional[str] = None
+    answered_timestamp: Optional[str] = None
+
+
+class EnhancedQuestionAnswerRequest(BaseModel):
+    """Request model for answering an enhanced follow-up question."""
+    answer: str
+    memory_updates: Optional[Dict[str, Any]] = None
+    person_updates: Optional[Dict[str, Any]] = None
 
 
 class MemoryResponse(BaseModel):
@@ -149,6 +172,7 @@ class FamilyInteractionAPI:
                     answer=result['generated_answer'],
                     memories_used=result['memories_used'],
                     insights_used=result['insights_used'],
+                    enhanced_questions=result.get('enhanced_questions', []),
                     confidence_score=result['confidence_score'],
                     access_denied=result['access_denied'],
                     moderation_applied=moderation_applied,
@@ -157,6 +181,49 @@ class FamilyInteractionAPI:
 
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Error processing question: {str(e)}")
+
+        @self.app.get("/enhanced-questions", response_model=List[EnhancedQuestionResponse])
+        async def get_enhanced_questions(
+            user_id: str = Query(..., description="User ID for pending enhanced questions"),
+        ):
+            """Retrieve pending enhanced questions for the widget UI."""
+            try:
+                service = getattr(self.conversation_engine, "knowledge_gap_service", None)
+                if not service:
+                    return []
+                return service.retrieve_pending_questions(user_id)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Error retrieving enhanced questions: {str(e)}",
+                )
+
+        @self.app.post(
+            "/enhanced-questions/{question_id}/answer",
+            response_model=EnhancedQuestionResponse,
+        )
+        async def answer_enhanced_question(
+            question_id: str,
+            request: EnhancedQuestionAnswerRequest,
+        ):
+            """Answer a pending enhanced question and enrich stored knowledge."""
+            try:
+                result = self.conversation_engine.answer_enhanced_question(
+                    question_id=question_id,
+                    answer_text=request.answer,
+                    memory_updates=request.memory_updates,
+                    person_updates=request.person_updates,
+                )
+                if not result:
+                    raise HTTPException(status_code=404, detail="Enhanced question not found")
+                return result
+            except HTTPException:
+                raise
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Error answering enhanced question: {str(e)}",
+                )
 
         @self.app.get("/timeline", response_model=List[TimelineEvent])
         async def get_timeline(

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Legacy AI Chat Interface</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="standalone-shell">
+      <section class="intro-card">
+        <p class="eyebrow">Legacy AI</p>
+        <h1>Minimal chat interface</h1>
+        <p>Ask a question, review referenced memories, and answer follow-up prompts from the Enhanced Questions panel.</p>
+      </section>
+
+      <section class="composer-card">
+        <label for="user-id">User ID</label>
+        <input id="user-id" value="family_user" />
+        <label for="chat-question">Question</label>
+        <textarea id="chat-question" placeholder="What do you remember about your first job?"></textarea>
+        <div class="button-row">
+          <button id="ask-button">Send to /ask</button>
+          <button id="refresh-button" class="ghost">Load Enhanced Questions</button>
+        </div>
+        <p id="error-message" class="error-message"></p>
+      </section>
+
+      <section class="content-grid">
+        <section>
+          <h2>Conversation History</h2>
+          <div id="conversation-history" class="stacked-list"></div>
+        </section>
+        <section>
+          <h2>Enhanced Questions</h2>
+          <div id="enhanced-questions" class="stacked-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./standalone.js"></script>
+  </body>
+  </html>
