@@ -5,7 +5,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 ## Features
 
 - **Life Experience Capture**: Guided structured interviews and free-form tools to record personal stories across all life domains.
-- **Structured Memory Storage**: Memories stored with rich metadata — life stage, emotional tone, people, locations, and timestamps.
+- **Structured Memory Storage**: Memories stored with rich metadata — life stage, emotional tone, people, locations, timestamps, and temporal context (day of week, time of day, start/end time).
 - **Media Memory Service**: Attach photos, audio recordings, and video clips to memory entries.
 - **Timeline Engine**: Organize memories chronologically and by life stage (childhood, education, career, retirement).
 - **Semantic Search**: Vector embeddings enable natural-language queries to find the most relevant memories instantly.
@@ -48,6 +48,24 @@ Memories now support richer temporal metadata in addition to the main timestamp:
 
 This temporal context helps the Timeline Engine and Life Story Generator build more natural narratives, such as describing recurring morning routines, weekend family rituals, or evening milestones. It also improves response quality in conversational prompts where users ask when events typically happened.
 
+Example memory payload:
+
+```json
+{
+    "id": "memory_042",
+    "title": "Dinner date with your mom",
+    "description": "...",
+    "timestamp": "2012-06-15T21:00:00",
+    "day_of_week": "Sunday",
+    "time_of_day": "evening",
+    "start_time": "21:00",
+    "end_time": "23:45",
+    "people_involved": ["mom"],
+    "emotions": ["joy"],
+    "tags": ["family"]
+}
+```
+
 ## System Pipeline
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
@@ -73,7 +91,7 @@ The Legacy AI platform follows a comprehensive data processing pipeline that tra
 
 ### Data Flow Integration
 
-- **Interview responses** automatically become **structured memories** with rich metadata
+- **Interview responses** automatically become **structured memories** with rich metadata, including temporal context for more natural storytelling
 - **Timeline context** enhances memory relevance by considering chronological relationships
 - **Semantic embeddings** enable natural language queries to find relevant experiences
 - **Vector store** persists embeddings locally as JSON (development) or in a scalable vector database (production)
@@ -1005,6 +1023,8 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |-- backend
 |   |-- .dockerignore
 |   |-- Dockerfile
+|   |-- data
+|   |   `-- sample_memories.json
 |   |-- app
 |   |   |-- __init__.py
 |   |   |-- main.py
