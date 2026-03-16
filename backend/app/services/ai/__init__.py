@@ -7,6 +7,7 @@ from .conversation_engine import ConversationEngine
 from .personality_model_service import PersonalityModelService, PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
 from .life_story_generator import LifeStoryGenerator, LifeStory, LifeStageSummary
+from .knowledge_gap_service import KnowledgeGapService
 
 __all__ = [
     'ConversationEngine',
@@ -17,4 +18,5 @@ __all__ = [
     'LifeStoryGenerator',
     'LifeStory',
     'LifeStageSummary',
+    'KnowledgeGapService',
 ]

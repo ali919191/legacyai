@@ -11,6 +11,8 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - **Semantic Search**: Vector embeddings enable natural-language queries to find the most relevant memories instantly.
 - **Life Story Generator**: Compiles chronological biographical narratives with key events, themes, and personality evolution.
 - **Conversation Engine**: Orchestrates memory retrieval and context building to generate personalized AI responses.
+- **Knowledge Gap Detection**: Detects missing details during free-style storytelling and prepares follow-up prompts.
+- **Enhanced Questions Widget Support**: Stores pending follow-up questions users can answer later to enrich memory records.
 - **Personality Modeling**: Analyzes memory patterns to build authentic personality profiles for realistic interactions.
 - **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories.
 - **Secure Posthumous Access**: Role-based access controls (guardian, spouse, child, extended family, friend) for designated beneficiaries.
@@ -48,6 +50,24 @@ Memories now support richer temporal metadata in addition to the main timestamp:
 
 This temporal context helps the Timeline Engine and Life Story Generator build more natural narratives, such as describing recurring morning routines, weekend family rituals, or evening milestones. It also improves response quality in conversational prompts where users ask when events typically happened.
 
+## Enhanced Questions System
+
+The AI now includes a Knowledge Gap Detection workflow that analyzes free-style storytelling for missing context without interrupting the user.
+
+When the system detects missing information (for example, unknown people mentions, incomplete memories, or absent contextual details), it generates follow-up prompts and stores them for the **Enhanced Questions** widget.
+
+Each stored question includes:
+
+- `question_id`
+- `question`
+- `related_memory_id`
+- `source_conversation_timestamp`
+- `context_description`
+- `priority`
+- `status` (`pending` or `answered`)
+
+When users answer these prompts, the system marks each question as answered and updates the related memory with the newly provided context, improving future narrative quality and response relevance.
+
 Example memory payload:
 
 ```json
@@ -70,7 +90,7 @@ Example memory payload:
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Family Interaction API → Structured Interview → Memory Capture → Media Memory Service → Timeline Engine → Memory Embeddings → Vector Search → Life Story Generator → Conversation Engine → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
+**Family Interaction API → Structured Interview → Memory Capture → Media Memory Service → Timeline Engine → Memory Embeddings → Vector Search → Life Story Generator → Conversation Engine → Knowledge Gap Detection → Enhanced Questions Widget → Personality Model → Memory Distillation → Legacy Access Control → Response Moderation → AI Response**
 
 ### Pipeline Components
 
@@ -83,11 +103,13 @@ The Legacy AI platform follows a comprehensive data processing pipeline that tra
 7. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
 8. **Life Story Generator**: Compiles chronological narratives from memories, creating cohesive life stories with key events and personality evolution
 9. **Conversation Engine**: Orchestrates memory retrieval, context building, and response generation
-10. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
-11. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
-12. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
-13. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
-14. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
+10. **Knowledge Gap Detection**: Identifies unknown people, incomplete memory fields, and missing context during open storytelling
+11. **Enhanced Questions Widget**: Displays pending follow-up prompts that users can answer asynchronously
+12. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
+13. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
+14. **Legacy Access Control**: Implements privacy and access controls for authorized beneficiaries
+15. **Response Moderation**: Ensures all AI responses remain appropriate, respectful, and safe for family interactions
+16. **AI Response**: Delivers personalized, contextually appropriate answers to user questions
 
 ### Data Flow Integration
 
@@ -98,6 +120,7 @@ The Legacy AI platform follows a comprehensive data processing pipeline that tra
 - **Vector search** provides fast, accurate memory retrieval for conversational context
 - **Memory distillation** transforms raw memories into actionable wisdom and life lessons
 - **Conversation engine** synthesizes multiple memory sources into coherent, personalized responses
+- **Knowledge gap detection** creates follow-up questions for the Enhanced Questions widget without interrupting active storytelling
 - **Legacy access control** ensures privacy protection and authorized beneficiary access
 - **Response moderation** filters and adjusts AI responses for safety and appropriateness
 
@@ -881,6 +904,7 @@ Query → ConversationEngine
        ├── MemoryEmbeddingService  (semantic search)
        ├── MemoryCaptureService    (full memory retrieval)
        ├── TimelineEngine          (chronological context)
+    ├── KnowledgeGapService     (follow-up questions)
        ├── PersonalityModelService (personality profile)
        ├── MemoryDistillationService (distilled wisdom)
        ├── LegacyAccessService     (access control)
@@ -911,15 +935,16 @@ Query → ConversationEngine
 | `test_memory_capture_service.py` | MemoryCaptureService | 6 |
 | `test_timeline_engine.py` | TimelineEngine | 5 |
 | `test_life_story_generator.py` | LifeStoryGenerator | 6 |
+| `test_knowledge_gap_service.py` | KnowledgeGapService (+ ConversationEngine trigger path) | 4 |
 | `test_legacy_access_service.py` | LegacyAccessService | 4 |
 | `test_response_moderation_service.py` | ResponseModerationService | 12 |
 
-**Total: 44 tests** (33 unit + 10 integration + 1 placeholder)
+**Total: 48 tests** (37 unit + 10 integration + 1 placeholder)
 
 ### Running Tests with Make
 
 ```bash
-make test        # Run all 44 tests with verbose output (uses pytest)
+make test        # Run all 48 tests with verbose output (uses pytest)
 make test-cov    # Run all tests with line-level coverage report
 ```
 
@@ -1040,6 +1065,7 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |       |-- ai
 |   |       |   |-- __init__.py
 |   |       |   |-- conversation_engine.py
+|   |       |   |-- knowledge_gap_service.py
 |   |       |   |-- life_story_generator.py
 |   |       |   |-- memory_distillation_service.py
 |   |       |   `-- personality_model_service.py
@@ -1056,12 +1082,14 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |       `-- security
 |   |           |-- __init__.py
 |   |           |-- legacy_access_service.py
+|   |       |   |-- knowledge_gap_service.py
 |   |           `-- response_moderation_service.py
 |   |-- config
 |   |   `-- __init__.py
 |   |-- tests
 |   |   |-- __init__.py
 |   |   |-- test_integration_pipeline.py
+|   |   |-- test_knowledge_gap_service.py
 |   |   |-- test_legacy_access_service.py
 |   |   |-- test_life_story_generator.py
 |   |   |-- test_memory_capture_service.py
@@ -1126,14 +1154,15 @@ Backend server code using Flask.
 - **app/api/family_interaction_api.py**: Family interaction API using FastAPI. Provides REST endpoints for asking questions to Legacy AI (/ask), browsing memories (/memories), exploring timelines (/timeline), and health checks. Integrates with ConversationEngine, LegacyAccessService, and ResponseModerationService for secure, moderated AI interactions.
 - **app/models/__init__.py**: Data models module. Placeholder for SQLAlchemy models like User and Memory.
 - **app/services/__init__.py**: Business logic services. Includes a sample service function for shared logic.
-- **app/services/ai/__init__.py**: Package initializer for AI services, exporting ConversationEngine.
-- **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, timeline, embedding, personality, distillation, and access control services to generate personalized responses to user queries based on stored memories, with placeholder for LLM integration.
+- **app/services/ai/__init__.py**: Package initializer for AI services, exporting conversation, personality, distillation, life story, and knowledge gap services.
+- **app/services/ai/conversation_engine.py**: Conversation engine for AI-powered interactions. Integrates memory capture, timeline, embedding, knowledge gap detection, personality, distillation, and access control services to generate personalized responses and enhanced follow-up questions based on stored memories.
+- **app/services/ai/knowledge_gap_service.py**: Knowledge gap detection service. Finds missing context in free-style conversation, generates follow-up prompts, stores pending/answered question records for the Enhanced Questions widget, and writes user answers back into linked memories.
 - **app/services/ai/life_story_generator.py**: Life story generator service. Compiles chronological narratives from memories, creates life stage summaries, extracts key events and lessons learned, and traces personality evolution across the lifespan. Integrates with timeline, personality, and distillation services to generate coherent biographical narratives suitable for family preservation and storytelling.
 - **app/services/ai/personality_model_service.py**: Personality modeling service. Analyzes memories to extract personality traits, beliefs, values, communication styles, and decision patterns, creating a comprehensive profile for authentic AI responses.
 - **app/services/ai/memory_distillation_service.py**: Memory distillation service. Extracts higher-level wisdom from memories including life lessons, advice, regrets, and guiding principles, providing distilled insights for wisdom-based conversations.
 - **app/services/interview/__init__.py**: Package initializer for interview services, exporting StructuredInterviewService.
 - **app/services/interview/structured_interview_service.py**: Structured interview service. Guides users through systematic interviews across life domains (childhood, education, career, relationships, failures, lessons, advice, beliefs) to capture comprehensive life experiences. Automatically converts responses to memory entries with interview metadata, improving personality modeling and memory distillation quality.
-- **app/services/memory_capture_service.py**: Memory capture service. Defines a Memory dataclass and MemoryCaptureService class for creating, updating, retrieving, and deleting memory entries with fields like title, description, timestamp, people_involved, location, emotions, and tags.
+- **app/services/memory_capture_service.py**: Memory capture service. Defines a Memory dataclass and MemoryCaptureService class for creating, updating, retrieving, and deleting memory entries with fields like title, description, timestamp, day_of_week, time_of_day, start_time, end_time, people_involved, location, emotions, and tags.
 - **app/services/timeline_engine.py**: Timeline engine. Organizes memories chronologically, groups them by life stages (childhood, education, career, retirement), and allows querying by date range or life stage using birth date for age calculations.
 - **app/services/memory/__init__.py**: Package initializer for memory services, exporting MemoryEmbeddingService and VectorStore.
 - **app/services/memory/memory_embedding_service.py**: Semantic memory search service. Generates embeddings from memory text using a placeholder model, stores them in a vector store, and performs similarity search for retrieving relevant memories based on queries.
@@ -1142,12 +1171,13 @@ Backend server code using Flask.
 - **app/services/security/legacy_access_service.py**: Legacy access control service. Manages posthumous access to memories with beneficiary registration, access levels (public, family, intimate), relationship verification, and authorization checks to ensure ethical memory sharing.
 - **app/services/security/response_moderation_service.py**: Response moderation service. Reviews all AI-generated responses before delivery to ensure appropriateness, safety, and respectfulness. Detects sensitive topics (violence, illegal activity, explicit content, self-harm), applies content filtering, and replaces inappropriate responses with safe alternatives. Designed for future integration with external AI moderation APIs.
 - **app/__init__.py**: Package initializer for the Flask app.
-- **app/main.py**: FastAPI application entry point. Loads environment variables, wires all platform services (MemoryCaptureService, TimelineEngine, MemoryEmbeddingService, ConversationEngine, LegacyAccessService, ResponseModerationService), mounts the Family Interaction API at `/api/v1`, and adds CORS middleware and a top-level `/health` endpoint. Consumed by `uvicorn backend.app.main:app --reload` locally and `uvicorn app.main:app` inside Docker.
+- **app/main.py**: FastAPI application entry point. Loads environment variables, wires all platform services (MemoryCaptureService, TimelineEngine, MemoryEmbeddingService, KnowledgeGapService, ConversationEngine, LegacyAccessService, ResponseModerationService), mounts the Family Interaction API at `/api/v1`, and adds CORS middleware and a top-level `/health` endpoint. Consumed by `uvicorn backend.app.main:app --reload` locally and `uvicorn app.main:app` inside Docker.
 - **config/__init__.py**: Configuration helpers. Provides default config values for database and JWT.
 - **tests/__init__.py**: Test package initializer.
 - **tests/test_memory_capture_service.py**: Unit tests for MemoryCaptureService (create, retrieve, update, delete, retrieve_all — 6 tests).
 - **tests/test_timeline_engine.py**: Unit tests for TimelineEngine (chronological sort, life stage grouping, date range query, life stage filter — 5 tests).
 - **tests/test_life_story_generator.py**: Unit tests for LifeStoryGenerator (LifeStory object shape, narrative compilation, stage summaries — 6 tests).
+- **tests/test_knowledge_gap_service.py**: Unit tests for KnowledgeGapService, including detection, question lifecycle, memory enrichment, and ConversationEngine trigger integration.
 - **tests/test_legacy_access_service.py**: Unit tests for LegacyAccessService (4 tests).
 - **tests/test_response_moderation_service.py**: Unit tests for ResponseModerationService (12 tests).
 - **tests/test_placeholder.py**: Placeholder test file for backend unit tests.

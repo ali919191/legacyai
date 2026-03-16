@@ -4,6 +4,7 @@ from ..timeline_engine import TimelineEngine
 from ..memory.memory_embedding_service import MemoryEmbeddingService
 from .personality_model_service import PersonalityProfile
 from .memory_distillation_service import MemoryDistillationService, DistilledInsight
+from .knowledge_gap_service import KnowledgeGapService
 from ..security.legacy_access_service import LegacyAccessService, MemoryMetadata
 from ..security.response_moderation_service import ResponseModerationService
 
@@ -30,6 +31,7 @@ class ConversationEngine:
         embedding_service: MemoryEmbeddingService,
         personality_profile: Optional[PersonalityProfile] = None,
         distillation_service: Optional[MemoryDistillationService] = None,
+        knowledge_gap_service: Optional[KnowledgeGapService] = None,
         access_service: Optional[LegacyAccessService] = None,
         moderation_service: Optional[ResponseModerationService] = None
     ):
@@ -42,6 +44,7 @@ class ConversationEngine:
             embedding_service: Instance of MemoryEmbeddingService for semantic search.
             personality_profile: Optional PersonalityProfile for personalized responses.
             distillation_service: Optional MemoryDistillationService for wisdom insights.
+            knowledge_gap_service: Optional KnowledgeGapService for missing-context follow-up questions.
             access_service: Optional LegacyAccessService for access control and privacy.
             moderation_service: Optional ResponseModerationService for response safety.
         """
@@ -50,6 +53,7 @@ class ConversationEngine:
         self.embedding_service = embedding_service
         self.personality_profile = personality_profile
         self.distillation_service = distillation_service
+        self.knowledge_gap_service = knowledge_gap_service
         self.access_service = access_service
         self.moderation_service = moderation_service
 
@@ -121,18 +125,29 @@ class ConversationEngine:
             relevant_insights = self._get_relevant_insights(user_query, relevant_memories)
             context['distilled_insights'] = [insight.to_dict() for insight in relevant_insights]
 
-        # Step 6: Construct prompt and generate response
+        # Step 6: Detect knowledge gaps and create follow-up questions for widget display.
+        generated_question_records = []
+        if self.knowledge_gap_service:
+            gap_context = self.knowledge_gap_service.detect_missing_context(user_query)
+            followup_questions = self.knowledge_gap_service.generate_followup_questions(gap_context)
+            for question in followup_questions:
+                question["user_id"] = user_id or "anonymous"
+                generated_question_records.append(
+                    self.knowledge_gap_service.store_question(question)
+                )
+
+        # Step 7: Construct prompt and generate response
         prompt = self._construct_prompt(user_query, context)
         response = self._generate_ai_response(prompt)
 
-        # Step 7: Review response through moderation layer (if available)
+        # Step 8: Review response through moderation layer (if available)
         moderation_result = None
         if self.moderation_service:
             moderated_response = self.moderation_service.adjust_response_if_needed(response)
             moderation_result = self.moderation_service.review_response(response)
             response = moderated_response
 
-        # Step 8: Calculate confidence based on similarity scores and insights
+        # Step 9: Calculate confidence based on similarity scores and insights
         confidence = self._calculate_confidence(similar_memories, relevant_insights)
 
         return {
@@ -141,8 +156,24 @@ class ConversationEngine:
             'insights_used': [insight.insight_text for insight in relevant_insights],
             'confidence_score': confidence,
             'access_denied': access_denied,
-            'moderation': moderation_result
+            'moderation': moderation_result,
+            'enhanced_questions': generated_question_records,
         }
+
+    def answer_enhanced_question(
+        self,
+        question_id: str,
+        answer_text: str,
+        memory_updates: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Answer a stored enhanced question and enrich the related memory."""
+        if not self.knowledge_gap_service:
+            return None
+        return self.knowledge_gap_service.answer_question(
+            question_id=question_id,
+            answer_text=answer_text,
+            memory_updates=memory_updates,
+        )
 
     def _build_context(self, memories: List[Memory], chronological: List[Memory]) -> Dict[str, Any]:
         """
