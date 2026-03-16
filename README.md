@@ -2,6 +2,91 @@
 
 Legacy AI is a platform designed to capture and preserve life experiences as structured memories, enabling family members to interact with an AI representation of their loved one after they pass away.
 
+## Table of Contents
+
+- [End-to-End Architecture Overview](#end-to-end-architecture-overview)
+- [Features](#features)
+- [Current Implementation Status](#current-implementation-status)
+- [Recent Implementation Changes (What Was Actually Added)](#recent-implementation-changes-what-was-actually-added)
+- [Project Biography (How the System Became Operational)](#project-biography-how-the-system-became-operational)
+- [Scalable Memory Storage Architecture](#scalable-memory-storage-architecture)
+- [System Pipeline](#system-pipeline)
+- [System Architecture Diagram](#system-architecture-diagram)
+- [Repository Directory Tree](#repository-directory-tree)
+- [Conversation Engine](#conversation-engine)
+- [Testing](#testing)
+- [Code Quality and Testing](#code-quality-and-testing)
+- [Project Structure](#project-structure)
+- [Running the Legacy AI Platform](#running-the-legacy-ai-platform)
+- [Getting Started](#getting-started)
+- [Contributing](#contributing)
+- [License](#license)
+
+## End-to-End Architecture Overview
+
+```mermaid
+flowchart TB
+    subgraph Clients
+        WEB[Web UI / Frontend]
+        APIUSER[Family Member / Beneficiary]
+    end
+
+    subgraph Edge
+        FASTAPI[Family Interaction API\nFastAPI]
+    end
+
+    subgraph CoreMicroservices
+        CONV[ConversationEngine]
+        MEMCAP[MemoryCaptureService]
+        EMBED[MemoryEmbeddingService]
+        PROFILE[PersonProfileService]
+        REL[RelationshipService]
+        RECIP[RecipientContextService]
+        DISTILL[MemoryDistillationService]
+        WISDOM[WisdomEngine]
+        GROUND[MemoryGroundingService]
+        PRIORITY[MemoryPriorityService]
+        TIMELINE[TimelineEngine]
+        EPISODE[EpisodeService]
+        ACCESS[LegacyAccessService]
+        MOD[ResponseModerationService]
+    end
+
+    subgraph DataLayer
+        DOCDB[(Document DB\nPostgreSQL JSONB)]
+        VECTORDB[(Vector DB\npgvector / Pinecone)]
+        GRAPHDB[(Graph DB\nNeo4j)]
+    end
+
+    subgraph Platform
+        DOCKER[Docker Compose]
+        ENV[Environment Config\nbackend/config/database_config.py]
+    end
+
+    APIUSER --> WEB --> FASTAPI --> CONV
+    CONV --> PRIORITY --> GROUND
+    CONV --> RECIP
+    CONV --> DISTILL --> WISDOM
+    CONV --> TIMELINE --> EPISODE
+    CONV --> ACCESS --> MOD
+
+    MEMCAP --> DOCDB
+    EMBED --> VECTORDB
+    PROFILE --> GRAPHDB
+    REL --> GRAPHDB
+
+    CONV --> MEMCAP
+    CONV --> EMBED
+    CONV --> PROFILE
+    CONV --> REL
+
+    DOCKER --> FASTAPI
+    ENV --> FASTAPI
+    ENV --> DOCDB
+    ENV --> VECTORDB
+    ENV --> GRAPHDB
+```
+
 ## Features
 
 - **Structured Memory Storage**: Memories stored with rich metadata — life stage, emotional tone, people, locations, timestamps, and temporal context (day of week, time of day, start/end time).
