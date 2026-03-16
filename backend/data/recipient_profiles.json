@@ -1,0 +1,18 @@
+{
+  "child_01": {
+    "user_id": "child_01",
+    "name": "Omid",
+    "relationship_to_user": "son",
+    "age": 10,
+    "age_bucket": "child",
+    "maturity_level": "child",
+    "topic_preferences": [],
+    "known_children": [],
+    "interaction_history": [
+      {
+        "timestamp": "2026-03-16T23:00:10.798593+00:00",
+        "event": "profile_created"
+      }
+    ]
+  }
+}

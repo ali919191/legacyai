@@ -4,31 +4,29 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 
 ## Features
 
-- **Life Experience Capture**: Guided structured interviews and free-form tools to record personal stories across all life domains.
 - **Structured Memory Storage**: Memories stored with rich metadata — life stage, emotional tone, people, locations, timestamps, and temporal context (day of week, time of day, start/end time).
 - **Media Memory Service**: Attach photos, audio recordings, and video clips to memory entries.
-- **Timeline Engine**: Organize memories chronologically and by life stage (childhood, education, career, retirement).
-- **Episodic Memory System**: Groups related memories into meaningful life episodes using shared tags and time-period proximity.
-- **Semantic Search**: Vector embeddings enable natural-language queries to find the most relevant memories instantly.
-- **Life Story Generator**: Compiles chronological biographical narratives with key events, themes, and personality evolution.
-- **Conversation Engine**: Orchestrates memory retrieval and context building to generate personalized AI responses.
+3. **Priority + Grounding**: Re-ranks and validates retrieved memories before generation
+4. **Recipient Context**: Injects relationship, age, age bucket, and maturity-level guidance
+5. **Insight Extraction**: Retrieves distilled wisdom and life lessons relevant to the query
+6. **Prompt Construction**: Creates prompts using memory evidence plus recipient/personality context
+7. **Response Generation**: Generates conversational responses (currently placeholder)
+8. **Confidence Calculation**: Computes response confidence based on similarity scores and insight quality
 - **Memory Importance & Emotional Weighting**: Prioritizes retrieved memories using life importance, emotional intensity, and recency.
 - **Memory Grounding**: Forces responses to stay anchored to retrieved memory evidence and returns a safe fallback when evidence is missing.
-- **Wisdom Engine**: Converts lived experiences into lessons, recurring principles, and practical advice for guidance-oriented questions.
-- **Recipient Context Engine**: Tailors responses using recipient relationship and age to provide maturity-appropriate explanations.
-- **Knowledge Gap Detection**: Detects missing details during free-style storytelling and prepares follow-up prompts.
 - **Enhanced Questions Widget Support**: Stores pending follow-up questions users can answer later to enrich memory records.
 - **Person Profile System**: Tracks people mentioned in memories and conversations so the AI can reason about relationships over time.
-- **Relationship Graph**: Tracks links between people (family, colleagues, mentors, introductions, friendships) from memories and conversations.
 - **Minimal Chat Interface**: Provides a simple frontend for asking questions, reviewing referenced memories, and resolving enhanced follow-up prompts.
+- **MemoryPriorityService**: Re-ranks memories by importance, emotional weight, and recency
+- **MemoryGroundingService**: Constrains prompt content to validated memory evidence
+- **RecipientContextService**: Adds relationship + age-bucket context and sensitive-topic adaptation
 - **Personality Modeling**: Analyzes memory patterns to build authentic personality profiles for realistic interactions.
 - **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories.
+
 - **Secure Posthumous Access**: Role-based access controls (guardian, spouse, child, extended family, friend) for designated beneficiaries.
-- **Response Moderation**: Automatic filtering to ensure all AI responses remain respectful, safe, and appropriate.
 - **Family Interaction API**: REST endpoints for querying memories, browsing timelines, and conversing with the AI persona.
 - **Containerised Deployment**: Docker Compose setup with PostgreSQL and Qdrant vector database for one-command local deployment.
 - **CI/CD Pipeline**: GitHub Actions runs black, ruff, mypy, and pytest across Python 3.9 / 3.10 / 3.11 on every push.
-
 ## Current Implementation Status
 
 This repository is in an active build phase: the architecture is documented in detail, and a growing subset of services is already implemented and wired together.
@@ -297,31 +295,55 @@ Integration behavior:
 - **ConversationEngine** detects advice-oriented questions and switches to wisdom-based advice generation when relevant memories exist
 - if no relevant memories are available, the grounding fallback still applies: `"I don't remember that clearly."`
 
-## Recipient Context Engine
+## Recipient Context & Age Buckets
 
-The platform now includes a **RecipientContextService** so responses can adapt to who is asking the question.
+The platform now includes an **age-aware RecipientContextService** so responses adapt to who is asking and how old they are.
 
 Recipient profile fields:
 
 - `user_id`
 - `name`
-- `relationship` (`son`, `daughter`, `friend`, `spouse`)
+- `relationship_to_user` (`son`, `daughter`, `friend`, `spouse`)
 - `age`
+- `age_bucket`
 - `maturity_level`
 - `topic_preferences`
+- `known_children`
+- `interaction_history`
 
 Core methods:
 
-- `create_recipient_profile(user_id, name, relationship, age)`
+- `create_recipient_profile(user_id, name, relationship)`
 - `update_recipient_profile(user_id, details)`
 - `retrieve_recipient_profile(user_id)`
+- `determine_age_bucket(age)`
 - `determine_maturity_level(age)`
+- `extract_family_profiles_from_conversation(conversation_text)`
+
+Age buckets:
+
+- `0-7 -> young_child`
+- `8-12 -> child`
+- `13-17 -> teenager`
+- `18-25 -> young_adult`
+- `26-40 -> adult`
+- `40+ -> mature_adult`
 
 Conversation integration behavior:
 
 - every question now includes recipient context in prompt construction
-- example context: "The question is asked by the user's son who is 10 years old. Adjust explanations accordingly."
-- for younger recipients (`child` / `teen`), sensitive topics are simplified; for children with sensitive memories, details are filtered into a safe high-level summary
+- prompt context includes relationship, age, and age bucket
+- example context: "The question is asked by the user's son who is 10 years old (age bucket: child). Adjust explanations accordingly."
+- for younger age buckets (`young_child`, `child`, `teenager`), sensitive topics are simplified or filtered
+
+Automatic family profile extraction:
+
+- statements like "I have two children, one is 10 and the other is 15" are parsed to auto-create child recipient profiles
+- extracted profiles are persisted with correct age buckets and interaction history
+
+Data store:
+
+- recipient profiles are persisted in `backend/data/recipient_profiles.json`
 
 ## Enhanced Questions System
 
@@ -426,7 +448,7 @@ Example memory payload:
 
 The Legacy AI platform follows a comprehensive data processing pipeline that transforms personal stories into meaningful AI interactions:
 
-**Family Interaction API → Structured Interview → Memory Capture → Person Profile System → Relationship Graph → Media Memory Service → Timeline Engine → Episodic Memory System → Memory Embeddings → Vector Search → Memory Importance & Emotional Weighting → Memory Grounding → Recipient Context Engine → Personality Model → Memory Distillation → Wisdom Engine → Conversation Engine → Life Story Generator → Knowledge Gap Detection → Enhanced Questions Widget → Legacy Access Control → Response Moderation → AI Response**
+**Family Interaction API → Structured Interview → Memory Capture → Person Profile System → Relationship Graph → Media Memory Service → Timeline Engine → Episodic Memory System → Memory Embeddings → Vector Search → Memory Importance & Emotional Weighting → Memory Grounding → Recipient Context & Age Buckets → Personality Model → Memory Distillation → Wisdom Engine → Conversation Engine → Life Story Generator → Knowledge Gap Detection → Enhanced Questions Widget → Legacy Access Control → Response Moderation → AI Response**
 
 ## System Architecture Diagram
 
@@ -444,7 +466,7 @@ flowchart LR
     VECTOR[Vector Search]
     PRIORITY[MemoryPriorityService]
     GROUNDING[MemoryGroundingService]
-    RECIPIENT[RecipientContextService]
+    RECIPIENT[RecipientContextService: Age Buckets]
     WISDOM[WisdomEngine]
     STORY[LifeStoryGenerator]
     CONVO[ConversationEngine]
@@ -487,7 +509,7 @@ flowchart LR
 10. **Vector Search**: Finds semantically similar memories using cosine similarity and embedding matching
 11. **Memory Importance & Emotional Weighting**: Reorders retrieved memories by combining importance, emotional intensity, and recency
 12. **Memory Grounding**: Validates retrieved memory sources and creates strict evidence-bound prompts to reduce hallucinations
-13. **Recipient Context Engine**: Models recipient age and relationship to tailor explanation depth and phrasing
+13. **Recipient Context & Age Buckets**: Models relationship, age, and age bucket, and auto-detects family profiles from conversation text
 14. **Personality Model**: Analyzes memory patterns to create authentic personality profiles for personalized responses
 15. **Memory Distillation**: Extracts higher-level wisdom, life lessons, and guidance from raw memories
 16. **Wisdom Engine**: Identifies repeated life patterns and transforms lessons into actionable principles and advice
@@ -509,7 +531,7 @@ flowchart LR
 - **Semantic embeddings** enable natural language queries to find relevant experiences
 - **Memory priority ranking** promotes high-importance and emotionally significant memories before prompt construction
 - **Memory grounding** prevents unsupported details by constraining generation to validated memory packets
-- **Recipient context adaptation** adjusts detail depth and safety handling based on recipient age and relationship
+- **Recipient context adaptation** adjusts detail depth and safety handling based on recipient age, relationship, and age bucket
 - **Wisdom extraction** turns concrete experiences into reusable principles for advice-oriented responses
 - **Vector store** persists embeddings locally as JSON (development) or in a scalable vector database (production)
 - **Vector search** provides fast, accurate memory retrieval for conversational context
@@ -523,6 +545,8 @@ flowchart LR
 
 ```text
 backend/
+    data/
+        recipient_profiles.json
     app/
         main.py
         services/
@@ -605,7 +629,7 @@ Backend service layer (FastAPI application path plus a legacy Flask app entrypoi
 
 The Personality Modeling Engine analyzes stored memories to build comprehensive personality profiles that capture the authentic character, values, and behavioral patterns of the individual. This enables the Conversation Engine to generate responses that reflect the person's true personality.
 
-- **app/services/ai/recipient_context_service.py**: Recipient context service. Stores recipient profiles (name, relationship, age, maturity level, topic preferences) so responses can be tailored to who is asking and how mature the explanation should be.
+- **app/services/ai/recipient_context_service.py**: Recipient context service. Stores recipient profiles (relationship_to_user, age, age_bucket, maturity_level, topic_preferences, known_children, interaction_history), extracts child profiles from conversation text, and persists data to `backend/data/recipient_profiles.json`.
 ### Key Features
 
 - **Trait Analysis**: Identifies personality traits through keyword analysis and pattern recognition
@@ -1366,19 +1390,19 @@ Query → ConversationEngine
 | `test_memory_grounding_service.py` | MemoryGroundingService (+ ConversationEngine fallback integration) | 4 |
 | `test_memory_priority_service.py` | MemoryPriorityService (+ ConversationEngine ranking integration) | 4 |
 | `test_wisdom_engine.py` | WisdomEngine (+ MemoryDistillationService and ConversationEngine advice integration) | 4 |
-| `test_recipient_context_service.py` | RecipientContextService (+ ConversationEngine age-aware filtering integration) | 4 |
+| `test_recipient_context_service.py` | RecipientContextService (+ age buckets, family extraction, and ConversationEngine age-aware filtering integration) | 5 |
 | `test_timeline_engine.py` | TimelineEngine | 5 |
 | `test_life_story_generator.py` | LifeStoryGenerator | 6 |
 | `test_knowledge_gap_service.py` | KnowledgeGapService (+ ConversationEngine trigger path) | 4 |
 | `test_legacy_access_service.py` | LegacyAccessService | 4 |
 | `test_response_moderation_service.py` | ResponseModerationService | 12 |
 
-**Total: 80 tests** (69 unit + 10 integration + 1 placeholder)
+**Total: 81 tests** (70 unit + 10 integration + 1 placeholder)
 
 ### Running Tests with Make
 
 ```bash
-make test        # Run all 80 tests with verbose output (uses pytest)
+make test        # Run all 81 tests with verbose output (uses pytest)
 make test-cov    # Run all tests with line-level coverage report
 ```
 
@@ -1484,6 +1508,7 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |-- Dockerfile
 |   |-- data
 |   |   `-- sample_memories.json
+|   |   `-- recipient_profiles.json
 |   |-- app
 |   |   |-- __init__.py
 |   |   |-- main.py
@@ -1609,6 +1634,7 @@ AI-related components and resources.
 Backend service layer using FastAPI as the main runtime path, with a legacy Flask entrypoint retained for compatibility.
 - **app.py**: Main Flask application file with routes for login, memories, and database setup.
 - **requirements.txt**: Python dependencies for the backend.
+- **data/recipient_profiles.json**: Persistent JSON datastore for recipient profiles used by RecipientContextService (age buckets, maturity, topic preferences, interaction history).
 - **app/api/__init__.py**: API endpoints module. Contains a sample health check route and setup for additional Blueprints.
 - **app/api/family_interaction_api.py**: Family interaction API using FastAPI. Provides REST endpoints for asking questions to Legacy AI (`/ask`), browsing memories (`/memories`), exploring timelines (`/timeline`), listing pending enhanced questions, answering follow-up prompts, and running health checks. Integrates with ConversationEngine, KnowledgeGapService, LegacyAccessService, and ResponseModerationService for secure, moderated AI interactions.
 - **app/models/__init__.py**: Data models module. Placeholder for SQLAlchemy models like User and Memory.

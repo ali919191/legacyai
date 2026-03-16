@@ -136,7 +136,14 @@ class ConversationEngine:
             memory_priority = self.memory_priority_service.rank_memories(relevant_memories)
             relevant_memories = [item["memory"] for item in memory_priority]
 
-        # Step 3b: Resolve recipient context so every response is recipient-aware.
+        # Step 3b: Extract family profiles from conversation and resolve recipient context.
+        extracted_family_profiles: List[Dict[str, Any]] = []
+        if self.recipient_context_service:
+            extracted_family_profiles = self.recipient_context_service.extract_family_profiles_from_conversation(
+                user_query
+            )
+
+        # Step 3c: Resolve recipient context so every response is recipient-aware.
         recipient_profile = self._resolve_recipient_profile(user_id)
         recipient_context_text = self._build_recipient_context_text(recipient_profile)
 
@@ -259,6 +266,7 @@ class ConversationEngine:
             'moderation': moderation_result,
             'enhanced_questions': generated_question_records,
             'recipient_context': recipient_profile,
+            'extracted_family_profiles': extracted_family_profiles,
         }
 
     def _is_advice_oriented_query(self, user_query: str) -> bool:
@@ -582,20 +590,24 @@ Please answer the question using these memories. Be conversational and authentic
         return {
             "user_id": user_id or "unknown",
             "name": "recipient",
-            "relationship": "unknown",
+            "relationship_to_user": "unknown",
             "age": 30,
+            "age_bucket": "adult",
             "maturity_level": "adult",
             "topic_preferences": [],
+            "known_children": [],
+            "interaction_history": [],
         }
 
     def _build_recipient_context_text(self, recipient_profile: Dict[str, Any]) -> str:
         """Build prompt instruction with recipient relationship and maturity context."""
-        relationship = recipient_profile.get("relationship", "unknown")
+        relationship = recipient_profile.get("relationship_to_user", "unknown")
         age = recipient_profile.get("age", "unknown")
+        age_bucket = recipient_profile.get("age_bucket", "adult")
         maturity = recipient_profile.get("maturity_level", "adult")
         return (
             f"The question is asked by the user's {relationship} who is {age} years old "
-            f"(maturity level: {maturity}). Adjust explanations accordingly."
+            f"(age bucket: {age_bucket}, maturity level: {maturity}). Adjust explanations accordingly."
         )
 
     def _apply_recipient_safety(
@@ -605,8 +617,9 @@ Please answer the question using these memories. Be conversational and authentic
         relevant_memories: List[Memory],
     ) -> str:
         """Simplify or filter sensitive topics for younger recipients."""
+        age_bucket = recipient_profile.get("age_bucket", "adult")
         maturity_level = recipient_profile.get("maturity_level", "adult")
-        is_young = maturity_level in {"child", "teen"}
+        is_young = age_bucket in {"young_child", "child", "teenager"} or maturity_level in {"child", "teen"}
         if not is_young:
             return response
 
@@ -616,16 +629,16 @@ Please answer the question using these memories. Be conversational and authentic
             for memory in relevant_memories
         )
 
-        if maturity_level == "child" and has_sensitive_memory:
+        if age_bucket in {"young_child", "child"} and has_sensitive_memory:
             return (
                 "I'll keep this simple and safe: this topic is important, but some details are best "
                 "shared when you're older."
             )
 
-        if maturity_level == "child":
+        if age_bucket in {"young_child", "child"}:
             return "Here is a simple version: " + response
 
-        if maturity_level == "teen" and has_sensitive_memory:
+        if age_bucket == "teenager" and has_sensitive_memory:
             return "Here is a careful summary: " + response
 
         return response
