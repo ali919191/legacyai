@@ -47,6 +47,7 @@ The Legacy AI platform follows a comprehensive data processing pipeline that tra
 - **Interview responses** automatically become **structured memories** with rich metadata
 - **Timeline context** enhances memory relevance by considering chronological relationships
 - **Semantic embeddings** enable natural language queries to find relevant experiences
+- **Vector store** persists embeddings locally as JSON (development) or in a scalable vector database (production)
 - **Vector search** provides fast, accurate memory retrieval for conversational context
 - **Memory distillation** transforms raw memories into actionable wisdom and life lessons
 - **Conversation engine** synthesizes multiple memory sources into coherent, personalized responses
@@ -578,6 +579,185 @@ print(response['generated_answer'])  # Safe response if original was inappropria
 - **User Feedback Integration**: Learning from user reports to improve detection
 - **Contextual Analysis**: Understanding intent and context beyond keyword matching
 - **Real-Time Updates**: Dynamic keyword lists and pattern updates
+
+## Vector Memory Storage
+
+The vector memory storage subsystem is responsible for persisting and searching the numerical embedding representations of every memory entry. It is implemented across two files:
+
+- [`backend/app/services/memory/vector_store.py`](backend/app/services/memory/vector_store.py) — low-level storage and cosine-similarity search
+- [`backend/app/services/memory/memory_embedding_service.py`](backend/app/services/memory/memory_embedding_service.py) — embedding generation and the public API consumed by the Conversation Engine
+
+### How Embeddings Are Generated
+
+`MemoryEmbeddingService` converts memory text into a fixed-length numerical vector:
+
+```python
+# Current placeholder — seeds random.uniform with hash(text) for repeatable output
+EMBEDDING_DIMENSION = 384   # matches common BERT-style model output size
+
+def generate_embedding(self, text: str) -> List[float]:
+    random.seed(hash(text))
+    return [random.uniform(-1, 1) for _ in range(self.EMBEDDING_DIMENSION)]
+```
+
+The 384-dimension size mirrors the output of lightweight sentence-transformer models (e.g. `all-MiniLM-L6-v2`) so the interface requires no changes when the placeholder is replaced with a real model.
+
+When a memory is saved, the caller invokes:
+
+```python
+embedding_service.store_memory_embedding(memory_id, title + " " + description)
+```
+
+This generates the vector and delegates storage to `VectorStore`.
+
+### How Embeddings Are Stored (Current — JSON)
+
+`VectorStore` keeps all vectors in a Python `dict` that is flushed to a JSON file on every write:
+
+```
+memory_embeddings.json
+{
+  "mem_001": [0.12, -0.47, 0.83, ...],   // 384 floats
+  "mem_002": [0.05,  0.91, -0.34, ...],
+  ...
+}
+```
+
+**Operation summary**
+
+| Operation | Method | Description |
+|---|---|---|
+| Add | `add_embedding(id, vector)` | Stores vector, flushes JSON to disk |
+| Search | `search(query_vector, top_k=5)` | Brute-force cosine similarity across all stored vectors |
+| Update | `add_embedding(id, vector)` | Overwrites by key, flushes JSON |
+| Delete | `remove_embedding(id)` | Removes key, flushes JSON |
+| Retrieve | `get_embedding(id)` | Returns vector by ID |
+
+The brute-force cosine scan is suitable for development and small datasets (< ~10 000 memories). For larger corpora the vector store should be swapped for an indexed solution (see below).
+
+### Cosine Similarity Search
+
+Similarity between the query vector $\mathbf{q}$ and each stored vector $\mathbf{v}$ is computed as:
+
+$$\text{sim}(\mathbf{q}, \mathbf{v}) = \frac{\mathbf{q} \cdot \mathbf{v}}{\|\mathbf{q}\| \cdot \|\mathbf{v}\|}$$
+
+All stored vectors are scored, sorted descending, and the top-$k$ results are returned with their scores. The Conversation Engine uses the top-5 results by default.
+
+### Production Vector Storage Options
+
+The `VectorStore` class is intentionally thin — replacing it requires only updating `MemoryEmbeddingService.__init__` to construct a different backend while keeping the `add_embedding`, `search`, `remove_embedding`, and `get_embedding` interface unchanged.
+
+#### pgvector (PostgreSQL extension)
+
+```python
+# psycopg2 + pgvector extension
+import psycopg2
+from pgvector.psycopg2 import register_vector
+
+conn = psycopg2.connect(DATABASE_URL)
+register_vector(conn)
+
+# Store
+cur.execute("INSERT INTO memory_embeddings (id, embedding) VALUES (%s, %s)",
+            (memory_id, embedding))
+
+# Search (IVFFlat index for approximate nearest-neighbour)
+cur.execute("""
+    SELECT id, 1 - (embedding <=> %s::vector) AS score
+    FROM memory_embeddings
+    ORDER BY embedding <=> %s::vector
+    LIMIT %s
+""", (embedding, embedding, top_k))
+```
+
+**Best for**: teams already running PostgreSQL (the project's `docker-compose.yml` includes a PostgreSQL 15 container). No additional infrastructure needed — install the `pgvector` extension and add an `IVFFlat` or `HNSW` index for fast approximate search.
+
+#### Pinecone (managed cloud)
+
+```python
+from pinecone import Pinecone
+
+pc = Pinecone(api_key=PINECONE_API_KEY)
+index = pc.Index("legacyai-memories")
+
+# Store
+index.upsert(vectors=[(memory_id, embedding, {"user_id": user_id})])
+
+# Search with metadata filter
+results = index.query(vector=query_embedding, top_k=5,
+                      filter={"user_id": {"$eq": user_id}})
+```
+
+**Best for**: serverless or cloud-native deployments where operational simplicity matters. Supports metadata filtering, namespace isolation per user, and scales to billions of vectors without self-managed infrastructure.
+
+#### Weaviate (open-source / cloud)
+
+```python
+import weaviate
+
+client = weaviate.connect_to_local()  # or weaviate.connect_to_wcs()
+collection = client.collections.get("Memory")
+
+# Store
+collection.data.insert({"memory_id": memory_id, "user_id": user_id},
+                        vector=embedding)
+
+# Search
+result = collection.query.near_vector(near_vector=query_embedding, limit=5)
+```
+
+**Best for**: projects that want GraphQL-style queries, built-in multi-tenancy, and hybrid (keyword + vector) search. Can be self-hosted (add a `weaviate` service to `docker-compose.yml`) or used as a managed cloud service.
+
+### Comparison Matrix
+
+| Feature | JSON (current) | pgvector | Pinecone | Weaviate |
+|---|---|---|---|---|
+| Infrastructure | None | PostgreSQL | Managed SaaS | Self-hosted / SaaS |
+| Max practical scale | ~10 k vectors | ~10 M vectors | Billions | ~100 M vectors |
+| ANN index | No (brute force) | IVFFlat / HNSW | Managed | HNSW |
+| Metadata filtering | No | SQL `WHERE` | Yes | Yes |
+| Multi-tenancy | No | Schema-level | Namespaces | Native |
+| Existing infra overlap | — | Reuses Postgres container | None | Add new container |
+| Migration effort | — | Low | Medium | Medium |
+
+### How MemoryEmbeddingService Integrates
+
+`MemoryEmbeddingService` is the only component that talks to `VectorStore`. All other services go through `MemoryEmbeddingService`:
+
+```
+MemoryCaptureService  ──store──►  MemoryEmbeddingService  ──add_embedding──►  VectorStore / backend DB
+                                                          ◄──search────────
+ConversationEngine    ──query──►  MemoryEmbeddingService
+```
+
+To swap in a production backend:
+
+1. Implement a new class (e.g. `PgVectorStore`) with the same four methods as `VectorStore`.
+2. Replace `self.vector_store = VectorStore(...)` in `MemoryEmbeddingService.__init__` with the new class.
+3. Replace `generate_embedding` with a real model call (OpenAI `text-embedding-3-small` or `sentence-transformers`).
+4. No other files need to change.
+
+### Replacing the Placeholder Embedding Model
+
+For real semantic search, replace the random-vector placeholder with one of:
+
+```python
+# Option A — OpenAI (API key required)
+from openai import OpenAI
+client = OpenAI()
+def generate_embedding(self, text: str) -> List[float]:
+    return client.embeddings.create(
+        input=text, model="text-embedding-3-small"
+    ).data[0].embedding  # 1 536-dim
+
+# Option B — sentence-transformers (fully local, no API key)
+from sentence_transformers import SentenceTransformer
+_model = SentenceTransformer("all-MiniLM-L6-v2")
+def generate_embedding(self, text: str) -> List[float]:
+    return _model.encode(text).tolist()  # 384-dim — matches EMBEDDING_DIMENSION
+```
+
+Option B requires no external service and keeps `EMBEDDING_DIMENSION = 384` unchanged, making it the lowest-friction upgrade path.
 
 ## Upcoming Components
 
