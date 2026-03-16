@@ -770,7 +770,7 @@ The following systems are planned for future development to enhance the Legacy A
 
 ## Testing
 
-The Legacy AI platform includes comprehensive unit tests to ensure system reliability and behavior verification.
+The Legacy AI platform has two testing layers: **unit tests** that verify individual services in isolation, and **integration tests** that exercise the complete AI reasoning pipeline end-to-end. Both layers log human-readable summaries to `tests.log`.
 
 ### Test Logging System
 
@@ -810,20 +810,54 @@ The `tests.log` file serves several important purposes:
 ### Running Tests
 
 ```bash
-# Run all tests (generates tests.log)
-PYTHONPATH=backend python -m unittest discover -s backend/tests -p "test_*.py"
+# Run all tests with pytest (recommended)
+python3 -m pytest backend/tests/ -v
 
-# Run specific test file
-PYTHONPATH=backend python -m unittest backend.tests.test_legacy_access_service
+# Run only unit tests
+python3 -m pytest backend/tests/ -v --ignore=backend/tests/test_integration_pipeline.py
 
-# Run with verbose output
-PYTHONPATH=backend python -m unittest discover -s backend/tests -p "test_*.py" -v
+# Run only integration tests
+python3 -m pytest backend/tests/test_integration_pipeline.py -v
 
-# View recent test results
-tail -50 tests.log
+# View recent test log entries
+tail -60 tests.log
 ```
 
 ### Test Coverage
+
+#### Integration Tests (`test_integration_pipeline.py`)
+
+The integration test suite verifies the full end-to-end reasoning pipeline — the same path taken by a request to the `/api/v1/ask` endpoint:
+
+```
+Query → ConversationEngine
+       ├── MemoryEmbeddingService  (semantic search)
+       ├── MemoryCaptureService    (full memory retrieval)
+       ├── TimelineEngine          (chronological context)
+       ├── PersonalityModelService (personality profile)
+       ├── MemoryDistillationService (distilled wisdom)
+       ├── LegacyAccessService     (access control)
+       └── ResponseModerationService (safety review)
+              ↓
+          AskResponse { generated_answer, memories_used,
+                    insights_used, confidence_score,
+                    access_denied, moderation }
+```
+
+| Test | What it verifies |
+|---|---|
+| `test_ask_returns_required_response_keys` | Response always contains all mandatory keys with correct types |
+| `test_memories_used_references_seeded_memory_ids` | `memories_used` IDs are a subset of stored memory IDs |
+| `test_confidence_score_within_valid_range` | `confidence_score` is a float in `[0.0, 1.0]` |
+| `test_pipeline_with_personality_model_integration` | `PersonalityModelService` builds a profile without breaking the pipeline |
+| `test_pipeline_with_memory_distillation_integration` | `MemoryDistillationService` populates `insights_used` |
+| `test_moderation_does_not_block_safe_response` | `ResponseModerationService` passes ordinary memory responses |
+| `test_authorised_beneficiary_can_retrieve_public_memories` | Child beneficiary can access memories — `access_denied` is False |
+| `test_pipeline_handles_empty_memory_store_gracefully` | Empty store returns valid response with `memories_used = []` |
+| `test_timeline_engine_provides_chronological_context` | `TimelineEngine` returns memories in ascending timestamp order |
+| `test_full_stack_all_services_active` | All six optional services active simultaneously — full contract satisfied |
+
+#### Unit Tests
 
 | Test File | Service | Tests |
 |---|---|---|
@@ -833,13 +867,13 @@ tail -50 tests.log
 | `test_legacy_access_service.py` | LegacyAccessService | 4 |
 | `test_response_moderation_service.py` | ResponseModerationService | 12 |
 
-**Total: 33 tests**
+**Total: 44 tests** (33 unit + 10 integration + 1 placeholder)
 
 ### Running Tests with Make
 
 ```bash
-make test        # Run all tests with verbose output
-make test-cov    # Run tests with coverage report
+make test        # Run all 44 tests with verbose output (uses pytest)
+make test-cov    # Run all tests with line-level coverage report
 ```
 
 ## Code Quality and Testing
@@ -978,6 +1012,7 @@ Code quality tool configurations are defined in `pyproject.toml`:
 |   |   `-- __init__.py
 |   |-- tests
 |   |   |-- __init__.py
+|   |   |-- test_integration_pipeline.py
 |   |   |-- test_legacy_access_service.py
 |   |   |-- test_life_story_generator.py
 |   |   |-- test_memory_capture_service.py

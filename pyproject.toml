@@ -85,3 +85,6 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --tb=short"
+# Add both backend/ (for 'services.*' imports) and backend/tests/ (for 'utils.*'
+# imports) so pytest finds the same modules as unittest-discover does.
+pythonpath = ["backend", "backend/tests"]

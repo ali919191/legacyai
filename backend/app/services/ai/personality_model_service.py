@@ -115,7 +115,7 @@ class PersonalityModelService:
             PersonalityProfile containing traits, beliefs, communication style, values, and decision patterns.
         """
         if memories is None:
-            memories = self.memory_service.list_memories()
+            memories = self.memory_service.retrieve_all_memories()
 
         profile = PersonalityProfile()
 
