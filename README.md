@@ -19,6 +19,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - [Memory Grounding Enforcement](#memory-grounding-enforcement)
 - [Semantic Memory Retrieval](#semantic-memory-retrieval)
 - [Wisdom Engine Integration](#wisdom-engine-integration)
+- [Multi-Memory Reasoning](#multi-memory-reasoning)
 - [Code Quality and Testing](#code-quality-and-testing)
 - [Project Structure](#project-structure)
 - [Running the Legacy AI Platform](#running-the-legacy-ai-platform)
@@ -1795,6 +1796,45 @@ LESSONS EXTRACTED: NONE
 ```
 
 The pipeline test log (`logs/pipeline_test.log`) now also records a `LESSONS EXTRACTED` block per request for debugging and verification.
+
+## Multi-Memory Reasoning
+
+Advice responses now use **multi-memory reasoning** instead of treating memories independently.
+
+### Reasoning flow
+
+When multiple relevant memories are retrieved for an advice-oriented query:
+
+1. Extract a lesson from each memory (`MemoryDistillationService.extract_wisdom_lessons`).
+2. Identify recurring patterns across those lessons (`WisdomEngine.identify_patterns`).
+3. Generate higher-level principles from shared categories (`WisdomEngine.generate_principle`).
+4. Pass memories + lessons + patterns + principles into `ConversationEngine` prompt context.
+5. Synthesize advice grounded in those patterns.
+
+### Prompt grounding for advice
+
+For wisdom-enabled responses, the prompt now includes explicit synthesis guidance:
+
+```text
+You are answering based on these memories and the lessons derived from them.
+Synthesize patterns across memories to give thoughtful advice.
+```
+
+### New trace logs
+
+Advice runs now emit additional debugging traces:
+
+```text
+PATTERNS IDENTIFIED:
+    * failure (count=2)
+    * major_life_event (count=1)
+
+PRINCIPLES GENERATED:
+    * Learn quickly from setbacks and take action before problems compound.
+    * For major transitions, plan ahead and lean on trusted relationships.
+```
+
+`logs/pipeline_test.log` includes these blocks so multi-memory reasoning can be validated per question.
 
 ## Code Quality and Testing
 

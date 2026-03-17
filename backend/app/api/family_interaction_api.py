@@ -43,6 +43,7 @@ class AskResponse(BaseModel):
     memory_details: List[Dict[str, Any]]
     memory_priority: List[Dict[str, Any]]
     lessons_extracted: List[str]
+    patterns_identified: List[str]
     wisdom_principles: List[str]
     insights_used: List[str]
     enhanced_questions: List[Dict[str, Any]]
@@ -227,6 +228,7 @@ class FamilyInteractionAPI:
                     memory_details=result.get('memory_details', []),
                     memory_priority=result.get('memory_priority', []),
                     lessons_extracted=result.get('lessons_used', []),
+                    patterns_identified=result.get('patterns_identified', []),
                     wisdom_principles=result.get('wisdom_principles', []),
                     insights_used=result['insights_used'],
                     enhanced_questions=result.get('enhanced_questions', []),

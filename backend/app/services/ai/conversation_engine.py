@@ -238,6 +238,22 @@ class ConversationEngine:
                 patterns = wisdom_engine.identify_patterns(relevant_memories)
                 principles = wisdom_engine.generate_principle(lessons)
                 advice = wisdom_engine.generate_advice(user_query, principles)
+
+                if patterns:
+                    pattern_lines = "\n".join(
+                        f"  * {item.get('pattern', 'unknown')} (count={item.get('count', 0)})"
+                        for item in patterns
+                    )
+                    logger.info("PATTERNS IDENTIFIED:\n%s", pattern_lines)
+                else:
+                    logger.info("PATTERNS IDENTIFIED: NONE")
+
+                if principles:
+                    principle_lines = "\n".join(f"  * {p}" for p in principles)
+                    logger.info("PRINCIPLES GENERATED:\n%s", principle_lines)
+                else:
+                    logger.info("PRINCIPLES GENERATED: NONE")
+
                 wisdom_context = {
                     "lessons": lessons,
                     "patterns": patterns,
@@ -249,6 +265,23 @@ class ConversationEngine:
                     user_query,
                     relevant_memories,
                 )
+                patterns = wisdom_context.get("patterns", [])
+                principles = wisdom_context.get("principles", [])
+
+                if patterns:
+                    pattern_lines = "\n".join(
+                        f"  * {item.get('pattern', 'unknown')} (count={item.get('count', 0)})"
+                        for item in patterns
+                    )
+                    logger.info("PATTERNS IDENTIFIED:\n%s", pattern_lines)
+                else:
+                    logger.info("PATTERNS IDENTIFIED: NONE")
+
+                if principles:
+                    principle_lines = "\n".join(f"  * {p}" for p in principles)
+                    logger.info("PRINCIPLES GENERATED:\n%s", principle_lines)
+                else:
+                    logger.info("PRINCIPLES GENERATED: NONE")
             context['wisdom'] = wisdom_context
 
         # Step 9: Detect knowledge gaps and create follow-up questions for widget display.
@@ -297,6 +330,10 @@ class ConversationEngine:
 
         wisdom_lessons = [item.get("lesson", "") for item in wisdom_context.get("lessons", [])]
         wisdom_principles = wisdom_context.get("principles", [])
+        wisdom_patterns = [
+            f"{item.get('pattern', 'unknown')} (count={item.get('count', 0)})"
+            for item in wisdom_context.get("patterns", [])
+        ]
         combined_insights = [insight.insight_text for insight in relevant_insights] + wisdom_principles
 
         return {
@@ -318,6 +355,7 @@ class ConversationEngine:
             ],
             'insights_used': combined_insights,
             'lessons_used': wisdom_lessons,
+            'patterns_identified': wisdom_patterns,
             'wisdom_principles': wisdom_principles,
             'confidence_score': confidence,
             'access_denied': access_denied,
@@ -613,19 +651,32 @@ Respond in a way that reflects these personality characteristics."""
         if context.get("wisdom"):
             principles = context["wisdom"].get("principles", [])
             lessons = context["wisdom"].get("lessons", [])
+            patterns = context["wisdom"].get("patterns", [])
             lesson_lines = [
                 f"- {item.get('lesson', '').strip()}"
                 for item in lessons
                 if item.get("lesson")
             ][:3]
             principle_lines = [f"- {text}" for text in principles[:3]]
+            pattern_lines = [
+                f"- {item.get('pattern', 'unknown')} (count={item.get('count', 0)})"
+                for item in patterns[:3]
+            ]
             wisdom_text = (
                 "\nWisdom distilled from these same memories:\n"
+                + ("Patterns:\n" + "\n".join(pattern_lines) + "\n" if pattern_lines else "")
                 + ("Principles:\n" + "\n".join(principle_lines) + "\n" if principle_lines else "")
                 + ("Lessons:\n" + "\n".join(lesson_lines) + "\n" if lesson_lines else "")
             )
 
-        prompt = f"""You are an AI representation of a person built from their life memories. You MUST use ONLY the memories below to answer the question. If the answer is not present in these memories, say "I don't remember that clearly." Do not use any knowledge outside of these memories.{personality_text}{person_profile_text}{recipient_text}{wisdom_text}
+        advice_instruction = ""
+        if context.get("wisdom"):
+            advice_instruction = (
+                "\nYou are answering based on these memories and the lessons derived from them. "
+                "Synthesize patterns across memories to give thoughtful advice."
+            )
+
+        prompt = f"""You are an AI representation of a person built from their life memories. You MUST use ONLY the memories below to answer the question. If the answer is not present in these memories, say "I don't remember that clearly." Do not use any knowledge outside of these memories.{advice_instruction}{personality_text}{person_profile_text}{recipient_text}{wisdom_text}
 
 User's question: {user_query}
 

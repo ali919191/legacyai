@@ -213,6 +213,26 @@ def run_tests(base_url: str, user_id: str, logger: logging.Logger) -> None:
         else:
             lessons_block = "LESSONS EXTRACTED: NONE"
 
+        patterns = body.get("patterns_identified") or []
+        if patterns:
+            patterns_block = "PATTERNS IDENTIFIED:\n" + "\n".join(
+                f"  * {pattern}" for pattern in patterns if pattern
+            )
+            if patterns_block == "PATTERNS IDENTIFIED:\n":
+                patterns_block = "PATTERNS IDENTIFIED: NONE"
+        else:
+            patterns_block = "PATTERNS IDENTIFIED: NONE"
+
+        principles = body.get("wisdom_principles") or []
+        if principles:
+            principles_block = "PRINCIPLES GENERATED:\n" + "\n".join(
+                f"  * {principle}" for principle in principles if principle
+            )
+            if principles_block == "PRINCIPLES GENERATED:\n":
+                principles_block = "PRINCIPLES GENERATED: NONE"
+        else:
+            principles_block = "PRINCIPLES GENERATED: NONE"
+
         answer_text = body.get("answer", "") if status == 200 else (
             body.get("detail") or body.get("error") or body_text
         )
@@ -225,6 +245,8 @@ def run_tests(base_url: str, user_id: str, logger: logging.Logger) -> None:
             f"STATUS  : {status} {status_label}\n"
             f"{memories_block}\n"
             f"{lessons_block}\n"
+            f"{patterns_block}\n"
+            f"{principles_block}\n"
             f"RESPONSE: {answer_text}\n"
             f"{sep}\n"
         )
