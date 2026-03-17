@@ -615,7 +615,10 @@ Please answer the question using ONLY these memories. If the memories do not con
                 continue
 
             intro = intro_phrases[idx % len(intro_phrases)]
-            sentence = f"{intro} {raw_text.rstrip('.')}."
+            if title:
+                sentence = f"{intro} in \"{title}\", {raw_text.rstrip('.')}"
+            else:
+                sentence = f"{intro} {raw_text.rstrip('.')}"
 
             details: List[str] = []
             if location:

@@ -103,7 +103,7 @@ def _setup_logging() -> logging.Logger:
     logger.setLevel(logging.DEBUG)
 
     # File handler — full detail
-    fh = logging.FileHandler(LOG_FILE, encoding="utf-8")
+    fh = logging.FileHandler(LOG_FILE, mode="w", encoding="utf-8")
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter("%(message)s"))
 
