@@ -23,6 +23,20 @@ _QUERY_STOPWORDS = {
     "would", "you", "your",
 }
 
+_ABSTRACT_REFLECTION_TERMS = {
+    "grow",
+    "growth",
+    "shaped",
+    "shape",
+    "made",
+    "become",
+    "became",
+    "identity",
+    "values",
+    "purpose",
+    "character",
+}
+
 
 class ConversationEngine:
     """
@@ -338,6 +352,10 @@ class ConversationEngine:
         if not all_memories:
             return []
 
+        query_terms = self._tokenize_query(user_query)
+        is_abstract_query = bool(query_terms & _ABSTRACT_REFLECTION_TERMS)
+        semantic_threshold = 0.45 if is_abstract_query else 0.55
+
         embedding_hits = self.embedding_service.search_similar_memories(user_query, top_k=max(top_k * 2, 10))
         embedding_scores = {memory_id: score for memory_id, score in embedding_hits}
 
@@ -347,10 +365,19 @@ class ConversationEngine:
             semantic_similarity = max(embedding_scores.get(memory.id, 0.0), 0.0)
             combined_score = (semantic_similarity * 0.7) + (keyword_score * 0.3)
 
-            # Strict grounding: only keep memories with actual lexical evidence,
-            # or very strong embedding similarity when lexical evidence is weak.
-            if keyword_score > 0 or semantic_similarity >= 0.55:
+            # Strict grounding: require lexical evidence or adequate semantic match.
+            # Reflection-style questions are semantically broad, so allow a slightly
+            # lower semantic threshold while keeping hybrid ranking.
+            if keyword_score > 0 or semantic_similarity >= semantic_threshold:
                 ranked.append((memory.id, combined_score))
+
+        if not ranked and is_abstract_query:
+            # Reflection queries are broad by nature; when direct similarity is weak,
+            # recover by selecting memories with strong growth/lesson signals.
+            for memory in all_memories:
+                reflection_score = self._score_reflection_memory(memory)
+                if reflection_score > 0:
+                    ranked.append((memory.id, reflection_score))
 
         ranked.sort(key=lambda item: item[1], reverse=True)
         return ranked[:top_k]
@@ -404,6 +431,34 @@ class ConversationEngine:
             if stripped and stripped not in _QUERY_STOPWORDS:
                 cleaned.append(stripped)
         return set(cleaned)
+
+    def _score_reflection_memory(self, memory: Memory) -> float:
+        """Score memories that are likely relevant to broad growth/reflection queries."""
+        tags = {tag.lower() for tag in memory.tags}
+        emotions = {emotion.lower() for emotion in memory.emotions}
+        text = f"{memory.title} {memory.description}".lower()
+
+        score = 0.0
+        growth_terms = {
+            "learned", "lesson", "realized", "changed", "grew", "growth",
+            "mistake", "failure", "regret", "mentor", "promotion", "career",
+            "family", "values", "discipline", "advice",
+        }
+        high_signal_tags = {
+            "career", "lesson", "milestone", "family", "major_event", "failure", "regret",
+        }
+        high_signal_emotions = {
+            "pride", "gratitude", "regret", "relief", "love", "anxiety", "humility",
+        }
+
+        if tags & high_signal_tags:
+            score += 0.5
+        if emotions & high_signal_emotions:
+            score += 0.2
+        if any(term in text for term in growth_terms):
+            score += 0.5
+
+        return min(score, 1.0)
 
     def answer_enhanced_question(
         self,
