@@ -1,3 +1,4 @@
+import logging
 from typing import List, Dict, Any, Optional
 from ..memory_capture_service import MemoryCaptureService, Memory
 from ..timeline_engine import TimelineEngine
@@ -12,6 +13,8 @@ from .memory_priority_service import MemoryPriorityService
 from .recipient_context_service import RecipientContextService
 from ..security.legacy_access_service import LegacyAccessService, MemoryMetadata
 from ..security.response_moderation_service import ResponseModerationService
+
+logger = logging.getLogger(__name__)
 
 
 class ConversationEngine:
@@ -217,20 +220,18 @@ class ConversationEngine:
                     self.knowledge_gap_service.store_question(question)
                 )
 
-        # Step 10: Construct prompt and generate response
+        # Step 10: Construct prompt and generate response (always memory-grounded)
         if not relevant_memories:
             response = "I don't remember that clearly."
-        elif wisdom_context.get("advice"):
-            response = wisdom_context["advice"]
         else:
-            if self.memory_grounding_service:
-                prompt = self.memory_grounding_service.generate_grounded_prompt(
-                    f"{user_query}\n\n{recipient_context_text}",
-                    relevant_memories,
-                )
-            else:
-                prompt = self._construct_prompt(user_query, context)
-            response = self._generate_ai_response(prompt)
+            prompt = self._construct_prompt(user_query, context)
+            response = self._generate_ai_response(prompt, context=context)
+            logger.info(
+                "Generated response for user=%s using %d memories: %s",
+                user_id or "anonymous",
+                len(relevant_memories),
+                [m.id for m in relevant_memories],
+            )
 
         # Step 10b: Adjust for recipient age/relationship on sensitive topics.
         response = self._apply_recipient_safety(response, recipient_profile, relevant_memories)
@@ -432,14 +433,14 @@ Respond in a way that reflects these personality characteristics."""
                 + self._build_recipient_context_text(context["recipient_profile"])
             )
 
-        prompt = f"""You are an AI representation of a person built from their life memories. Use the memories below to answer the user's question.{personality_text}{person_profile_text}{recipient_text}
+        prompt = f"""You are an AI representation of a person built from their life memories. Use ONLY the following memories to answer the user's question. Do not use any knowledge outside of these memories.{personality_text}{person_profile_text}{recipient_text}
 
 User's question: {user_query}
 
 Relevant memories from my life:
 {memories_text}
 
-Please answer the question using these memories. Be conversational and authentic, as if sharing personal stories."""
+Please answer the question using ONLY these memories. If the memories do not contain relevant information, say "I don't remember that clearly." Be conversational and authentic, as if sharing personal stories."""
 
         return prompt
 
@@ -494,29 +495,86 @@ Please answer the question using these memories. Be conversational and authentic
 
         return list(relationship_map.values())
 
-    def _generate_ai_response(self, prompt: str) -> str:
+    def _generate_ai_response(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> str:
         """
-        Generate AI response from the prompt.
+        Generate a response grounded in the provided memory context.
 
-        Currently a placeholder. In production, integrate with:
-        - OpenAI API
-        - Local LLM models
-        - Azure OpenAI
+        Synthesises a first-person narrative from the highest-priority memories
+        found in *context*. The *prompt* string is accepted for
+        forward-compatibility: when an LLM integration is added (OpenAI, Azure
+        OpenAI, local model, etc.) replace this method body with an API call
+        that sends *prompt* directly to the model.
 
         Args:
-            prompt: The constructed prompt.
+            prompt: Fully-constructed, memory-grounded prompt string.
+            context: Optional context dict produced by _build_context, containing
+                     'memories' and 'memory_priority' lists.
 
         Returns:
-            Generated response text.
+            Response text synthesised from memory content, or
+            "I don't remember that clearly." when no memory data is available.
         """
-        # Placeholder response generation
-        # TODO: Replace with actual LLM integration
-        if "school" in prompt.lower():
-            return "I remember my school days fondly. There was this time when..."
-        elif "family" in prompt.lower():
-            return "Family has always been important to me. Let me tell you about..."
-        else:
-            return "Based on my memories, I can share that..."
+        if not context or not context.get("memories"):
+            return "I don't remember that clearly."
+
+        memories = list(context["memories"])
+
+        # Sort by priority score when priority data is available
+        priority_lookup: Dict[str, float] = {
+            p["id"]: p["priority_score"]
+            for p in context.get("memory_priority", [])
+        }
+        if priority_lookup:
+            memories = sorted(
+                memories,
+                key=lambda m: priority_lookup.get(m["id"], 0.0),
+                reverse=True,
+            )
+
+        top_memories = memories[:3]
+        used_ids = [m["id"] for m in top_memories]
+        logger.info("Memory IDs used in response synthesis: %s", used_ids)
+
+        intro_phrases = ["I remember", "I recall", "There was a time when"]
+        sentences: List[str] = []
+
+        for idx, mem in enumerate(top_memories):
+            title: str = mem.get("title", "")
+            description: str = mem.get("description", "")
+            location: str = mem.get("location", "") or ""
+            people: List[str] = mem.get("people_involved", []) or []
+            emotions: List[str] = mem.get("emotions", []) or []
+
+            raw_text = description or title
+            if not raw_text:
+                continue
+
+            intro = intro_phrases[idx % len(intro_phrases)]
+            sentence = f"{intro} {raw_text.rstrip('.')}."
+
+            details: List[str] = []
+            if location:
+                details.append(f"at {location}")
+            if len(people) == 1:
+                details.append(f"with {people[0]}")
+            elif len(people) == 2:
+                details.append(f"with {people[0]} and {people[1]}")
+            elif len(people) > 2:
+                details.append(f"with {', '.join(people[:-1])}, and {people[-1]}")
+
+            if details:
+                sentence = sentence.rstrip(".") + " " + ", ".join(details) + "."
+
+            if emotions:
+                emotion_str = " and ".join(emotions[:2])
+                sentence += f" I felt {emotion_str}."
+
+            sentences.append(sentence)
+
+        if not sentences:
+            return "I don't remember that clearly."
+
+        return " ".join(sentences)
 
     def _get_relevant_insights(self, user_query: str, relevant_memories: List[Memory]) -> List[DistilledInsight]:
         """
