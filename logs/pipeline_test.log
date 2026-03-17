@@ -5341,3 +5341,206 @@ Results  : 15 passed, 0 failed out of 15
 Log file : /home/ali/Documents/github/legacyai/logs/pipeline_test.log
 ------------------------------------------------------------
 
+
+------------------------------------------------------------
+Legacy AI Platform -- Pipeline Test Run
+Base URL : http://localhost:8001
+User ID  : test_user
+Cases    : 15
+Started  : 2026-03-16 22:02:23
+------------------------------------------------------------
+
+[1/15] Early career lessons
+
+[2026-03-16 22:02:23]
+CASE    : Early career lessons
+QUESTION: What did you learn from your early career?
+STATUS  : 200 OK
+MEMORIES USED:
+  * a5007974-efbc-4b19-a21c-ee3b4b72a37b: "Becoming a grandfather"
+  * 615b8d94-c271-4089-b9d1-b80f7059c271: "Graduating with honors"
+  * 79fb4362-dd7a-4faa-af44-5eae36bee80b: "Teaching my first tutoring session"
+RESPONSE: I remember When I held my first grandchild, every old worry about legacy softened. Love suddenly felt both familiar and brand new with Anna, baby Emma, and Sarah. I felt awe and joy. I recall When my name was called for honors, I looked up and saw my parents standing in the back because seats were full. Their sacrifice carried me there with Mom, Dad, and Sarah. I felt pride and gratitude. There was a time when Explaining algebra to first-year students showed me how much I had actually learned. Teaching gave me confidence that quiet people can still lead with tutoring group. I felt nervous and confidence.
+------------------------------------------------------------
+  -> OK | memories:3 | I remember When I held my first grandchild, every old worry about legacy softened. Love suddenly felt both familiar and 
+[2/15] Mistakes and regrets
+
+[2026-03-16 22:02:23]
+CASE    : Mistakes and regrets
+QUESTION: Tell me about a mistake you made and what you learned from it.
+STATUS  : 200 OK
+MEMORIES USED:
+  * 3a7b7712-9481-433a-80c1-37b2bbce62e5: "First day as junior engineer"
+  * 9000a575-10ac-4682-a8bb-520fab9b4a3f: "County fair talent night"
+RESPONSE: I remember I wore an oversized hard hat and barely spoke in meetings. A kind supervisor told me to bring one question to every meeting and ask it with Supervisor Tom and engineering team. I felt intimidated and grateful. I recall I froze halfway through my harmonica song and forgot the tune. Grandmother applauded anyway and told me courage is showing up again next time with Grandmother. I felt fear and shame.
+------------------------------------------------------------
+  -> OK | memories:2 | I remember I wore an oversized hard hat and barely spoke in meetings. A kind supervisor told me to bring one question to
+[3/15] Parenting advice -- discipline
+
+[2026-03-16 22:02:23]
+CASE    : Parenting advice -- discipline
+QUESTION: What advice would you give your son about discipline?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 9000a575-10ac-4682-a8bb-520fab9b4a3f: "County fair talent night"
+RESPONSE: I remember I froze halfway through my harmonica song and forgot the tune. Grandmother applauded anyway and told me courage is showing up again next time with Grandmother. I felt fear and shame.
+------------------------------------------------------------
+  -> OK | memories:1 | I remember I froze halfway through my harmonica song and forgot the tune. Grandmother applauded anyway and told me coura
+[4/15] Person lookup -- Mike
+
+[2026-03-16 22:02:23]
+CASE    : Person lookup -- Mike
+QUESTION: Who is Mike and what is your relationship with him?
+STATUS  : 200 OK
+MEMORIES USED: NONE
+RESPONSE: I don't remember that clearly.
+------------------------------------------------------------
+  -> OK | memories:0 | I don't remember that clearly.
+[5/15] Most important life lesson
+
+[2026-03-16 22:02:23]
+CASE    : Most important life lesson
+QUESTION: What is your most important life lesson?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 89869ab5-1a70-49d6-8e65-de5b4f927d29: "Wedding in a small chapel"
+  * a055cb54-46c1-4841-8875-6ca4bf71eaef: "Quiet promise to my little sister"
+RESPONSE: I remember Sarah and I married in a simple chapel with homemade flowers and borrowed music. We started with little money but a lot of commitment with Sarah, family, and friends. I felt love and hope. I recall After kids teased my sister's stutter, we practiced breathing and reading together each evening. Protecting her taught me gentleness can be a form of strength with Lily. I felt protective and tender.
+------------------------------------------------------------
+  -> OK | memories:2 | I remember Sarah and I married in a simple chapel with homemade flowers and borrowed music. We started with little money
+[6/15] Family relationships
+
+[2026-03-16 22:02:23]
+CASE    : Family relationships
+QUESTION: Tell me about your relationship with your family.
+STATUS  : 200 OK
+MEMORIES USED:
+  * 4089b819-501a-4eb2-bd3b-7052f4da1aed: "Becoming a father"
+  * 236b463d-f928-40e4-b226-f263f0dde13e: "Hiring someone better than me"
+  * 36ebb9bd-6c86-40f1-9ba9-24b428519e78: "Missed design deadline"
+RESPONSE: I remember Holding my son for the first time felt like my priorities rearranged in a minute. I promised to be present, not just successful with Sarah and Michael. I felt awe and fear. I recall I recruited a systems architect whose expertise surpassed mine in several domains. Letting go of ego accelerated the whole department with Nora and hiring committee. I felt insecurity and relief. There was a time when I underestimated a systems integration task and missed a major deadline. Owning the mistake publicly rebuilt trust faster than excuses ever could with project manager and team. I felt stress and regret.
+------------------------------------------------------------
+  -> OK | memories:3 | I remember Holding my son for the first time felt like my priorities rearranged in a minute. I promised to be present, n
+[7/15] Lessons from failure
+
+[2026-03-16 22:02:23]
+CASE    : Lessons from failure
+QUESTION: What did you learn from your biggest failure?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 85c9d128-0c5a-4a9c-acd9-220357bac141: "Passed over for promotion"
+  * c7f2a194-17ec-49a9-acdd-4df5b2fd7a48: "Farewell party at headquarters"
+  * 87b47977-e328-440b-8286-a8f9e96633b5: "Woodshop birdhouse project"
+RESPONSE: I remember I expected a director role and watched it go to someone else with less tenure. The feedback was blunt: I needed to communicate strategy, not just execution with division head. I felt hurt and anger. I recall Colleagues shared stories about projects and difficult years we survived together. I realized impact is measured in people, not awards with colleagues, Sarah, and children. I felt nostalgia and pride. There was a time when My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is more valuable than perfection with Mr. Lewis. I felt frustration and pride.
+------------------------------------------------------------
+  -> OK | memories:3 | I remember I expected a director role and watched it go to someone else with less tenure. The feedback was blunt: I need
+[8/15] Early life description
+
+[2026-03-16 22:02:23]
+CASE    : Early life description
+QUESTION: Describe your early life and childhood.
+STATUS  : 200 OK
+MEMORIES USED:
+  * c7f2a194-17ec-49a9-acdd-4df5b2fd7a48: "Farewell party at headquarters"
+  * cd66b767-1247-4b86-b5c8-5ed10efeef7b: "Volunteering at the literacy center"
+  * a1dd2eda-3801-4517-ac07-6e37f4926cc9: "Research lab assistantship"
+RESPONSE: I remember Colleagues shared stories about projects and difficult years we survived together. I realized impact is measured in people, not awards with colleagues, Sarah, and children. I felt nostalgia and pride. I recall Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement feel meaningful and connected with adult learners and volunteer team. I felt purpose and humility. There was a time when I spent weekends labeling circuit boards and logging test data for graduate students. Repetition taught me discipline and attention to detail with Dr. Patel and lab team. I felt focused and tired.
+------------------------------------------------------------
+  -> OK | memories:3 | I remember Colleagues shared stories about projects and difficult years we survived together. I realized impact is measu
+[9/15] Relationship advice
+
+[2026-03-16 22:02:23]
+CASE    : Relationship advice
+QUESTION: What advice do you have about maintaining strong relationships?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 88551c2d-6eff-421e-ba09-510a478c120d: "Graduation handshake"
+  * bf39a8a4-d27c-4e28-b688-dcfa05383576: "Company merger turbulence"
+RESPONSE: I remember As principal shook my hand, Dad cried openly in the front row. That moment made education feel like a family achievement, not just a personal one with Dad, Mom, and Principal. I felt pride and gratitude. I recall The merger brought layoffs and uncertainty, and I had to deliver hard news to good people. Transparency did not remove pain, but it preserved dignity with staff and executives. I felt stress and sorrow.
+------------------------------------------------------------
+  -> OK | memories:2 | I remember As principal shook my hand, Dad cried openly in the front row. That moment made education feel like a family 
+[10/15] Core values
+
+[2026-03-16 22:02:23]
+CASE    : Core values
+QUESTION: What values were most important to you throughout your life?
+STATUS  : 200 OK
+MEMORIES USED:
+  * cd66b767-1247-4b86-b5c8-5ed10efeef7b: "Volunteering at the literacy center"
+  * f4be1efe-3935-4639-9607-7922e9830a79: "First week at state university"
+  * 2958e0de-fdb0-4d02-a0a1-6c62dc60f58b: "Anna leaves for college"
+RESPONSE: I remember Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement feel meaningful and connected with adult learners and volunteer team. I felt purpose and humility. I recall I arrived with one suitcase and no idea how to navigate campus buildings. Learning to ask for help quickly became my survival skill with roommate Ben. I felt anxious and excited. There was a time when We unpacked her dorm room and then sat in silence on the drive home. Parenting suddenly became advice by phone instead of help in person with Anna and Sarah. I felt pride and sadness.
+------------------------------------------------------------
+  -> OK | memories:3 | I remember Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement fee
+[11/15] Career regrets
+
+[2026-03-16 22:02:23]
+CASE    : Career regrets
+QUESTION: Is there anything in your career you would have done differently?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 106d27dd-fb4e-4c87-b0e1-724bd454c3e1: "Burnout warning signs"
+  * 689b0c72-319d-4caa-90c5-78579824d9dc: "Daughter's school recital"
+  * 56067e38-20db-4723-94b9-7f6a87f5aa8b: "Sunday dinners become sacred"
+RESPONSE: I remember I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest is a responsibility, not a reward with Sarah and Dr. Mendez. I felt anxiety and relief. I recall I arrived just before curtains and still caught Anna's solo. Her face in the spotlight reminded me that small attendance moments become lifelong memories with Anna and Sarah. I felt relief and pride. There was a time when With everyone busy, we protected Sunday dinner as non-negotiable family time. Consistency built closeness more than occasional grand gestures with Sarah, Michael, Anna, and extended family. I felt warmth and belonging.
+------------------------------------------------------------
+  -> OK | memories:3 | I remember I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest
+[12/15] Advice to younger self
+
+[2026-03-16 22:02:23]
+CASE    : Advice to younger self
+QUESTION: What would you tell your younger self if you could?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 106d27dd-fb4e-4c87-b0e1-724bd454c3e1: "Burnout warning signs"
+  * a1dd2eda-3801-4517-ac07-6e37f4926cc9: "Research lab assistantship"
+RESPONSE: I remember I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest is a responsibility, not a reward with Sarah and Dr. Mendez. I felt anxiety and relief. I recall I spent weekends labeling circuit boards and logging test data for graduate students. Repetition taught me discipline and attention to detail with Dr. Patel and lab team. I felt focused and tired.
+------------------------------------------------------------
+  -> OK | memories:2 | I remember I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest
+[13/15] Proudest achievement
+
+[2026-03-16 22:02:23]
+CASE    : Proudest achievement
+QUESTION: What are you most proud of in your life?
+STATUS  : 200 OK
+MEMORIES USED:
+  * a2de0612-96e8-4c0f-b641-df47dada4fe4: "Coaching little league on weekends"
+  * 106d27dd-fb4e-4c87-b0e1-724bd454c3e1: "Burnout warning signs"
+  * dc88067a-2bbd-4831-b4a2-4ebd82f00ba0: "Returning to school at night"
+RESPONSE: I remember I volunteered to coach because Michael was shy around other kids. Watching him celebrate teammates showed me confidence is contagious with Michael, team parents, and players. I felt pride and joy. I recall I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest is a responsibility, not a reward with Sarah and Dr. Mendez. I felt anxiety and relief. There was a time when I enrolled in evening management classes while working full time. Learning again in my thirties proved reinvention has no age limit with class cohort. I felt exhausted and motivated.
+------------------------------------------------------------
+  -> OK | memories:3 | I remember I volunteered to coach because Michael was shy around other kids. Watching him celebrate teammates showed me 
+[14/15] Handling adversity
+
+[2026-03-16 22:02:23]
+CASE    : Handling adversity
+QUESTION: How did you handle difficult times and adversity?
+STATUS  : 200 OK
+MEMORIES USED:
+  * e5941270-fd6d-489d-8da7-d722a9d045c3: "Letter to my children about life lessons"
+  * 49c3428a-81d3-44f6-8c1f-3992a8cf922d: "Dad's final advice"
+  * e128ce4a-5bdb-46dc-87fb-194cd00192a2: "The bicycle fall on Oak Street"
+  * ed97ce6f-6ce4-491e-8f4a-9f111f8f9f3d: "Helping Mom at the diner"
+RESPONSE: I remember I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall At the hospital Dad squeezed my hand and said, 'Be kind before you are right.' That sentence has corrected me more than any management book with Dad. I felt grief and love. There was a time when I tried to race older kids downhill and slid hard on gravel. Mr. Hanley patched my knee and reminded me that speed means responsibility with Mr. Hanley and neighborhood kids. I felt embarrassment and pain.
+------------------------------------------------------------
+  -> OK | memories:4 | I remember I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect 
+[15/15] Legacy and impact
+
+[2026-03-16 22:02:23]
+CASE    : Legacy and impact
+QUESTION: How do you want to be remembered by your family?
+STATUS  : 200 OK
+MEMORIES USED:
+  * e5941270-fd6d-489d-8da7-d722a9d045c3: "Letter to my children about life lessons"
+  * 49c3428a-81d3-44f6-8c1f-3992a8cf922d: "Dad's final advice"
+  * a1dd2eda-3801-4517-ac07-6e37f4926cc9: "Research lab assistantship"
+  * 7e4f7211-c34b-47d7-ad40-64bd4efc230c: "Science fair volcano"
+RESPONSE: I remember I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall At the hospital Dad squeezed my hand and said, 'Be kind before you are right.' That sentence has corrected me more than any management book with Dad. I felt grief and love. There was a time when I spent weekends labeling circuit boards and logging test data for graduate students. Repetition taught me discipline and attention to detail with Dr. Patel and lab team. I felt focused and tired.
+------------------------------------------------------------
+  -> OK | memories:4 | I remember I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect 
+
+------------------------------------------------------------
+Results  : 15 passed, 0 failed out of 15
+Log file : /home/ali/Documents/github/legacyai/logs/pipeline_test.log
+------------------------------------------------------------
+

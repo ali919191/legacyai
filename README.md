@@ -16,7 +16,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - [Conversation Engine](#conversation-engine)
 - [Testing](#testing)
 - [Pipeline Testing](#pipeline-testing)
-- [Memory-Driven Response System](#memory-driven-response-system)
+- [Memory Grounding Enforcement](#memory-grounding-enforcement)
 - [Code Quality and Testing](#code-quality-and-testing)
 - [Project Structure](#project-structure)
 - [Running the Legacy AI Platform](#running-the-legacy-ai-platform)
@@ -1638,7 +1638,7 @@ The console output also shows a per-test memory count:
 
 The script uses only the Python standard library (`urllib`, `logging`, `json`). No additional packages need to be installed beyond the existing `backend/requirements.txt`.
 
-## Memory-Driven Response System
+## Memory Grounding Enforcement
 
 All AI responses are **exclusively grounded in stored memories**. The engine will never fabricate an answer — if the retrieved memories do not contain relevant information, it returns `"I don't remember that clearly."` No external knowledge or hardcoded strings are used.
 

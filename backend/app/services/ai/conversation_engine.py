@@ -222,6 +222,10 @@ class ConversationEngine:
 
         # Step 10: Construct prompt and generate response (always memory-grounded)
         if not relevant_memories:
+            logger.info(
+                "Generated response for user=%s. MEMORIES USED: NONE",
+                user_id or "anonymous",
+            )
             response = "I don't remember that clearly."
         else:
             prompt = self._construct_prompt(user_query, context)
@@ -545,6 +549,10 @@ Please answer the question using ONLY these memories. If the memories do not con
             )
 
         top_memories = memories[:3]
+        if not top_memories:
+            logger.info("MEMORIES USED in response synthesis: NONE")
+            return "I don't remember that clearly."
+
         used_ids = [m["id"] for m in top_memories]
         mem_trace_lines = "\n".join(
             f"  * {m['id']}: {m.get('title', 'untitled')}" for m in top_memories
