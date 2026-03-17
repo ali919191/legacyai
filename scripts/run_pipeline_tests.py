@@ -188,13 +188,33 @@ def run_tests(base_url: str, user_id: str, logger: logging.Logger) -> None:
         except Exception:
             body_text = str(body)
 
-        # Log file entry — detailed
+        # Build MEMORIES USED block (id + title from memory_details when available)
+        memory_details = body.get("memory_details") or []
+        memory_ids_only = body.get("memories_used") or []
+        if memory_details:
+            memories_block = "MEMORIES USED:\n" + "\n".join(
+                f'  * {m.get("id", "?")}: "{m.get("title", "untitled")}"'
+                for m in memory_details
+            )
+        elif memory_ids_only:
+            memories_block = "MEMORIES USED:\n" + "\n".join(
+                f"  * {mid}" for mid in memory_ids_only
+            )
+        else:
+            memories_block = "MEMORIES USED: NONE"
+
+        answer_text = body.get("answer", "") if status == 200 else (
+            body.get("detail") or body.get("error") or body_text
+        )
+
+        # Log file entry — detailed with memory trace
         log_entry = (
             f"\n[{ts}]\n"
             f"CASE    : {label}\n"
             f"QUESTION: {query}\n"
             f"STATUS  : {status} {status_label}\n"
-            f"RESPONSE:\n{body_text}\n"
+            f"{memories_block}\n"
+            f"RESPONSE: {answer_text}\n"
             f"{sep}\n"
         )
         # Write directly to file handler (bypasses console handler's level filter)
@@ -205,8 +225,9 @@ def run_tests(base_url: str, user_id: str, logger: logging.Logger) -> None:
 
         # Console — brief summary
         if status == 200:
-            answer_preview = str(body.get("answer", ""))[:120].replace("\n", " ")
-            logger.info("  -> %s | %.120s", status_label, answer_preview)
+            answer_preview = str(answer_text)[:120].replace("\n", " ")
+            mem_count = len(memory_details) or len(memory_ids_only)
+            logger.info("  -> %s | memories:%d | %.120s", status_label, mem_count, answer_preview)
         else:
             error_detail = body.get("error") or body.get("detail") or body_text[:200]
             logger.info("  -> %s | %s", status_label, error_detail)

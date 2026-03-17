@@ -252,7 +252,11 @@ class ConversationEngine:
 
         return {
             'generated_answer': response,
-            'memories_used': [mem.id for mem in relevant_memories],  # Use actual memories used after filtering
+            'memories_used': [mem.id for mem in relevant_memories],
+            'memory_details': [
+                {'id': mem.id, 'title': mem.title}
+                for mem in relevant_memories
+            ],
             'memory_priority': [
                 {
                     'memory_id': item['memory'].id,

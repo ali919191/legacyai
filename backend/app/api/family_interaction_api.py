@@ -40,6 +40,7 @@ class AskResponse(BaseModel):
     """Response model for Legacy AI answers."""
     answer: str
     memories_used: List[str]
+    memory_details: List[Dict[str, Any]]
     memory_priority: List[Dict[str, Any]]
     insights_used: List[str]
     enhanced_questions: List[Dict[str, Any]]
@@ -216,6 +217,7 @@ class FamilyInteractionAPI:
                 return AskResponse(
                     answer=result['generated_answer'],
                     memories_used=result['memories_used'],
+                    memory_details=result.get('memory_details', []),
                     memory_priority=result.get('memory_priority', []),
                     insights_used=result['insights_used'],
                     enhanced_questions=result.get('enhanced_questions', []),
