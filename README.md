@@ -19,6 +19,11 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - [Code Quality and Testing](#code-quality-and-testing)
 - [Project Structure](#project-structure)
 - [Running the Legacy AI Platform](#running-the-legacy-ai-platform)
+- [Troubleshooting](#troubleshooting)
+  - [KB: ModuleNotFoundError for app](#kb-article-uvicorn-fails-from-repository-root-with-modulenotfounderror-for-app)
+  - [KB: 500 NoneType has no attribute get](#kb-article-pipeline-test-returns-500--nonetype-object-has-no-attribute-get)
+  - [KB: All responses say I don't remember that clearly](#kb-article-all-pipeline-test-responses-return-i-dont-remember-that-clearly)
+  - [KB: UnicodeEncodeError on Linux terminal](#kb-article-unicodeencodeerror-when-running-pipeline-test-script-on-linux-terminal)
 - [Getting Started](#getting-started)
 - [Contributing](#contributing)
 - [License](#license)
@@ -2316,6 +2321,175 @@ Example change pattern:
 - Confirm you are using the same Python environment where backend requirements were installed.
 - Search for remaining absolute imports in backend/app and replace them with package-relative imports.
 - Re-run startup after clearing stale interpreter sessions.
+
+---
+
+### KB Article: Pipeline test returns 500 — `'NoneType' object has no attribute 'get'`
+
+#### Symptom
+
+Running `python scripts/run_pipeline_tests.py` returns HTTP 500 for every case:
+
+```text
+STATUS  : 500 HTTP 500
+RESPONSE:
+{
+  "detail": "Error processing question: 'NoneType' object has no attribute 'get'"
+}
+```
+
+#### Root cause
+
+The `generate_response` method in `ConversationEngine` always inserts `'moderation': None` into its return dict when no moderation service fires. The `/ask` handler then called:
+
+```python
+result.get('moderation', {}).get('is_safe', True)
+```
+
+The default `{}` only applies when the key is **absent**. Because the key was present with value `None`, `.get('is_safe', ...)` was called on `None` and raised `AttributeError`.
+
+#### Fix applied in this repository
+
+File: [backend/app/api/family_interaction_api.py](backend/app/api/family_interaction_api.py)
+
+```python
+# Before (broken — default {} ignored when key is present as None)
+moderation_applied = result.get('moderation', {}).get('is_safe', True) == False
+
+# After (fixed — treats both absent key and None value as empty dict)
+moderation_applied = (result.get('moderation') or {}).get('is_safe', True) == False
+```
+
+#### Verification
+
+```bash
+curl -X POST http://localhost:8001/api/v1/ask \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Tell me about your life", "user_id": null}'
+```
+
+Expected: HTTP 200 with `"answer"` field populated.
+
+---
+
+### KB Article: All pipeline test responses return "I don't remember that clearly."
+
+#### Symptom
+
+All 15 pipeline tests pass (HTTP 200) but every answer is:
+
+```text
+I don't remember that clearly.
+```
+
+The `memories_used` field in the response is an empty list `[]`.
+
+#### Root cause
+
+Two compounding issues:
+
+1. **No memory ingestion endpoint** — there was no `POST /api/v1/memories` endpoint, so memories from `backend/data/sample_memories.json` had no way to be loaded into the running server's in-memory store.
+2. **No embedding storage on ingest** — even after the endpoint was added, the `MemoryEmbeddingService` was not wired into the API, so no embeddings were stored and semantic search returned zero results.
+3. **No fallback when vector store is empty** — `generate_response` treated zero search results as "no memories found" and returned the fallback string.
+
+#### Fix applied in this repository
+
+**1. Added `POST /api/v1/memories` ingestion endpoint**
+
+File: [backend/app/api/family_interaction_api.py](backend/app/api/family_interaction_api.py)
+
+```python
+@self.app.post("/memories", response_model=CreateMemoryResponse, tags=["Memories"])
+async def ingest_memory(request: CreateMemoryRequest):
+    memory_id = self.memory_service.create_memory(...)
+    if self.embedding_service:
+        embed_text = f"{request.title}. {request.description}"
+        self.embedding_service.store_memory_embedding(memory_id, embed_text)
+    return CreateMemoryResponse(memory_id=memory_id, title=request.title)
+```
+
+**2. Wired `MemoryEmbeddingService` into the API**
+
+File: [backend/app/main.py](backend/app/main.py)
+
+```python
+family_api = create_family_interaction_api(
+    ...
+    embedding_service=services["embedding_service"],
+)
+```
+
+**3. Added fallback to all memories when vector store is empty**
+
+File: [backend/app/services/ai/conversation_engine.py](backend/app/services/ai/conversation_engine.py)
+
+```python
+similar_memories = self.embedding_service.search_similar_memories(user_query, top_k=5)
+if not similar_memories:
+    all_memories = self.memory_service.retrieve_all_memories()
+    similar_memories = [(m.id, 0.5) for m in all_memories[:5]]
+```
+
+**4. Created `scripts/seed_memories.py`**
+
+A dedicated seeder that loads all memories from `backend/data/sample_memories.json` into the live API via `POST /api/v1/memories` (stores embeddings automatically).
+
+#### Full workflow to run pipeline tests correctly
+
+```bash
+# Step 1 — Start the server from the repo root
+/home/ali/.pyenv/shims/python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8001 &
+
+# Or if pyenv is active in your shell:
+python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8001 &
+
+# Step 2 — Confirm server is healthy
+curl http://localhost:8001/health
+# Expected: {"status":"ok","service":"legacyai"}
+
+# Step 3 — Seed sample memories (must run after every server restart)
+python scripts/seed_memories.py
+# Expected: Done: 50 loaded, 0 errors.
+
+# Step 4 — Run the pipeline tests
+python scripts/run_pipeline_tests.py
+# Expected: Results  : 15 passed, 0 failed out of 15
+# Log file: logs/pipeline_test.log
+```
+
+#### Why seeding is required after every restart
+
+The server uses an in-memory store (Python dict). All memories and embeddings are lost when the process exits. Seeding re-populates the store each time. This is a known limitation of the current local development configuration; production deployments using the PostgreSQL/pgvector backends will persist data across restarts.
+
+---
+
+### KB Article: `UnicodeEncodeError` when running pipeline test script on Linux terminal
+
+#### Symptom
+
+```text
+--- Logging error ---
+UnicodeEncodeError: 'latin-1' codec can't encode character '\u2014' in position 19
+```
+
+The script crashes on console output containing em-dashes (`—`) or arrows (`→`).
+
+#### Root cause
+
+Python's `logging.StreamHandler` inherits the terminal's locale encoding. On some Linux systems `sys.stdout` defaults to `latin-1`, which cannot encode Unicode characters outside the ASCII range.
+
+#### Fix applied in this repository
+
+File: [scripts/run_pipeline_tests.py](scripts/run_pipeline_tests.py)
+
+1. The console `StreamHandler` was switched to an explicit UTF-8 wrapper:
+
+```python
+stdout_utf8 = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1, closefd=False)
+ch = logging.StreamHandler(stdout_utf8)
+```
+
+2. All Unicode symbols in log strings were replaced with plain ASCII equivalents (`—` → `--`, `→` → `->`).
 
 ## Getting Started
 
