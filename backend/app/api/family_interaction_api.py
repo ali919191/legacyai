@@ -42,6 +42,8 @@ class AskResponse(BaseModel):
     memories_used: List[str]
     memory_details: List[Dict[str, Any]]
     memory_priority: List[Dict[str, Any]]
+    lessons_extracted: List[str]
+    wisdom_principles: List[str]
     insights_used: List[str]
     enhanced_questions: List[Dict[str, Any]]
     confidence_score: float
@@ -219,6 +221,8 @@ class FamilyInteractionAPI:
                     memories_used=result['memories_used'],
                     memory_details=result.get('memory_details', []),
                     memory_priority=result.get('memory_priority', []),
+                    lessons_extracted=result.get('lessons_used', []),
+                    wisdom_principles=result.get('wisdom_principles', []),
                     insights_used=result['insights_used'],
                     enhanced_questions=result.get('enhanced_questions', []),
                     confidence_score=result['confidence_score'],

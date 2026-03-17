@@ -203,10 +203,33 @@ class ConversationEngine:
         # Step 8: If this is an advice-oriented question, build wisdom from lived experience.
         wisdom_context: Dict[str, Any] = {}
         if self._is_advice_oriented_query(user_query) and self.distillation_service and relevant_memories:
-            wisdom_context = self.distillation_service.generate_advice_from_experiences(
-                user_query,
-                relevant_memories,
-            )
+            lessons = self.distillation_service.extract_wisdom_lessons(relevant_memories)
+            if lessons:
+                lesson_lines = "\n".join(
+                    f"  * {item.get('lesson', '').strip()}" for item in lessons if item.get("lesson")
+                )
+                logger.info("LESSONS EXTRACTED:\n%s", lesson_lines or "  * NONE")
+            else:
+                logger.info("LESSONS EXTRACTED: NONE")
+
+            # Use WisdomEngine directly when available to make the integration explicit.
+            # Fall back to distillation_service.generate_advice_from_experiences for compatibility.
+            wisdom_engine = getattr(self.distillation_service, "wisdom_engine", None)
+            if wisdom_engine:
+                patterns = wisdom_engine.identify_patterns(relevant_memories)
+                principles = wisdom_engine.generate_principle(lessons)
+                advice = wisdom_engine.generate_advice(user_query, principles)
+                wisdom_context = {
+                    "lessons": lessons,
+                    "patterns": patterns,
+                    "principles": principles,
+                    "advice": advice,
+                }
+            else:
+                wisdom_context = self.distillation_service.generate_advice_from_experiences(
+                    user_query,
+                    relevant_memories,
+                )
             context['wisdom'] = wisdom_context
 
         # Step 9: Detect knowledge gaps and create follow-up questions for widget display.
@@ -289,9 +312,12 @@ class ConversationEngine:
         """Return True when the query asks for advice, lessons, or guidance."""
         advice_triggers = {
             "advice",
+            "what advice",
             "what should",
+            "what should i do",
             "what would you do",
             "how should",
+            "how should i handle",
             "guidance",
             "lesson",
             "recommend",
@@ -450,7 +476,23 @@ Respond in a way that reflects these personality characteristics."""
                 + self._build_recipient_context_text(context["recipient_profile"])
             )
 
-        prompt = f"""You are an AI representation of a person built from their life memories. Use ONLY the following memories to answer the user's question. Do not use any knowledge outside of these memories.{personality_text}{person_profile_text}{recipient_text}
+        wisdom_text = ""
+        if context.get("wisdom"):
+            principles = context["wisdom"].get("principles", [])
+            lessons = context["wisdom"].get("lessons", [])
+            lesson_lines = [
+                f"- {item.get('lesson', '').strip()}"
+                for item in lessons
+                if item.get("lesson")
+            ][:3]
+            principle_lines = [f"- {text}" for text in principles[:3]]
+            wisdom_text = (
+                "\nWisdom distilled from these same memories:\n"
+                + ("Principles:\n" + "\n".join(principle_lines) + "\n" if principle_lines else "")
+                + ("Lessons:\n" + "\n".join(lesson_lines) + "\n" if lesson_lines else "")
+            )
+
+        prompt = f"""You are an AI representation of a person built from their life memories. You MUST use ONLY the memories below to answer the question. If the answer is not present in these memories, say "I don't remember that clearly." Do not use any knowledge outside of these memories.{personality_text}{person_profile_text}{recipient_text}{wisdom_text}
 
 User's question: {user_query}
 
@@ -553,7 +595,6 @@ Please answer the question using ONLY these memories. If the memories do not con
             logger.info("MEMORIES USED in response synthesis: NONE")
             return "I don't remember that clearly."
 
-        used_ids = [m["id"] for m in top_memories]
         mem_trace_lines = "\n".join(
             f"  * {m['id']}: {m.get('title', 'untitled')}" for m in top_memories
         )
@@ -598,7 +639,12 @@ Please answer the question using ONLY these memories. If the memories do not con
         if not sentences:
             return "I don't remember that clearly."
 
-        return " ".join(sentences)
+        response = " ".join(sentences)
+        principles = context.get("wisdom", {}).get("principles", [])
+        if principles:
+            response += f" A guiding principle I learned is: {principles[0]}"
+
+        return response
 
     def _get_relevant_insights(self, user_query: str, relevant_memories: List[Memory]) -> List[DistilledInsight]:
         """

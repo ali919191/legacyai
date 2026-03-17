@@ -5544,3 +5544,205 @@ Results  : 15 passed, 0 failed out of 15
 Log file : /home/ali/Documents/github/legacyai/logs/pipeline_test.log
 ------------------------------------------------------------
 
+
+------------------------------------------------------------
+Legacy AI Platform -- Pipeline Test Run
+Base URL : http://localhost:8001
+User ID  : test_user
+Cases    : 15
+Started  : 2026-03-16 22:09:07
+------------------------------------------------------------
+
+[1/15] Early career lessons
+
+[2026-03-16 22:09:07]
+CASE    : Early career lessons
+QUESTION: What did you learn from your early career?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 082b3596-e0ae-4a9f-9f6f-4eefe8c74ad3: "Volunteering at the literacy center"
+  * cc07c96f-0b0b-4ad4-98a9-fd0991178e94: "Burnout warning signs"
+  * 330c93df-04b3-499d-88f8-5fa36631cb00: "Science fair volcano"
+LESSONS EXTRACTED: NONE
+RESPONSE: I remember Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement feel meaningful and connected with adult learners and volunteer team. I felt purpose and humility. I recall I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest is a responsibility, not a reward with Sarah and Dr. Mendez. I felt anxiety and relief. There was a time when My volcano erupted too early and soaked the display table in red foam. I rewrote the presentation overnight and still earned honorable mention with science teacher and classmates. I felt panic and relief.
+------------------------------------------------------------
+  -> OK | memories:3 | I remember Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement fee
+[2/15] Mistakes and regrets
+
+[2026-03-16 22:09:07]
+CASE    : Mistakes and regrets
+QUESTION: Tell me about a mistake you made and what you learned from it.
+STATUS  : 200 OK
+MEMORIES USED:
+  * e68a4052-24b3-4540-bcca-c8d176f41fd8: "Woodshop birdhouse project"
+  * 7899d92a-47bd-4874-8f4a-68422e5f2caa: "Missed design deadline"
+LESSONS EXTRACTED: NONE
+RESPONSE: I remember My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is more valuable than perfection with Mr. Lewis. I felt frustration and pride. I recall I underestimated a systems integration task and missed a major deadline. Owning the mistake publicly rebuilt trust faster than excuses ever could with project manager and team. I felt stress and regret.
+------------------------------------------------------------
+  -> OK | memories:2 | I remember My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is mo
+[3/15] Parenting advice -- discipline
+
+[2026-03-16 22:09:07]
+CASE    : Parenting advice -- discipline
+QUESTION: What advice would you give your son about discipline?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 082b3596-e0ae-4a9f-9f6f-4eefe8c74ad3: "Volunteering at the literacy center"
+LESSONS EXTRACTED:
+  * Major life transitions are best handled with preparation and trusted support.
+RESPONSE: I remember Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement feel meaningful and connected with adult learners and volunteer team. I felt purpose and humility. A guiding principle I learned is: For major transitions, plan ahead and lean on trusted relationships.
+------------------------------------------------------------
+  -> OK | memories:1 | I remember Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement fee
+[4/15] Person lookup -- Mike
+
+[2026-03-16 22:09:07]
+CASE    : Person lookup -- Mike
+QUESTION: Who is Mike and what is your relationship with him?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 3770a560-a0d9-4f2c-a28a-04a7a356d83a: "Caring for Mom after surgery"
+  * 06c0afd4-0571-4882-81be-3acbe5cb7b2b: "Meeting Sarah in the reference aisle"
+LESSONS EXTRACTED: NONE
+RESPONSE: I remember For six weeks I drove Mom to appointments before work and back home after. Slowing down for caregivers taught me what real gratitude looks like with Mom and Sarah. I felt fatigue and devotion. I recall I offered Sarah the last available statistics handbook and we ended up studying together until closing. Conversation with her felt effortless from the start with Sarah. I felt nervous and spark.
+------------------------------------------------------------
+  -> OK | memories:2 | I remember For six weeks I drove Mom to appointments before work and back home after. Slowing down for caregivers taught
+[5/15] Most important life lesson
+
+[2026-03-16 22:09:07]
+CASE    : Most important life lesson
+QUESTION: What is your most important life lesson?
+STATUS  : 200 OK
+MEMORIES USED:
+  * d5baf446-06bb-47f4-ba51-05f87f07df99: "Graduating with honors"
+LESSONS EXTRACTED:
+  * Consistent effort and strong relationships create lasting success.
+RESPONSE: I remember When my name was called for honors, I looked up and saw my parents standing in the back because seats were full. Their sacrifice carried me there with Mom, Dad, and Sarah. I felt pride and gratitude. A guiding principle I learned is: Protect daily discipline because small consistent actions shape outcomes.
+------------------------------------------------------------
+  -> OK | memories:1 | I remember When my name was called for honors, I looked up and saw my parents standing in the back because seats were fu
+[6/15] Family relationships
+
+[2026-03-16 22:09:07]
+CASE    : Family relationships
+QUESTION: Tell me about your relationship with your family.
+STATUS  : 200 OK
+MEMORIES USED:
+  * a2f24b17-969c-4df7-a651-5dba0c18bf95: "Quiet promise to my little sister"
+  * 06c0afd4-0571-4882-81be-3acbe5cb7b2b: "Meeting Sarah in the reference aisle"
+LESSONS EXTRACTED: NONE
+RESPONSE: I remember After kids teased my sister's stutter, we practiced breathing and reading together each evening. Protecting her taught me gentleness can be a form of strength with Lily. I felt protective and tender. I recall I offered Sarah the last available statistics handbook and we ended up studying together until closing. Conversation with her felt effortless from the start with Sarah. I felt nervous and spark.
+------------------------------------------------------------
+  -> OK | memories:2 | I remember After kids teased my sister's stutter, we practiced breathing and reading together each evening. Protecting h
+[7/15] Lessons from failure
+
+[2026-03-16 22:09:07]
+CASE    : Lessons from failure
+QUESTION: What did you learn from your biggest failure?
+STATUS  : 200 OK
+MEMORIES USED: NONE
+LESSONS EXTRACTED: NONE
+RESPONSE: I don't remember that clearly.
+------------------------------------------------------------
+  -> OK | memories:0 | I don't remember that clearly.
+[8/15] Early life description
+
+[2026-03-16 22:09:07]
+CASE    : Early life description
+QUESTION: Describe your early life and childhood.
+STATUS  : 200 OK
+MEMORIES USED:
+  * e68a4052-24b3-4540-bcca-c8d176f41fd8: "Woodshop birdhouse project"
+  * 7899d92a-47bd-4874-8f4a-68422e5f2caa: "Missed design deadline"
+LESSONS EXTRACTED: NONE
+RESPONSE: I remember My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is more valuable than perfection with Mr. Lewis. I felt frustration and pride. I recall I underestimated a systems integration task and missed a major deadline. Owning the mistake publicly rebuilt trust faster than excuses ever could with project manager and team. I felt stress and regret.
+------------------------------------------------------------
+  -> OK | memories:2 | I remember My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is mo
+[9/15] Relationship advice
+
+[2026-03-16 22:09:07]
+CASE    : Relationship advice
+QUESTION: What advice do you have about maintaining strong relationships?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 122be945-5699-4e4e-bc91-3d1acae47050: "Letter to my children about life lessons"
+LESSONS EXTRACTED:
+  * Major life transitions are best handled with preparation and trusted support.
+RESPONSE: I remember I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. A guiding principle I learned is: For major transitions, plan ahead and lean on trusted relationships.
+------------------------------------------------------------
+  -> OK | memories:1 | I remember I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect 
+[10/15] Core values
+
+[2026-03-16 22:09:07]
+CASE    : Core values
+QUESTION: What values were most important to you throughout your life?
+STATUS  : 200 OK
+MEMORIES USED: NONE
+LESSONS EXTRACTED: NONE
+RESPONSE: I don't remember that clearly.
+------------------------------------------------------------
+  -> OK | memories:0 | I don't remember that clearly.
+[11/15] Career regrets
+
+[2026-03-16 22:09:07]
+CASE    : Career regrets
+QUESTION: Is there anything in your career you would have done differently?
+STATUS  : 200 OK
+MEMORIES USED:
+  * b9dfbae0-1fb5-414a-a00f-2fcce2be3068: "Farewell party at headquarters"
+LESSONS EXTRACTED: NONE
+RESPONSE: I remember Colleagues shared stories about projects and difficult years we survived together. I realized impact is measured in people, not awards with colleagues, Sarah, and children. I felt nostalgia and pride.
+------------------------------------------------------------
+  -> OK | memories:1 | I remember Colleagues shared stories about projects and difficult years we survived together. I realized impact is measu
+[12/15] Advice to younger self
+
+[2026-03-16 22:09:07]
+CASE    : Advice to younger self
+QUESTION: What would you tell your younger self if you could?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 3770a560-a0d9-4f2c-a28a-04a7a356d83a: "Caring for Mom after surgery"
+LESSONS EXTRACTED: NONE
+RESPONSE: I remember For six weeks I drove Mom to appointments before work and back home after. Slowing down for caregivers taught me what real gratitude looks like with Mom and Sarah. I felt fatigue and devotion.
+------------------------------------------------------------
+  -> OK | memories:1 | I remember For six weeks I drove Mom to appointments before work and back home after. Slowing down for caregivers taught
+[13/15] Proudest achievement
+
+[2026-03-16 22:09:07]
+CASE    : Proudest achievement
+QUESTION: What are you most proud of in your life?
+STATUS  : 200 OK
+MEMORIES USED:
+  * 591eeb45-f03f-4bc9-962c-ffbadb2bc386: "Financial mistake in investment"
+LESSONS EXTRACTED: NONE
+RESPONSE: I remember I chased a 'sure thing' stock tip and lost a year of savings. It reminded me that discipline beats excitement in money decisions with Sarah. I felt regret and shame.
+------------------------------------------------------------
+  -> OK | memories:1 | I remember I chased a 'sure thing' stock tip and lost a year of savings. It reminded me that discipline beats excitement
+[14/15] Handling adversity
+
+[2026-03-16 22:09:07]
+CASE    : Handling adversity
+QUESTION: How did you handle difficult times and adversity?
+STATUS  : 200 OK
+MEMORIES USED:
+  * c095b9a3-d63d-484c-8f73-1b4a662f100a: "Wedding in a small chapel"
+  * 29580471-c5dc-48ed-8229-22bd49d7e5cf: "Learning to read road signs"
+LESSONS EXTRACTED: NONE
+RESPONSE: I remember Sarah and I married in a simple chapel with homemade flowers and borrowed music. We started with little money but a lot of commitment with Sarah, family, and friends. I felt love and hope. I recall On bus rides home, Mom quizzed me on street names and shop signs. Reading felt practical for the first time, not just homework with Mom. I felt encouraged and focused.
+------------------------------------------------------------
+  -> OK | memories:2 | I remember Sarah and I married in a simple chapel with homemade flowers and borrowed music. We started with little money
+[15/15] Legacy and impact
+
+[2026-03-16 22:09:07]
+CASE    : Legacy and impact
+QUESTION: How do you want to be remembered by your family?
+STATUS  : 200 OK
+MEMORIES USED: NONE
+LESSONS EXTRACTED: NONE
+RESPONSE: I don't remember that clearly.
+------------------------------------------------------------
+  -> OK | memories:0 | I don't remember that clearly.
+
+------------------------------------------------------------
+Results  : 15 passed, 0 failed out of 15
+Log file : /home/ali/Documents/github/legacyai/logs/pipeline_test.log
+------------------------------------------------------------
+

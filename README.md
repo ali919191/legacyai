@@ -17,6 +17,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - [Testing](#testing)
 - [Pipeline Testing](#pipeline-testing)
 - [Memory Grounding Enforcement](#memory-grounding-enforcement)
+- [Wisdom Engine Integration](#wisdom-engine-integration)
 - [Code Quality and Testing](#code-quality-and-testing)
 - [Project Structure](#project-structure)
 - [Running the Legacy AI Platform](#running-the-legacy-ai-platform)
@@ -1702,6 +1703,49 @@ def _generate_ai_response(self, prompt: str, context: Optional[Dict[str, Any]] =
 ```
 
 The `prompt` argument already contains all selected memories formatted as structured bullet points with the `Use ONLY ...` instruction, so the LLM will naturally produce a memory-grounded response without any additional changes to the rest of the pipeline.
+
+## Wisdom Engine Integration
+
+Advice-oriented questions now flow through an explicit wisdom pipeline before response synthesis.
+
+### Advice detection
+
+`ConversationEngine._is_advice_oriented_query()` marks a query as advice-focused when it contains triggers such as:
+
+- `what should i do`
+- `what advice`
+- `how should i handle`
+
+### Advice response flow
+
+For advice-focused queries, the response pipeline now performs these steps:
+
+1. Retrieve top memories via `MemoryEmbeddingService.search_similar_memories(..., top_k=5)`.
+2. Re-rank memories with `MemoryPriorityService.rank_memories(...)`.
+3. Extract lessons from those retrieved memories with `MemoryDistillationService.extract_wisdom_lessons(...)`.
+4. Pass extracted lessons into `WisdomEngine` to generate cross-memory principles and advice:
+     - `WisdomEngine.identify_patterns(...)`
+     - `WisdomEngine.generate_principle(lessons)`
+     - `WisdomEngine.generate_advice(question, principles)`
+5. Inject wisdom output into conversation context (`context["wisdom"]`) so `ConversationEngine` can incorporate principles into prompt construction and final response synthesis.
+
+### Trace logging
+
+Advice runs now include explicit lesson-level trace logs:
+
+```text
+LESSONS EXTRACTED:
+    * Speak up early, adapt quickly, and treat setbacks as feedback for growth.
+    * Protect daily discipline because small consistent actions shape outcomes.
+```
+
+When no lessons are produced:
+
+```text
+LESSONS EXTRACTED: NONE
+```
+
+The pipeline test log (`logs/pipeline_test.log`) now also records a `LESSONS EXTRACTED` block per request for debugging and verification.
 
 ## Code Quality and Testing
 

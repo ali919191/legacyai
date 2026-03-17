@@ -203,6 +203,16 @@ def run_tests(base_url: str, user_id: str, logger: logging.Logger) -> None:
         else:
             memories_block = "MEMORIES USED: NONE"
 
+        lessons = body.get("lessons_extracted") or body.get("lessons_used") or []
+        if lessons:
+            lessons_block = "LESSONS EXTRACTED:\n" + "\n".join(
+                f"  * {lesson}" for lesson in lessons if lesson
+            )
+            if lessons_block == "LESSONS EXTRACTED:\n":
+                lessons_block = "LESSONS EXTRACTED: NONE"
+        else:
+            lessons_block = "LESSONS EXTRACTED: NONE"
+
         answer_text = body.get("answer", "") if status == 200 else (
             body.get("detail") or body.get("error") or body_text
         )
@@ -214,6 +224,7 @@ def run_tests(base_url: str, user_id: str, logger: logging.Logger) -> None:
             f"QUESTION: {query}\n"
             f"STATUS  : {status} {status_label}\n"
             f"{memories_block}\n"
+            f"{lessons_block}\n"
             f"RESPONSE: {answer_text}\n"
             f"{sep}\n"
         )
