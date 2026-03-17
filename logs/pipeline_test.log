@@ -4,204 +4,251 @@ Legacy AI Platform -- Pipeline Test Run
 Base URL : http://localhost:8001
 User ID  : test_user
 Cases    : 15
-Started  : 2026-03-16 22:17:42
+Started  : 2026-03-16 22:27:14
 ------------------------------------------------------------
 
 [1/15] Early career lessons
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:14]
 CASE    : Early career lessons
 QUESTION: What did you learn from your early career?
 STATUS  : 200 OK
 MEMORIES USED:
-  * dda66052-e06d-4aa7-b74b-f962cc2865ba: "Coaching little league on weekends"
+  * b90a9cd3-a35c-4314-a72c-8354a59e7197: "Promotion to engineering director"
+  * af95d1f5-93a1-464d-93fd-d6d730b6baa6: "Passed over for promotion"
+  * c91a858d-634a-4527-9981-f62038e87fea: "Learning to read road signs"
+  * 0f4f6b18-548b-41b9-a4aa-1c1ef8941fbc: "Returning to school at night"
+  * bb0600e1-eeec-40db-883c-90bd44c1b3c8: "Library night that changed my major"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Coaching little league on weekends", I volunteered to coach because Michael was shy around other kids. Watching him celebrate teammates showed me confidence is contagious with Michael, team parents, and players. I felt pride and joy.
+RESPONSE: I remember in "Promotion to engineering director", After years of learning to communicate broader vision, I was finally promoted. The title mattered less than feeling ready for it with executive team and Sarah. I felt pride and gratitude. I recall in "Passed over for promotion", I expected a director role and watched it go to someone else with less tenure. The feedback was blunt: I needed to communicate strategy, not just execution with division head. I felt hurt and anger. There was a time when in "Learning to read road signs", On bus rides home, Mom quizzed me on street names and shop signs. Reading felt practical for the first time, not just homework with Mom. I felt encouraged and focused.
 ------------------------------------------------------------
-  -> OK | memories:1 | I remember in "Coaching little league on weekends", I volunteered to coach because Michael was shy around other kids. Wa
+  -> OK | memories:5 | I remember in "Promotion to engineering director", After years of learning to communicate broader vision, I was finally 
 [2/15] Mistakes and regrets
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:14]
 CASE    : Mistakes and regrets
 QUESTION: Tell me about a mistake you made and what you learned from it.
 STATUS  : 200 OK
 MEMORIES USED:
-  * c6e280ee-fb6b-4b44-9727-bd823080a89b: "Wedding in a small chapel"
-  * c2ce5b01-8880-4907-94a9-5e0892921609: "Farewell party at headquarters"
-  * 9701480c-1e95-4f1c-92c8-a68758fb5b12: "Conflict with teenage son"
+  * fc26840f-eb53-41e3-9671-4f0168d98e28: "Woodshop birdhouse project"
+  * 96c1a69b-73b3-43b8-900b-759ca12ae612: "Teaching my first tutoring session"
+  * 657601cf-4f72-48be-9375-a08deb3eefb7: "Summer fishing with Dad"
+  * be4bad79-d84e-4c6d-8b15-dbac13cc334e: "Financial mistake in investment"
+  * 0073c89f-8102-4235-99e0-65b40ab2c483: "Debate team regional finals"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Wedding in a small chapel", Sarah and I married in a simple chapel with homemade flowers and borrowed music. We started with little money but a lot of commitment with Sarah, family, and friends. I felt love and hope. I recall in "Farewell party at headquarters", Colleagues shared stories about projects and difficult years we survived together. I realized impact is measured in people, not awards with colleagues, Sarah, and children. I felt nostalgia and pride. There was a time when in "Conflict with teenage son", Michael wanted to quit piano and I insisted he continue, turning practice into daily arguments. Listening to his reasons helped us choose music on his terms with Michael. I felt frustration and concern.
+RESPONSE: I remember in "Woodshop birdhouse project", My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is more valuable than perfection with Mr. Lewis. I felt frustration and pride. I recall in "Teaching my first tutoring session", Explaining algebra to first-year students showed me how much I had actually learned. Teaching gave me confidence that quiet people can still lead with tutoring group. I felt nervous and confidence. There was a time when in "Summer fishing with Dad", Dad woke me before sunrise and we walked to Miller Creek with borrowed rods. I caught a tiny trout and learned patience from the long quiet between bites with Dad. I felt calm and pride.
 ------------------------------------------------------------
-  -> OK | memories:3 | I remember in "Wedding in a small chapel", Sarah and I married in a simple chapel with homemade flowers and borrowed mus
+  -> OK | memories:5 | I remember in "Woodshop birdhouse project", My first birdhouse leaned to one side, but my teacher praised clean measurin
 [3/15] Parenting advice -- discipline
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Parenting advice -- discipline
 QUESTION: What advice would you give your son about discipline?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 3a73b4f5-01da-4607-9eaa-da8660243a5f: "Graduation handshake"
-  * 643cbb71-410d-4ba7-98ab-ed3cc7229fd9: "Caring for Mom after surgery"
+  * 063c7630-5101-42fa-9a91-8898d8e3d09c: "Letter to my children about life lessons"
+  * 1a4be313-250b-4c34-bd07-8f19f970fefc: "Volunteering at the literacy center"
+  * 7ac04207-b26e-4506-945d-891d506c3b1d: "Dad's final advice"
+  * be4bad79-d84e-4c6d-8b15-dbac13cc334e: "Financial mistake in investment"
+  * 0ef66c0f-bbb6-44a5-898c-584f8da1f228: "Conflict with teenage son"
 LESSONS EXTRACTED:
-  * Consistent effort and strong relationships create lasting success.
   * Major life transitions are best handled with preparation and trusted support.
-RESPONSE: I remember in "Graduation handshake", As principal shook my hand, Dad cried openly in the front row. That moment made education feel like a family achievement, not just a personal one with Dad, Mom, and Principal. I felt pride and gratitude. I recall in "Caring for Mom after surgery", For six weeks I drove Mom to appointments before work and back home after. Slowing down for caregivers taught me what real gratitude looks like with Mom and Sarah. I felt fatigue and devotion. A guiding principle I learned is: Protect daily discipline because small consistent actions shape outcomes.
+  * Major life transitions are best handled with preparation and trusted support.
+  * Major life transitions are best handled with preparation and trusted support.
+  * Speak up early, adapt quickly, and treat setbacks as feedback for growth.
+  * Strong emotions often mark what matters most and should guide priorities.
+RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Volunteering at the literacy center", Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement feel meaningful and connected with adult learners and volunteer team. I felt purpose and humility. There was a time when in "Dad's final advice", At the hospital Dad squeezed my hand and said, 'Be kind before you are right.' That sentence has corrected me more than any management book with Dad. I felt grief and love. A guiding principle I learned is: Learn quickly from setbacks and take action before problems compound.
 ------------------------------------------------------------
-  -> OK | memories:2 | I remember in "Graduation handshake", As principal shook my hand, Dad cried openly in the front row. That moment made ed
+  -> OK | memories:5 | I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early,
 [4/15] Person lookup -- Mike
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Person lookup -- Mike
 QUESTION: Who is Mike and what is your relationship with him?
 STATUS  : 200 OK
 MEMORIES USED:
-  * c2ce5b01-8880-4907-94a9-5e0892921609: "Farewell party at headquarters"
+  * 2c0dd7b9-9eca-4219-90db-72f06fcbc50a: "Hiring someone better than me"
+  * b0f6b7e7-6728-49f3-83ee-4300877c8f80: "Coaching little league on weekends"
+  * c600de25-89ed-4d58-96b0-f6be84578be1: "Mentor who challenged my blind spots"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Farewell party at headquarters", Colleagues shared stories about projects and difficult years we survived together. I realized impact is measured in people, not awards with colleagues, Sarah, and children. I felt nostalgia and pride.
+RESPONSE: I remember in "Hiring someone better than me", I recruited a systems architect whose expertise surpassed mine in several domains. Letting go of ego accelerated the whole department with Nora and hiring committee. I felt insecurity and relief. I recall in "Coaching little league on weekends", I volunteered to coach because Michael was shy around other kids. Watching him celebrate teammates showed me confidence is contagious with Michael, team parents, and players. I felt pride and joy. There was a time when in "Mentor who challenged my blind spots", My mentor asked why I promoted only people who worked like me. It pushed me to value different working styles and made me a better manager with Mentor Grace. I felt defensive and reflective.
 ------------------------------------------------------------
-  -> OK | memories:1 | I remember in "Farewell party at headquarters", Colleagues shared stories about projects and difficult years we survived
+  -> OK | memories:3 | I remember in "Hiring someone better than me", I recruited a systems architect whose expertise surpassed mine in several
 [5/15] Most important life lesson
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Most important life lesson
 QUESTION: What is your most important life lesson?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 54d3a484-f0ef-4b83-803e-394ee03e2c2c: "Company merger turbulence"
+  * 063c7630-5101-42fa-9a91-8898d8e3d09c: "Letter to my children about life lessons"
+  * fc26840f-eb53-41e3-9671-4f0168d98e28: "Woodshop birdhouse project"
+  * be5f9617-687c-4551-8aae-9e97f37289cc: "The bicycle fall on Oak Street"
+  * 0ef66c0f-bbb6-44a5-898c-584f8da1f228: "Conflict with teenage son"
+  * 3e7c6639-5dee-4b89-9255-0e5b6b9287a4: "Science fair volcano"
 LESSONS EXTRACTED:
+  * Major life transitions are best handled with preparation and trusted support.
+  * Major life transitions are best handled with preparation and trusted support.
   * Speak up early, adapt quickly, and treat setbacks as feedback for growth.
-RESPONSE: I remember in "Company merger turbulence", The merger brought layoffs and uncertainty, and I had to deliver hard news to good people. Transparency did not remove pain, but it preserved dignity with staff and executives. I felt stress and sorrow. A guiding principle I learned is: Learn quickly from setbacks and take action before problems compound.
+  * Strong emotions often mark what matters most and should guide priorities.
+  * Speak up early, adapt quickly, and treat setbacks as feedback for growth.
+RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Woodshop birdhouse project", My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is more valuable than perfection with Mr. Lewis. I felt frustration and pride. There was a time when in "The bicycle fall on Oak Street", I tried to race older kids downhill and slid hard on gravel. Mr. Hanley patched my knee and reminded me that speed means responsibility with Mr. Hanley and neighborhood kids. I felt embarrassment and pain. A guiding principle I learned is: Learn quickly from setbacks and take action before problems compound.
 ------------------------------------------------------------
-  -> OK | memories:1 | I remember in "Company merger turbulence", The merger brought layoffs and uncertainty, and I had to deliver hard news to
+  -> OK | memories:5 | I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early,
 [6/15] Family relationships
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Family relationships
 QUESTION: Tell me about your relationship with your family.
 STATUS  : 200 OK
 MEMORIES USED:
-  * 7c40ddae-fc03-49ba-bf8e-c54fb6eabb98: "Retirement planning conversation"
+  * 3eecf4b6-8862-4d4a-a358-dbd16bbb9daa: "Graduation handshake"
+  * e8580a6c-b296-49ab-955b-02665f3bc378: "Wedding in a small chapel"
+  * 063c7630-5101-42fa-9a91-8898d8e3d09c: "Letter to my children about life lessons"
+  * 6448eb3b-f82f-4f09-82e1-156b13d34587: "Taking the family on a road trip"
+  * 4a85a877-aed5-4e91-aec8-c3442d450f2d: "Sunday dinners become sacred"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Retirement planning conversation", Sarah asked what we were retiring to, not just from. We listed purpose, service, and family before any travel plans with Sarah. I felt reflective and peaceful.
+RESPONSE: I remember in "Graduation handshake", As principal shook my hand, Dad cried openly in the front row. That moment made education feel like a family achievement, not just a personal one with Dad, Mom, and Principal. I felt pride and gratitude. I recall in "Wedding in a small chapel", Sarah and I married in a simple chapel with homemade flowers and borrowed music. We started with little money but a lot of commitment with Sarah, family, and friends. I felt love and hope. There was a time when in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity.
 ------------------------------------------------------------
-  -> OK | memories:1 | I remember in "Retirement planning conversation", Sarah asked what we were retiring to, not just from. We listed purpose
+  -> OK | memories:5 | I remember in "Graduation handshake", As principal shook my hand, Dad cried openly in the front row. That moment made ed
 [7/15] Lessons from failure
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Lessons from failure
 QUESTION: What did you learn from your biggest failure?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 57536aa2-e157-4165-b438-0116a9451a8c: "Internship interview stumble"
-  * dda66052-e06d-4aa7-b74b-f962cc2865ba: "Coaching little league on weekends"
-  * 0df62365-2995-48a5-ac24-bbd89a342176: "Mentor who challenged my blind spots"
-  * b642123d-7d6f-4d2b-9290-5f02e5b1433f: "Dad's final advice"
-  * 526c2f37-d11d-47c9-92bc-9d99dd0ca6c4: "Quiet promise to my little sister"
+  * 8fcadaae-984d-4d90-85c4-8f214e2be5c7: "Calculus exam failure"
+  * be5f9617-687c-4551-8aae-9e97f37289cc: "The bicycle fall on Oak Street"
+  * 0073c89f-8102-4235-99e0-65b40ab2c483: "Debate team regional finals"
+  * 3e7c6639-5dee-4b89-9255-0e5b6b9287a4: "Science fair volcano"
+  * 9b1d1ad1-a306-4593-b51c-4064adf68852: "County fair talent night"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Internship interview stumble", I rambled through technical questions and did not get the internship. Practicing clear answers taught me that communication can outweigh raw knowledge with hiring panel. I felt embarrassment and determination. I recall in "Coaching little league on weekends", I volunteered to coach because Michael was shy around other kids. Watching him celebrate teammates showed me confidence is contagious with Michael, team parents, and players. I felt pride and joy. There was a time when in "Mentor who challenged my blind spots", My mentor asked why I promoted only people who worked like me. It pushed me to value different working styles and made me a better manager with Mentor Grace. I felt defensive and reflective.
+RESPONSE: I remember in "Calculus exam failure", I failed my first college calculus midterm after assuming high school habits would be enough. Office hours and study groups changed my entire approach with Professor Klein and study group. I felt shock and humility. I recall in "The bicycle fall on Oak Street", I tried to race older kids downhill and slid hard on gravel. Mr. Hanley patched my knee and reminded me that speed means responsibility with Mr. Hanley and neighborhood kids. I felt embarrassment and pain. There was a time when in "Debate team regional finals", Our team lost the regional final by one point, but our coach praised how respectfully we argued. I learned dignity matters even in defeat with Coach Rivera and debate team. I felt disappointment and respect.
 ------------------------------------------------------------
-  -> OK | memories:5 | I remember in "Internship interview stumble", I rambled through technical questions and did not get the internship. Prac
+  -> OK | memories:5 | I remember in "Calculus exam failure", I failed my first college calculus midterm after assuming high school habits woul
 [8/15] Early life description
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Early life description
 QUESTION: Describe your early life and childhood.
 STATUS  : 200 OK
 MEMORIES USED:
-  * dda66052-e06d-4aa7-b74b-f962cc2865ba: "Coaching little league on weekends"
-  * 0a25e783-ca26-451d-b610-e36e45267503: "Taking the family on a road trip"
+  * 063c7630-5101-42fa-9a91-8898d8e3d09c: "Letter to my children about life lessons"
+  * c91a858d-634a-4527-9981-f62038e87fea: "Learning to read road signs"
+  * 657601cf-4f72-48be-9375-a08deb3eefb7: "Summer fishing with Dad"
+  * be5f9617-687c-4551-8aae-9e97f37289cc: "The bicycle fall on Oak Street"
+  * 3e7c6639-5dee-4b89-9255-0e5b6b9287a4: "Science fair volcano"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Coaching little league on weekends", I volunteered to coach because Michael was shy around other kids. Watching him celebrate teammates showed me confidence is contagious with Michael, team parents, and players. I felt pride and joy. I recall in "Taking the family on a road trip", Our station wagon broke down outside Amarillo and we spent the night in a cheap motel playing cards. The kids still call it the best trip ever with Sarah, Michael, and Anna. I felt frustration and laughter.
+RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Learning to read road signs", On bus rides home, Mom quizzed me on street names and shop signs. Reading felt practical for the first time, not just homework with Mom. I felt encouraged and focused. There was a time when in "Summer fishing with Dad", Dad woke me before sunrise and we walked to Miller Creek with borrowed rods. I caught a tiny trout and learned patience from the long quiet between bites with Dad. I felt calm and pride.
 ------------------------------------------------------------
-  -> OK | memories:2 | I remember in "Coaching little league on weekends", I volunteered to coach because Michael was shy around other kids. Wa
+  -> OK | memories:5 | I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early,
 [9/15] Relationship advice
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Relationship advice
 QUESTION: What advice do you have about maintaining strong relationships?
 STATUS  : 200 OK
-MEMORIES USED: NONE
-LESSONS EXTRACTED: NONE
-RESPONSE: I don't remember that clearly.
+MEMORIES USED:
+  * 7fdd4a9a-cbaa-4fa2-a931-2ba88f3edb92: "Retirement planning conversation"
+  * 4e320afc-dcd2-4562-b2e0-7bae4d38887c: "Argument with Sarah about work hours"
+  * 4a85a877-aed5-4e91-aec8-c3442d450f2d: "Sunday dinners become sacred"
+  * 7ac04207-b26e-4506-945d-891d506c3b1d: "Dad's final advice"
+  * e3278d30-08c3-4361-ab24-42dd87e70794: "Anna leaves for college"
+LESSONS EXTRACTED:
+  * Major life transitions are best handled with preparation and trusted support.
+  * Speak up early, adapt quickly, and treat setbacks as feedback for growth.
+  * Major life transitions are best handled with preparation and trusted support.
+  * Major life transitions are best handled with preparation and trusted support.
+  * Major life transitions are best handled with preparation and trusted support.
+RESPONSE: I remember in "Retirement planning conversation", Sarah asked what we were retiring to, not just from. We listed purpose, service, and family before any travel plans with Sarah. I felt reflective and peaceful. I recall in "Argument with Sarah about work hours", I missed three dinners in one week and Sarah finally said she felt like a single parent. We made a no-late-Wednesday rule and kept it for years with Sarah. I felt defensive and guilty. There was a time when in "Sunday dinners become sacred", With everyone busy, we protected Sunday dinner as non-negotiable family time. Consistency built closeness more than occasional grand gestures with Sarah, Michael, Anna, and extended family. I felt warmth and belonging. A guiding principle I learned is: Learn quickly from setbacks and take action before problems compound.
 ------------------------------------------------------------
-  -> OK | memories:0 | I don't remember that clearly.
+  -> OK | memories:5 | I remember in "Retirement planning conversation", Sarah asked what we were retiring to, not just from. We listed purpose
 [10/15] Core values
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Core values
 QUESTION: What values were most important to you throughout your life?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 57e19aab-35d3-4404-8bf9-774d851f46ee: "Argument with Sarah about work hours"
-  * 0a25e783-ca26-451d-b610-e36e45267503: "Taking the family on a road trip"
+  * 65d1e213-d2f0-4874-b276-06ce4f9578f5: "Graduating with honors"
+  * 7fdd4a9a-cbaa-4fa2-a931-2ba88f3edb92: "Retirement planning conversation"
+  * 063c7630-5101-42fa-9a91-8898d8e3d09c: "Letter to my children about life lessons"
+  * 41f39d3f-a783-4eae-8d1f-81f2276a040f: "Turning down a higher-paying role"
+  * f1f0a922-34a1-46c1-bf2a-3c1d4511f026: "Daughter's school recital"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Argument with Sarah about work hours", I missed three dinners in one week and Sarah finally said she felt like a single parent. We made a no-late-Wednesday rule and kept it for years with Sarah. I felt defensive and guilty. I recall in "Taking the family on a road trip", Our station wagon broke down outside Amarillo and we spent the night in a cheap motel playing cards. The kids still call it the best trip ever with Sarah, Michael, and Anna. I felt frustration and laughter.
+RESPONSE: I remember in "Graduating with honors", When my name was called for honors, I looked up and saw my parents standing in the back because seats were full. Their sacrifice carried me there with Mom, Dad, and Sarah. I felt pride and gratitude. I recall in "Retirement planning conversation", Sarah asked what we were retiring to, not just from. We listed purpose, service, and family before any travel plans with Sarah. I felt reflective and peaceful. There was a time when in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity.
 ------------------------------------------------------------
-  -> OK | memories:2 | I remember in "Argument with Sarah about work hours", I missed three dinners in one week and Sarah finally said she felt
+  -> OK | memories:5 | I remember in "Graduating with honors", When my name was called for honors, I looked up and saw my parents standing in t
 [11/15] Career regrets
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Career regrets
 QUESTION: Is there anything in your career you would have done differently?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 68b27117-bf9c-4508-8d10-e8deb3b0e6af: "Hiring someone better than me"
-  * e363d311-731e-4dcd-93e9-84df4915929a: "Debate team regional finals"
+  * ba5cbfcd-3ec8-4abb-95a5-4f2d01a06a01: "First day as junior engineer"
+  * 79b82c02-3b77-462c-ac70-ca758f172482: "Missed design deadline"
+  * 7cc5039f-402c-44f8-a08c-d733694f01e8: "Internship interview stumble"
+  * bb0600e1-eeec-40db-883c-90bd44c1b3c8: "Library night that changed my major"
+  * 30ff30ae-2022-4c9a-9ee8-42ac3e4651f5: "Research lab assistantship"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Hiring someone better than me", I recruited a systems architect whose expertise surpassed mine in several domains. Letting go of ego accelerated the whole department with Nora and hiring committee. I felt insecurity and relief. I recall in "Debate team regional finals", Our team lost the regional final by one point, but our coach praised how respectfully we argued. I learned dignity matters even in defeat with Coach Rivera and debate team. I felt disappointment and respect.
+RESPONSE: I remember in "First day as junior engineer", I wore an oversized hard hat and barely spoke in meetings. A kind supervisor told me to bring one question to every meeting and ask it with Supervisor Tom and engineering team. I felt intimidated and grateful. I recall in "Missed design deadline", I underestimated a systems integration task and missed a major deadline. Owning the mistake publicly rebuilt trust faster than excuses ever could with project manager and team. I felt stress and regret. There was a time when in "Internship interview stumble", I rambled through technical questions and did not get the internship. Practicing clear answers taught me that communication can outweigh raw knowledge with hiring panel. I felt embarrassment and determination.
 ------------------------------------------------------------
-  -> OK | memories:2 | I remember in "Hiring someone better than me", I recruited a systems architect whose expertise surpassed mine in several
+  -> OK | memories:5 | I remember in "First day as junior engineer", I wore an oversized hard hat and barely spoke in meetings. A kind supervis
 [12/15] Advice to younger self
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Advice to younger self
 QUESTION: What would you tell your younger self if you could?
 STATUS  : 200 OK
 MEMORIES USED:
-  * fcb0efe9-2103-452a-8709-7af3169fb959: "Burnout warning signs"
-  * 66557d2c-58ad-4a86-87ce-f3fb61fa1e82: "County fair talent night"
+  * 79b82c02-3b77-462c-ac70-ca758f172482: "Missed design deadline"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Burnout warning signs", I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest is a responsibility, not a reward with Sarah and Dr. Mendez. I felt anxiety and relief. I recall in "County fair talent night", I froze halfway through my harmonica song and forgot the tune. Grandmother applauded anyway and told me courage is showing up again next time with Grandmother. I felt fear and shame.
+RESPONSE: I remember in "Missed design deadline", I underestimated a systems integration task and missed a major deadline. Owning the mistake publicly rebuilt trust faster than excuses ever could with project manager and team. I felt stress and regret.
 ------------------------------------------------------------
-  -> OK | memories:2 | I remember in "Burnout warning signs", I started forgetting names, sleeping poorly, and snapping at home. Therapy and bo
+  -> OK | memories:1 | I remember in "Missed design deadline", I underestimated a systems integration task and missed a major deadline. Owning 
 [13/15] Proudest achievement
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Proudest achievement
 QUESTION: What are you most proud of in your life?
 STATUS  : 200 OK
 MEMORIES USED:
-  * c83523c0-591f-41a8-9639-d3c86374f5c6: "Apology to a direct report"
+  * 063c7630-5101-42fa-9a91-8898d8e3d09c: "Letter to my children about life lessons"
+  * f1f0a922-34a1-46c1-bf2a-3c1d4511f026: "Daughter's school recital"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Apology to a direct report", I dismissed an analyst's concern in a meeting, then realized she was right. Apologizing publicly taught the team accountability starts at the top with Analyst Priya and project team. I felt shame and respect.
+RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Daughter's school recital", I arrived just before curtains and still caught Anna's solo. Her face in the spotlight reminded me that small attendance moments become lifelong memories with Anna and Sarah. I felt relief and pride.
 ------------------------------------------------------------
-  -> OK | memories:1 | I remember in "Apology to a direct report", I dismissed an analyst's concern in a meeting, then realized she was right. 
+  -> OK | memories:2 | I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early,
 [14/15] Handling adversity
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Handling adversity
 QUESTION: How did you handle difficult times and adversity?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 3d416f2c-161c-483f-8439-2530961c2fb2: "Becoming a father"
-  * 7c391672-4849-44a1-b14b-c2146561a968: "First day as junior engineer"
+  * 4a600e47-cc40-4a7d-92e5-c99f6936ba7b: "Farewell party at headquarters"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Becoming a father", Holding my son for the first time felt like my priorities rearranged in a minute. I promised to be present, not just successful with Sarah and Michael. I felt awe and fear. I recall in "First day as junior engineer", I wore an oversized hard hat and barely spoke in meetings. A kind supervisor told me to bring one question to every meeting and ask it with Supervisor Tom and engineering team. I felt intimidated and grateful.
+RESPONSE: I remember in "Farewell party at headquarters", Colleagues shared stories about projects and difficult years we survived together. I realized impact is measured in people, not awards with colleagues, Sarah, and children. I felt nostalgia and pride.
 ------------------------------------------------------------
-  -> OK | memories:2 | I remember in "Becoming a father", Holding my son for the first time felt like my priorities rearranged in a minute. I p
+  -> OK | memories:1 | I remember in "Farewell party at headquarters", Colleagues shared stories about projects and difficult years we survived
 [15/15] Legacy and impact
 
-[2026-03-16 22:17:42]
+[2026-03-16 22:27:15]
 CASE    : Legacy and impact
 QUESTION: How do you want to be remembered by your family?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 7881f171-bd08-4f75-9791-3b3ff3e7d7fb: "Public speaking breakthrough"
-  * 2e9d156f-e631-4674-a8af-7dc5c4594535: "Research lab assistantship"
+  * 3eecf4b6-8862-4d4a-a358-dbd16bbb9daa: "Graduation handshake"
+  * e8580a6c-b296-49ab-955b-02665f3bc378: "Wedding in a small chapel"
+  * 6448eb3b-f82f-4f09-82e1-156b13d34587: "Taking the family on a road trip"
+  * 4a85a877-aed5-4e91-aec8-c3442d450f2d: "Sunday dinners become sacred"
+  * e3278d30-08c3-4361-ab24-42dd87e70794: "Anna leaves for college"
 LESSONS EXTRACTED: NONE
-RESPONSE: I remember in "Public speaking breakthrough", After years of avoiding large audiences, I delivered the annual technical keynote calmly. Preparation and storytelling finally overcame fear with conference attendees. I felt fear and focus. I recall in "Research lab assistantship", I spent weekends labeling circuit boards and logging test data for graduate students. Repetition taught me discipline and attention to detail with Dr. Patel and lab team. I felt focused and tired.
+RESPONSE: I remember in "Graduation handshake", As principal shook my hand, Dad cried openly in the front row. That moment made education feel like a family achievement, not just a personal one with Dad, Mom, and Principal. I felt pride and gratitude. I recall in "Wedding in a small chapel", Sarah and I married in a simple chapel with homemade flowers and borrowed music. We started with little money but a lot of commitment with Sarah, family, and friends. I felt love and hope. There was a time when in "Taking the family on a road trip", Our station wagon broke down outside Amarillo and we spent the night in a cheap motel playing cards. The kids still call it the best trip ever with Sarah, Michael, and Anna. I felt frustration and laughter.
 ------------------------------------------------------------
-  -> OK | memories:2 | I remember in "Public speaking breakthrough", After years of avoiding large audiences, I delivered the annual technical 
+  -> OK | memories:5 | I remember in "Graduation handshake", As principal shook my hand, Dad cried openly in the front row. That moment made ed
 
 ------------------------------------------------------------
 Results  : 15 passed, 0 failed out of 15

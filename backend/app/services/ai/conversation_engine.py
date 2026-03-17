@@ -16,6 +16,13 @@ from ..security.response_moderation_service import ResponseModerationService
 
 logger = logging.getLogger(__name__)
 
+_QUERY_STOPWORDS = {
+    "a", "an", "and", "are", "about", "as", "at", "be", "did", "do", "for",
+    "from", "handle", "how", "i", "if", "in", "is", "it", "me", "my", "of",
+    "on", "or", "should", "tell", "that", "the", "to", "what", "when", "with",
+    "would", "you", "your",
+}
+
 
 class ConversationEngine:
     """
@@ -104,12 +111,10 @@ class ConversationEngine:
             - 'confidence_score': Float between 0-1 indicating response confidence.
             - 'access_denied': Boolean indicating if access was denied for some memories.
         """
-        # Step 1: Semantic search for relevant memories; fall back to all memories
-        # when the vector store is empty (e.g. no embeddings have been indexed yet).
-        similar_memories = self.embedding_service.search_similar_memories(user_query, top_k=5)
-        if not similar_memories:
-            all_memories = self.memory_service.retrieve_all_memories()
-            similar_memories = [(m.id, 0.5) for m in all_memories[:5]]
+        # Step 1: Strict memory retrieval using hybrid lexical + embedding search.
+        # Do not fall back to arbitrary memories. If nothing relevant is found,
+        # the engine should return "I don't remember that clearly."
+        similar_memories = self._retrieve_relevant_memory_candidates(user_query, top_k=5)
         memory_ids = [mem_id for mem_id, _ in similar_memories]
 
         # Step 2: Retrieve full memory objects
@@ -326,6 +331,79 @@ class ConversationEngine:
         }
         query_lower = user_query.lower()
         return any(trigger in query_lower for trigger in advice_triggers)
+
+    def _retrieve_relevant_memory_candidates(self, user_query: str, top_k: int = 5) -> List[tuple]:
+        """Return the top relevant memory IDs using lexical evidence plus embedding score."""
+        all_memories = self.memory_service.retrieve_all_memories()
+        if not all_memories:
+            return []
+
+        embedding_hits = self.embedding_service.search_similar_memories(user_query, top_k=max(top_k * 2, 10))
+        embedding_scores = {memory_id: score for memory_id, score in embedding_hits}
+
+        ranked: List[tuple[str, float]] = []
+        for memory in all_memories:
+            lexical_score = self._score_memory_match(user_query, memory)
+            embedding_score = embedding_scores.get(memory.id, 0.0)
+            combined_score = lexical_score + (embedding_score * 0.35)
+
+            # Strict grounding: only keep memories with actual lexical evidence,
+            # or very strong embedding similarity when lexical evidence is weak.
+            if lexical_score > 0 or embedding_score >= 0.92:
+                ranked.append((memory.id, combined_score))
+
+        ranked.sort(key=lambda item: item[1], reverse=True)
+        return ranked[:top_k]
+
+    def _score_memory_match(self, user_query: str, memory: Memory) -> float:
+        """Score how directly a memory matches the user query using lexical overlap."""
+        query_terms = self._tokenize_query(user_query)
+        if not query_terms:
+            return 0.0
+
+        title_text = memory.title.lower()
+        description_text = memory.description.lower()
+        tags = {tag.lower() for tag in memory.tags}
+        people = {person.lower() for person in memory.people_involved}
+        full_text = f"{title_text} {description_text} {' '.join(tags)} {' '.join(people)}"
+
+        score = 0.0
+        query_lower = user_query.lower()
+
+        for term in query_terms:
+            if term in title_text:
+                score += 3.0
+            if term in description_text:
+                score += 1.5
+            if term in tags:
+                score += 2.5
+            if term in people:
+                score += 3.0
+
+        if query_lower in full_text:
+            score += 4.0
+
+        career_terms = {"job", "career", "work", "office", "engineer", "internship"}
+        family_terms = {"family", "dad", "mom", "mother", "father", "son", "daughter", "wife", "husband", "sister", "brother"}
+        advice_terms = {"advice", "lesson", "learned", "failure", "mistake", "regret"}
+
+        if query_terms & career_terms and ({"career", "work"} & tags or any(t in full_text for t in career_terms)):
+            score += 3.0
+        if query_terms & family_terms and ({"family"} & tags or any(t in full_text for t in family_terms)):
+            score += 3.0
+        if query_terms & advice_terms and any(t in full_text for t in advice_terms):
+            score += 2.0
+
+        return score
+
+    def _tokenize_query(self, user_query: str) -> set[str]:
+        """Tokenize a query into lower-cased content terms used for lexical matching."""
+        cleaned = []
+        for token in user_query.lower().split():
+            stripped = token.strip(",.?!:;\"'()[]{}")
+            if stripped and stripped not in _QUERY_STOPWORDS:
+                cleaned.append(stripped)
+        return set(cleaned)
 
     def answer_enhanced_question(
         self,
