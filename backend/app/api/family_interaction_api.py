@@ -167,7 +167,7 @@ class FamilyInteractionAPI:
                 )
 
                 # Extract moderation info
-                moderation_applied = result.get('moderation', {}).get('is_safe', True) == False
+                moderation_applied = (result.get('moderation') or {}).get('is_safe', True) == False
 
                 return AskResponse(
                     answer=result['generated_answer'],
