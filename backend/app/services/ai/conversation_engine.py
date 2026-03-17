@@ -343,20 +343,20 @@ class ConversationEngine:
 
         ranked: List[tuple[str, float]] = []
         for memory in all_memories:
-            lexical_score = self._score_memory_match(user_query, memory)
-            embedding_score = embedding_scores.get(memory.id, 0.0)
-            combined_score = lexical_score + (embedding_score * 0.35)
+            keyword_score = self._score_memory_match(user_query, memory)
+            semantic_similarity = max(embedding_scores.get(memory.id, 0.0), 0.0)
+            combined_score = (semantic_similarity * 0.7) + (keyword_score * 0.3)
 
             # Strict grounding: only keep memories with actual lexical evidence,
             # or very strong embedding similarity when lexical evidence is weak.
-            if lexical_score > 0 or embedding_score >= 0.92:
+            if keyword_score > 0 or semantic_similarity >= 0.55:
                 ranked.append((memory.id, combined_score))
 
         ranked.sort(key=lambda item: item[1], reverse=True)
         return ranked[:top_k]
 
     def _score_memory_match(self, user_query: str, memory: Memory) -> float:
-        """Score how directly a memory matches the user query using lexical overlap."""
+        """Return a normalized keyword score in the range [0, 1]."""
         query_terms = self._tokenize_query(user_query)
         if not query_terms:
             return 0.0
@@ -394,7 +394,7 @@ class ConversationEngine:
         if query_terms & advice_terms and any(t in full_text for t in advice_terms):
             score += 2.0
 
-        return score
+        return min(score / 12.0, 1.0)
 
     def _tokenize_query(self, user_query: str) -> set[str]:
         """Tokenize a query into lower-cased content terms used for lexical matching."""

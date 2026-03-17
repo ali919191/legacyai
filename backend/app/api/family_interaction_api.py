@@ -182,7 +182,12 @@ class FamilyInteractionAPI:
                     sensitivity_tags=request.sensitivity_tags or [],
                 )
                 if self.embedding_service:
-                    embed_text = f"{request.title}. {request.description}"
+                    embed_text = self.embedding_service.build_memory_embedding_text(
+                        title=request.title,
+                        description=request.description,
+                        tags=request.tags or [],
+                        emotions=request.emotions or [],
+                    )
                     self.embedding_service.store_memory_embedding(memory_id, embed_text)
                 return CreateMemoryResponse(memory_id=memory_id, title=request.title)
             except Exception as e:

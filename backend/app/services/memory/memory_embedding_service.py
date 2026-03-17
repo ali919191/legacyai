@@ -1,5 +1,6 @@
-import random
-from typing import List, Tuple
+from __future__ import annotations
+
+from typing import Iterable, List, Tuple
 from .vector_store import VectorStore
 from ..storage.hybrid_storage import (
     LocalVectorBackend,
@@ -13,14 +14,14 @@ class MemoryEmbeddingService:
     """
     Service for generating embeddings from memory text and performing semantic similarity search.
 
-    Uses a placeholder embedding model (random vectors) for now.
-    Future: Replace with OpenAI embeddings API or local models like sentence-transformers.
+    Uses a real sentence-transformers embedding model for semantic search.
 
     Integrates with VectorStore for storage and search.
     Designed for conversation engine to retrieve relevant memories based on user queries.
     """
 
     EMBEDDING_DIMENSION = 384  # Common dimension for embeddings like BERT-based models
+    DEFAULT_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
     def __init__(
         self,
@@ -28,6 +29,7 @@ class MemoryEmbeddingService:
         vector_backend: VectorBackend | None = None,
         vector_provider: str = "local",
         vector_config: dict | None = None,
+        model_name: str = DEFAULT_MODEL_NAME,
     ):
         """
         Initialize the embedding service.
@@ -41,6 +43,8 @@ class MemoryEmbeddingService:
             vector_store_file=vector_store_file,
             vector_config=vector_config or {},
         )
+        self.model_name = model_name
+        self._model = None
 
     def _build_vector_backend(
         self,
@@ -62,20 +66,24 @@ class MemoryEmbeddingService:
             )
         return LocalVectorBackend(vector_store_file)
 
+    def _get_model(self):
+        """Lazily load the sentence-transformers model used for embeddings."""
+        if self._model is None:
+            try:
+                from sentence_transformers import SentenceTransformer
+            except ImportError as exc:  # pragma: no cover
+                raise RuntimeError(
+                    "sentence-transformers is required for semantic embeddings. "
+                    "Install backend requirements before running the embedding service."
+                ) from exc
+
+            self._model = SentenceTransformer(self.model_name)
+
+        return self._model
+
     def generate_embedding(self, text: str) -> List[float]:
         """
         Generate an embedding vector for the given text.
-
-        Currently uses a placeholder (random vector).
-        Future: Integrate with OpenAI API:
-            import openai
-            response = openai.Embedding.create(input=text, model="text-embedding-ada-002")
-            return response['data'][0]['embedding']
-
-        Or with sentence-transformers:
-            from sentence_transformers import SentenceTransformer
-            model = SentenceTransformer('all-MiniLM-L6-v2')
-            return model.encode(text).tolist()
 
         Args:
             text: The text to embed.
@@ -83,10 +91,29 @@ class MemoryEmbeddingService:
         Returns:
             The embedding vector.
         """
-        # Placeholder: Generate random vector
-        # In production, replace with actual embedding model
-        random.seed(hash(text))  # For consistency, seed with text hash
-        return [random.uniform(-1, 1) for _ in range(self.EMBEDDING_DIMENSION)]
+        model = self._get_model()
+        embedding = model.encode(text, normalize_embeddings=True)
+        return embedding.tolist()
+
+    def build_memory_embedding_text(
+        self,
+        title: str,
+        description: str,
+        tags: Iterable[str] | None = None,
+        emotions: Iterable[str] | None = None,
+    ) -> str:
+        """Build the canonical text used for memory embeddings."""
+        tag_text = ", ".join(tags or [])
+        emotion_text = ", ".join(emotions or [])
+        parts = [
+            f"Title: {title}",
+            f"Description: {description}",
+        ]
+        if tag_text:
+            parts.append(f"Tags: {tag_text}")
+        if emotion_text:
+            parts.append(f"Emotions: {emotion_text}")
+        return "\n".join(parts)
 
     def store_memory_embedding(self, memory_id: str, text: str):
         """
