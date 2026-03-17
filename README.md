@@ -20,6 +20,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - [Semantic Memory Retrieval](#semantic-memory-retrieval)
 - [Wisdom Engine Integration](#wisdom-engine-integration)
 - [Multi-Memory Reasoning](#multi-memory-reasoning)
+- [Contextual Principle Selection](#contextual-principle-selection)
 - [Code Quality and Testing](#code-quality-and-testing)
 - [Project Structure](#project-structure)
 - [Running the Legacy AI Platform](#running-the-legacy-ai-platform)
@@ -1835,6 +1836,51 @@ PRINCIPLES GENERATED:
 ```
 
 `logs/pipeline_test.log` includes these blocks so multi-memory reasoning can be validated per question.
+
+## Contextual Principle Selection
+
+The wisdom pipeline now selects **context-relevant principles** based on the user's question intent, instead of always using a generic principle set.
+
+### Query intent classification
+
+`WisdomEngine.classify_query_intent()` maps advice questions into one of:
+
+- `failure`
+- `career`
+- `relationships`
+- `discipline`
+- `growth`
+
+### Principle tagging
+
+Generated principles are now stored with categories and weights (frequency across memory-derived lessons), e.g.:
+
+- `Failure is a necessary part of growth.` → `failure`
+- `Consistency in small daily actions creates lasting results.` → `discipline`
+
+### Contextual filtering
+
+`WisdomEngine.select_principles_for_query(...)` chooses the top 2-3 principles by:
+
+1. matching principle category to query intent first
+2. using remaining high-weight principles as fallback
+3. deduplicating outputs
+
+Only these **selected principles** are passed into the final conversation prompt and advice generator.
+
+### New logs
+
+Advice runs now include:
+
+```text
+PRINCIPLES GENERATED:
+    * ... [category=...]
+
+SELECTED PRINCIPLES:
+    * ...
+```
+
+This makes it explicit which principles were generated globally vs. which were chosen for the specific user question.
 
 ## Code Quality and Testing
 

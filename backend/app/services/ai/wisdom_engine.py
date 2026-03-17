@@ -41,6 +41,35 @@ class WisdomEngine:
             "graduation",
         }
 
+        self.query_intent_keywords = {
+            "failure": {"failure", "fail", "mistake", "regret", "setback", "wrong"},
+            "career": {"career", "job", "work", "office", "promotion", "manager", "engineer"},
+            "relationships": {"relationship", "family", "marriage", "wife", "husband", "son", "daughter", "friend"},
+            "discipline": {"discipline", "consistent", "habit", "routine", "focus", "practice"},
+            "growth": {"grow", "growth", "learn", "become", "shape", "improve", "change"},
+        }
+
+        self.principle_catalog = {
+            "failure": "Failure is a necessary part of growth.",
+            "career": "Career progress comes from learning, communication, and long-term consistency.",
+            "relationships": "Strong relationships require empathy, presence, and honest communication.",
+            "discipline": "Consistency in small daily actions creates lasting results.",
+            "growth": "Personal growth comes from reflection, adaptation, and persistence.",
+            "major_life_event": "Major transitions are easier when you prepare early and lean on trusted people.",
+            "emotional_experience": "Emotionally significant moments reveal what matters most.",
+            "success": "Success compounds when discipline and relationships move together.",
+        }
+
+    def classify_query_intent(self, question: str) -> str:
+        """Classify user advice question into a coarse intent category."""
+        query = question.lower()
+        scores = {}
+        for intent, keywords in self.query_intent_keywords.items():
+            scores[intent] = sum(1 for keyword in keywords if keyword in query)
+
+        best_intent = max(scores, key=scores.get)
+        return best_intent if scores[best_intent] > 0 else "growth"
+
     def extract_lesson(self, memory: Memory) -> Dict[str, Any]:
         """Extract a single life lesson from one memory."""
         text = f"{memory.title} {memory.description}".lower()
@@ -112,25 +141,67 @@ class WisdomEngine:
 
     def generate_principle(self, lessons: List[Dict[str, Any]]) -> List[str]:
         """Convert lesson clusters into generalized life principles."""
+        return [item["text"] for item in self.generate_categorized_principles(lessons)]
+
+    def generate_categorized_principles(self, lessons: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Generate principle records with text/category/weight for contextual selection."""
         if not lessons:
-            return []
+            return [
+                {
+                    "text": "Reflect on experience, identify patterns, and make the next choice more intentional.",
+                    "category": "growth",
+                    "weight": 1,
+                }
+            ]
 
         categories = Counter(lesson.get("category", "") for lesson in lessons)
-        principles = []
+        principles: List[Dict[str, Any]] = []
+        for category, count in categories.items():
+            mapped = category
+            if category == "major_life_event":
+                mapped = "relationships"
+            elif category == "emotional_experience":
+                mapped = "growth"
 
-        if categories.get("failure", 0):
-            principles.append("Learn quickly from setbacks and take action before problems compound.")
-        if categories.get("success", 0):
-            principles.append("Protect daily discipline because small consistent actions shape outcomes.")
-        if categories.get("major_life_event", 0):
-            principles.append("For major transitions, plan ahead and lean on trusted relationships.")
-        if categories.get("emotional_experience", 0):
-            principles.append("Use emotionally significant moments to clarify long-term priorities.")
+            principle_text = self.principle_catalog.get(
+                category,
+                self.principle_catalog.get(mapped, "Reflect on experience, identify patterns, and make the next choice more intentional."),
+            )
+            principles.append({"text": principle_text, "category": mapped, "weight": count})
 
-        if not principles:
-            principles.append("Reflect on experience, identify patterns, and make the next choice more intentional.")
-
+        principles.sort(key=lambda item: item["weight"], reverse=True)
         return principles
+
+    def select_principles_for_query(
+        self,
+        question: str,
+        categorized_principles: List[Dict[str, Any]],
+        max_items: int = 3,
+    ) -> List[str]:
+        """Select top context-relevant principles using classified query intent."""
+        if not categorized_principles:
+            return []
+
+        intent = self.classify_query_intent(question)
+        matching = [
+            item for item in categorized_principles
+            if item.get("category") == intent
+        ]
+        fallback = [
+            item for item in categorized_principles
+            if item.get("category") != intent
+        ]
+
+        ordered = matching + fallback
+        selected: List[str] = []
+        for item in ordered:
+            text = item.get("text", "").strip()
+            if text and text not in selected:
+                selected.append(text)
+            if len(selected) >= max_items:
+                break
+
+        return selected
 
     def generate_advice(self, question: str, principles: List[str]) -> str:
         """Generate advice response grounded in distilled life principles."""

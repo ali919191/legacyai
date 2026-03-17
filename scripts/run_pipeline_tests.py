@@ -233,6 +233,16 @@ def run_tests(base_url: str, user_id: str, logger: logging.Logger) -> None:
         else:
             principles_block = "PRINCIPLES GENERATED: NONE"
 
+        selected_principles = body.get("selected_principles") or principles
+        if selected_principles:
+            selected_principles_block = "SELECTED PRINCIPLES:\n" + "\n".join(
+                f"  * {principle}" for principle in selected_principles if principle
+            )
+            if selected_principles_block == "SELECTED PRINCIPLES:\n":
+                selected_principles_block = "SELECTED PRINCIPLES: NONE"
+        else:
+            selected_principles_block = "SELECTED PRINCIPLES: NONE"
+
         answer_text = body.get("answer", "") if status == 200 else (
             body.get("detail") or body.get("error") or body_text
         )
@@ -247,6 +257,7 @@ def run_tests(base_url: str, user_id: str, logger: logging.Logger) -> None:
             f"{lessons_block}\n"
             f"{patterns_block}\n"
             f"{principles_block}\n"
+            f"{selected_principles_block}\n"
             f"RESPONSE: {answer_text}\n"
             f"{sep}\n"
         )

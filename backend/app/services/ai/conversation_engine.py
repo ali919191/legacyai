@@ -236,8 +236,13 @@ class ConversationEngine:
             wisdom_engine = getattr(self.distillation_service, "wisdom_engine", None)
             if wisdom_engine:
                 patterns = wisdom_engine.identify_patterns(relevant_memories)
-                principles = wisdom_engine.generate_principle(lessons)
-                advice = wisdom_engine.generate_advice(user_query, principles)
+                categorized_principles = wisdom_engine.generate_categorized_principles(lessons)
+                selected_principles = wisdom_engine.select_principles_for_query(
+                    user_query,
+                    categorized_principles,
+                    max_items=3,
+                )
+                advice = wisdom_engine.generate_advice(user_query, selected_principles)
 
                 if patterns:
                     pattern_lines = "\n".join(
@@ -248,16 +253,27 @@ class ConversationEngine:
                 else:
                     logger.info("PATTERNS IDENTIFIED: NONE")
 
-                if principles:
-                    principle_lines = "\n".join(f"  * {p}" for p in principles)
+                if categorized_principles:
+                    principle_lines = "\n".join(
+                        f"  * {item.get('text', '')} [category={item.get('category', 'unknown')}]"
+                        for item in categorized_principles
+                    )
                     logger.info("PRINCIPLES GENERATED:\n%s", principle_lines)
                 else:
                     logger.info("PRINCIPLES GENERATED: NONE")
 
+                if selected_principles:
+                    selected_lines = "\n".join(f"  * {p}" for p in selected_principles)
+                    logger.info("SELECTED PRINCIPLES:\n%s", selected_lines)
+                else:
+                    logger.info("SELECTED PRINCIPLES: NONE")
+
                 wisdom_context = {
                     "lessons": lessons,
                     "patterns": patterns,
-                    "principles": principles,
+                    "all_principles": [item.get("text", "") for item in categorized_principles],
+                    "principles": selected_principles,
+                    "principle_categories": categorized_principles,
                     "advice": advice,
                 }
             else:
@@ -282,6 +298,11 @@ class ConversationEngine:
                     logger.info("PRINCIPLES GENERATED:\n%s", principle_lines)
                 else:
                     logger.info("PRINCIPLES GENERATED: NONE")
+                if principles:
+                    selected_lines = "\n".join(f"  * {p}" for p in principles[:3])
+                    logger.info("SELECTED PRINCIPLES:\n%s", selected_lines)
+                else:
+                    logger.info("SELECTED PRINCIPLES: NONE")
             context['wisdom'] = wisdom_context
 
         # Step 9: Detect knowledge gaps and create follow-up questions for widget display.
@@ -330,6 +351,7 @@ class ConversationEngine:
 
         wisdom_lessons = [item.get("lesson", "") for item in wisdom_context.get("lessons", [])]
         wisdom_principles = wisdom_context.get("principles", [])
+        all_wisdom_principles = wisdom_context.get("all_principles", wisdom_principles)
         wisdom_patterns = [
             f"{item.get('pattern', 'unknown')} (count={item.get('count', 0)})"
             for item in wisdom_context.get("patterns", [])
@@ -357,6 +379,8 @@ class ConversationEngine:
             'lessons_used': wisdom_lessons,
             'patterns_identified': wisdom_patterns,
             'wisdom_principles': wisdom_principles,
+            'all_wisdom_principles': all_wisdom_principles,
+            'selected_principles': wisdom_principles,
             'confidence_score': confidence,
             'access_denied': access_denied,
             'moderation': moderation_result,

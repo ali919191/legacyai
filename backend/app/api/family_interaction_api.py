@@ -45,6 +45,8 @@ class AskResponse(BaseModel):
     lessons_extracted: List[str]
     patterns_identified: List[str]
     wisdom_principles: List[str]
+    all_wisdom_principles: List[str]
+    selected_principles: List[str]
     insights_used: List[str]
     enhanced_questions: List[Dict[str, Any]]
     confidence_score: float
@@ -230,6 +232,8 @@ class FamilyInteractionAPI:
                     lessons_extracted=result.get('lessons_used', []),
                     patterns_identified=result.get('patterns_identified', []),
                     wisdom_principles=result.get('wisdom_principles', []),
+                    all_wisdom_principles=result.get('all_wisdom_principles', []),
+                    selected_principles=result.get('selected_principles', []),
                     insights_used=result['insights_used'],
                     enhanced_questions=result.get('enhanced_questions', []),
                     confidence_score=result['confidence_score'],

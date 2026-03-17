@@ -4,57 +4,59 @@ Legacy AI Platform -- Pipeline Test Run
 Base URL : http://localhost:8001
 User ID  : test_user
 Cases    : 15
-Started  : 2026-03-16 22:58:17
+Started  : 2026-03-16 23:05:26
 ------------------------------------------------------------
 
 [1/15] Early career lessons
 
-[2026-03-16 22:58:17]
+[2026-03-16 23:05:26]
 CASE    : Early career lessons
 QUESTION: What did you learn from your early career?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 8e70f047-e66f-49d9-b66c-044575f845d6: "Promotion to engineering director"
-  * 50b9b3ed-aa59-4a14-993a-f5118457e3d6: "Learning to read road signs"
-  * 944a119b-67fa-45e5-be94-256fa4352a95: "Returning to school at night"
-  * 36ecfe93-a828-4e36-bc3a-ae4127a83d62: "Library night that changed my major"
-  * a6aa5f6c-e289-438a-8ea0-cab10250a32a: "Research lab assistantship"
+  * ee76645c-ef06-4e95-91c8-a510732d9559: "Promotion to engineering director"
+  * 023bc333-e7bc-466e-b06e-544eaae72192: "Learning to read road signs"
+  * 0cc42f34-8419-43ae-94fd-c4984a935dbd: "Returning to school at night"
+  * ce21f448-0508-4271-8bd8-f5b59ec440ef: "Library night that changed my major"
+  * f8d392fa-90ce-42ef-983d-23e790b650f6: "Research lab assistantship"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Promotion to engineering director", After years of learning to communicate broader vision, I was finally promoted. The title mattered less than feeling ready for it with executive team and Sarah. I felt pride and gratitude. I recall in "Learning to read road signs", On bus rides home, Mom quizzed me on street names and shop signs. Reading felt practical for the first time, not just homework with Mom. I felt encouraged and focused. There was a time when in "Returning to school at night", I enrolled in evening management classes while working full time. Learning again in my thirties proved reinvention has no age limit with class cohort. I felt exhausted and motivated.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Promotion to engineering director", After years of learning to communicate broader vision, I was finally 
 [2/15] Mistakes and regrets
 
-[2026-03-16 22:58:17]
+[2026-03-16 23:05:26]
 CASE    : Mistakes and regrets
 QUESTION: Tell me about a mistake you made and what you learned from it.
 STATUS  : 200 OK
 MEMORIES USED:
-  * 741f9363-3faa-4de5-9910-72616705da35: "Woodshop birdhouse project"
-  * 0a3fe74d-a9c2-48f3-b749-e6a74bd67d53: "Calculus exam failure"
-  * bb6ae977-1b69-4745-ac52-fd2766e28501: "Summer fishing with Dad"
-  * a0bb2745-fc3c-4dc1-b42d-49da50774612: "Financial mistake in investment"
-  * 10546936-2224-482c-b479-d3737b90aeb7: "Debate team regional finals"
+  * ab66025d-1fce-4ac4-9afc-a258a4603d50: "Woodshop birdhouse project"
+  * ea2da2c0-f07d-43d0-be8a-512247640822: "Calculus exam failure"
+  * 70ddecd5-525a-4594-8e1d-8413b1d9651a: "Summer fishing with Dad"
+  * 1efc6a7c-7845-4190-ad09-a1cf3cae4049: "Summer fishing with Dad"
+  * 66c6bbce-be30-4aac-b313-e9c265bbcde9: "Financial mistake in investment"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Woodshop birdhouse project", My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is more valuable than perfection with Mr. Lewis. I felt frustration and pride. I recall in "Calculus exam failure", I failed my first college calculus midterm after assuming high school habits would be enough. Office hours and study groups changed my entire approach with Professor Klein and study group. I felt shock and humility. There was a time when in "Summer fishing with Dad", Dad woke me before sunrise and we walked to Miller Creek with borrowed rods. I caught a tiny trout and learned patience from the long quiet between bites with Dad. I felt calm and pride.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Woodshop birdhouse project", My first birdhouse leaned to one side, but my teacher praised clean measurin
 [3/15] Parenting advice -- discipline
 
-[2026-03-16 22:58:18]
+[2026-03-16 23:05:26]
 CASE    : Parenting advice -- discipline
 QUESTION: What advice would you give your son about discipline?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 0a96b8b8-b337-4cfc-8e7f-0d7697706b86: "Letter to my children about life lessons"
-  * 971e7383-379f-4876-b18f-fdec2968580e: "Volunteering at the literacy center"
-  * a865a1f7-4d6f-4eec-8e5a-6d604cf21f2c: "Dad's final advice"
-  * a0bb2745-fc3c-4dc1-b42d-49da50774612: "Financial mistake in investment"
-  * 4d8aa6d2-68a0-4fc0-8514-eb844d6dfe26: "Conflict with teenage son"
+  * 8af2f457-532a-4209-aa5f-73e6728477d9: "Letter to my children about life lessons"
+  * d7fa2de6-56dc-4d65-9ee5-f47961d3228d: "Volunteering at the literacy center"
+  * 9de4e236-79b3-4954-bd00-166829eb37cc: "Dad's final advice"
+  * 66c6bbce-be30-4aac-b313-e9c265bbcde9: "Financial mistake in investment"
+  * 4223e793-b9d4-40f3-935d-860e5c415ca3: "Conflict with teenage son"
 LESSONS EXTRACTED:
   * Major life transitions are best handled with preparation and trusted support.
   * Major life transitions are best handled with preparation and trusted support.
@@ -66,40 +68,45 @@ PATTERNS IDENTIFIED:
   * failure (count=1)
   * emotional_experience (count=1)
 PRINCIPLES GENERATED:
-  * Learn quickly from setbacks and take action before problems compound.
-  * For major transitions, plan ahead and lean on trusted relationships.
-  * Use emotionally significant moments to clarify long-term priorities.
-RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Volunteering at the literacy center", Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement feel meaningful and connected with adult learners and volunteer team. I felt purpose and humility. There was a time when in "Dad's final advice", At the hospital Dad squeezed my hand and said, 'Be kind before you are right.' That sentence has corrected me more than any management book with Dad. I felt grief and love. A guiding principle I learned is: Learn quickly from setbacks and take action before problems compound.
+  * Major transitions are easier when you prepare early and lean on trusted people.
+  * Failure is a necessary part of growth.
+  * Emotionally significant moments reveal what matters most.
+SELECTED PRINCIPLES:
+  * Major transitions are easier when you prepare early and lean on trusted people.
+  * Failure is a necessary part of growth.
+  * Emotionally significant moments reveal what matters most.
+RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Volunteering at the literacy center", Tutoring adults in reading reminded me of Mom's bus-sign lessons decades earlier. Service made retirement feel meaningful and connected with adult learners and volunteer team. I felt purpose and humility. There was a time when in "Dad's final advice", At the hospital Dad squeezed my hand and said, 'Be kind before you are right.' That sentence has corrected me more than any management book with Dad. I felt grief and love. A guiding principle I learned is: Major transitions are easier when you prepare early and lean on trusted people.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early,
 [4/15] Person lookup -- Mike
 
-[2026-03-16 22:58:18]
+[2026-03-16 23:05:26]
 CASE    : Person lookup -- Mike
 QUESTION: Who is Mike and what is your relationship with him?
 STATUS  : 200 OK
 MEMORIES USED:
-  * a9175b03-2b1b-4c5b-bbfc-39543753f495: "Hiring someone better than me"
-  * fcb5428c-b13d-4c44-b38e-5a63b03d9582: "Coaching little league on weekends"
-  * 288a3722-00c7-4cca-8c97-5754a15665f3: "Mentor who challenged my blind spots"
+  * 33db085e-9f5a-4980-ad6d-223ff182829d: "Hiring someone better than me"
+  * 6e089a9c-645d-4fe9-838e-1511cefdc8f1: "Coaching little league on weekends"
+  * d721e06a-0fbd-4e5b-a9e1-d399da27ca62: "Mentor who challenged my blind spots"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Hiring someone better than me", I recruited a systems architect whose expertise surpassed mine in several domains. Letting go of ego accelerated the whole department with Nora and hiring committee. I felt insecurity and relief. I recall in "Coaching little league on weekends", I volunteered to coach because Michael was shy around other kids. Watching him celebrate teammates showed me confidence is contagious with Michael, team parents, and players. I felt pride and joy. There was a time when in "Mentor who challenged my blind spots", My mentor asked why I promoted only people who worked like me. It pushed me to value different working styles and made me a better manager with Mentor Grace. I felt defensive and reflective.
 ------------------------------------------------------------
   -> OK | memories:3 | I remember in "Hiring someone better than me", I recruited a systems architect whose expertise surpassed mine in several
 [5/15] Most important life lesson
 
-[2026-03-16 22:58:18]
+[2026-03-16 23:05:27]
 CASE    : Most important life lesson
 QUESTION: What is your most important life lesson?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 0a96b8b8-b337-4cfc-8e7f-0d7697706b86: "Letter to my children about life lessons"
-  * 741f9363-3faa-4de5-9910-72616705da35: "Woodshop birdhouse project"
-  * 190c3519-8f1f-40ec-a5af-ff239555c0e6: "Burnout warning signs"
-  * f99e1378-8a55-4d31-bc76-c65a4fe12ea0: "The bicycle fall on Oak Street"
-  * 803453e0-d909-43f8-a75b-9fdb1f7e89eb: "Science fair volcano"
+  * 8af2f457-532a-4209-aa5f-73e6728477d9: "Letter to my children about life lessons"
+  * ab66025d-1fce-4ac4-9afc-a258a4603d50: "Woodshop birdhouse project"
+  * 8fec547e-d253-4b84-95d3-789e22483769: "Burnout warning signs"
+  * 920e65ae-6eca-4bd5-8424-03c22a5ab73b: "The bicycle fall on Oak Street"
+  * c40610c4-3304-46f9-b380-497bdaa4c4a5: "Science fair volcano"
 LESSONS EXTRACTED:
   * Major life transitions are best handled with preparation and trusted support.
   * Major life transitions are best handled with preparation and trusted support.
@@ -110,77 +117,83 @@ PATTERNS IDENTIFIED:
   * failure (count=3)
   * major_life_event (count=2)
 PRINCIPLES GENERATED:
-  * Learn quickly from setbacks and take action before problems compound.
-  * For major transitions, plan ahead and lean on trusted relationships.
-RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Woodshop birdhouse project", My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is more valuable than perfection with Mr. Lewis. I felt frustration and pride. There was a time when in "Burnout warning signs", I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest is a responsibility, not a reward with Sarah and Dr. Mendez. I felt anxiety and relief. A guiding principle I learned is: Learn quickly from setbacks and take action before problems compound.
+  * Major transitions are easier when you prepare early and lean on trusted people.
+  * Failure is a necessary part of growth.
+SELECTED PRINCIPLES:
+  * Major transitions are easier when you prepare early and lean on trusted people.
+  * Failure is a necessary part of growth.
+RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Woodshop birdhouse project", My first birdhouse leaned to one side, but my teacher praised clean measuring marks. I learned progress is more valuable than perfection with Mr. Lewis. I felt frustration and pride. There was a time when in "Burnout warning signs", I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest is a responsibility, not a reward with Sarah and Dr. Mendez. I felt anxiety and relief. A guiding principle I learned is: Major transitions are easier when you prepare early and lean on trusted people.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early,
 [6/15] Family relationships
 
-[2026-03-16 22:58:18]
+[2026-03-16 23:05:27]
 CASE    : Family relationships
 QUESTION: Tell me about your relationship with your family.
 STATUS  : 200 OK
 MEMORIES USED:
-  * f17ded3e-2b90-4235-a177-bffc0fd3f253: "Graduation handshake"
-  * 58a02b77-c5a8-4c4a-b174-6143f5d4e8cb: "Wedding in a small chapel"
-  * 260f3f8a-214c-4c43-8f2e-c59b69e2521e: "Becoming a grandfather"
-  * 3aa805c3-a248-4762-a716-6fb2dbde48d4: "Taking the family on a road trip"
-  * 3a32714e-40b7-4277-be99-36e63bf60e9c: "Helping Mom at the diner"
+  * ab7ef170-1f3a-4f0b-ad22-46cd98c54d19: "Graduation handshake"
+  * 13328592-1e35-45f7-a504-00b24f5bf4b8: "Wedding in a small chapel"
+  * 522cf3ea-deaf-457a-9c6f-159201591e3a: "Becoming a grandfather"
+  * 7d3f6631-dbfa-4a3f-8eb8-d14ab6f36f01: "Taking the family on a road trip"
+  * 40ad60ee-df4d-43ac-90a9-d460dbdeccb3: "Helping Mom at the diner"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Graduation handshake", As principal shook my hand, Dad cried openly in the front row. That moment made education feel like a family achievement, not just a personal one with Dad, Mom, and Principal. I felt pride and gratitude. I recall in "Wedding in a small chapel", Sarah and I married in a simple chapel with homemade flowers and borrowed music. We started with little money but a lot of commitment with Sarah, family, and friends. I felt love and hope. There was a time when in "Becoming a grandfather", When I held my first grandchild, every old worry about legacy softened. Love suddenly felt both familiar and brand new with Anna, baby Emma, and Sarah. I felt awe and joy.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Graduation handshake", As principal shook my hand, Dad cried openly in the front row. That moment made ed
 [7/15] Lessons from failure
 
-[2026-03-16 22:58:18]
+[2026-03-16 23:05:27]
 CASE    : Lessons from failure
 QUESTION: What did you learn from your biggest failure?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 0a3fe74d-a9c2-48f3-b749-e6a74bd67d53: "Calculus exam failure"
-  * 190c3519-8f1f-40ec-a5af-ff239555c0e6: "Burnout warning signs"
-  * f99e1378-8a55-4d31-bc76-c65a4fe12ea0: "The bicycle fall on Oak Street"
-  * 10546936-2224-482c-b479-d3737b90aeb7: "Debate team regional finals"
-  * 2164942b-c6be-4a31-86bc-9bceea503ea2: "County fair talent night"
+  * ea2da2c0-f07d-43d0-be8a-512247640822: "Calculus exam failure"
+  * 8fec547e-d253-4b84-95d3-789e22483769: "Burnout warning signs"
+  * 920e65ae-6eca-4bd5-8424-03c22a5ab73b: "The bicycle fall on Oak Street"
+  * d9bb5792-2d52-4290-a80d-510dcc57d232: "Debate team regional finals"
+  * f0bf4cd5-f941-4cf4-9e44-3fb8b0389e60: "County fair talent night"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Calculus exam failure", I failed my first college calculus midterm after assuming high school habits would be enough. Office hours and study groups changed my entire approach with Professor Klein and study group. I felt shock and humility. I recall in "Burnout warning signs", I started forgetting names, sleeping poorly, and snapping at home. Therapy and boundaries taught me that rest is a responsibility, not a reward with Sarah and Dr. Mendez. I felt anxiety and relief. There was a time when in "The bicycle fall on Oak Street", I tried to race older kids downhill and slid hard on gravel. Mr. Hanley patched my knee and reminded me that speed means responsibility with Mr. Hanley and neighborhood kids. I felt embarrassment and pain.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Calculus exam failure", I failed my first college calculus midterm after assuming high school habits woul
 [8/15] Early life description
 
-[2026-03-16 22:58:18]
+[2026-03-16 23:05:27]
 CASE    : Early life description
 QUESTION: Describe your early life and childhood.
 STATUS  : 200 OK
 MEMORIES USED:
-  * 0a96b8b8-b337-4cfc-8e7f-0d7697706b86: "Letter to my children about life lessons"
-  * 50b9b3ed-aa59-4a14-993a-f5118457e3d6: "Learning to read road signs"
-  * bb6ae977-1b69-4745-ac52-fd2766e28501: "Summer fishing with Dad"
-  * 3a32714e-40b7-4277-be99-36e63bf60e9c: "Helping Mom at the diner"
-  * 803453e0-d909-43f8-a75b-9fdb1f7e89eb: "Science fair volcano"
+  * 8af2f457-532a-4209-aa5f-73e6728477d9: "Letter to my children about life lessons"
+  * 70ddecd5-525a-4594-8e1d-8413b1d9651a: "Summer fishing with Dad"
+  * 1efc6a7c-7845-4190-ad09-a1cf3cae4049: "Summer fishing with Dad"
+  * 40ad60ee-df4d-43ac-90a9-d460dbdeccb3: "Helping Mom at the diner"
+  * c40610c4-3304-46f9-b380-497bdaa4c4a5: "Science fair volcano"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
-RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Learning to read road signs", On bus rides home, Mom quizzed me on street names and shop signs. Reading felt practical for the first time, not just homework with Mom. I felt encouraged and focused. There was a time when in "Summer fishing with Dad", Dad woke me before sunrise and we walked to Miller Creek with borrowed rods. I caught a tiny trout and learned patience from the long quiet between bites with Dad. I felt calm and pride.
+SELECTED PRINCIPLES: NONE
+RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Summer fishing with Dad", Dad woke me before sunrise and we walked to Miller Creek with borrowed rods. I caught a tiny trout and learned patience from the long quiet between bites with Dad. I felt calm and pride. There was a time when in "Summer fishing with Dad", Dad woke me before sunrise and we walked to Miller Creek with borrowed rods. I caught a tiny trout and learned patience from the long quiet between bites with Dad. I felt calm and pride.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early,
 [9/15] Relationship advice
 
-[2026-03-16 22:58:19]
+[2026-03-16 23:05:27]
 CASE    : Relationship advice
 QUESTION: What advice do you have about maintaining strong relationships?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 3184d944-8ba9-4721-a885-bfd5abe28691: "Retirement planning conversation"
-  * d8c22ee0-4774-4f60-9d3a-69f20f91fea4: "Sunday dinners become sacred"
-  * a865a1f7-4d6f-4eec-8e5a-6d604cf21f2c: "Dad's final advice"
-  * 6d94fa40-26aa-4a9b-bf88-545eb04fdbea: "Anna leaves for college"
-  * 3a32714e-40b7-4277-be99-36e63bf60e9c: "Helping Mom at the diner"
+  * 338acbd2-1145-4d20-9312-b889210f1c83: "Retirement planning conversation"
+  * 4cd36f0a-c9a1-4802-878b-85649f3da158: "Sunday dinners become sacred"
+  * 9de4e236-79b3-4954-bd00-166829eb37cc: "Dad's final advice"
+  * ebf5e10c-dc49-4a39-8a10-83c081fe05aa: "Anna leaves for college"
+  * 40ad60ee-df4d-43ac-90a9-d460dbdeccb3: "Helping Mom at the diner"
 LESSONS EXTRACTED:
   * Major life transitions are best handled with preparation and trusted support.
   * Major life transitions are best handled with preparation and trusted support.
@@ -190,104 +203,112 @@ LESSONS EXTRACTED:
 PATTERNS IDENTIFIED:
   * major_life_event (count=5)
 PRINCIPLES GENERATED:
-  * For major transitions, plan ahead and lean on trusted relationships.
-RESPONSE: I remember in "Retirement planning conversation", Sarah asked what we were retiring to, not just from. We listed purpose, service, and family before any travel plans with Sarah. I felt reflective and peaceful. I recall in "Sunday dinners become sacred", With everyone busy, we protected Sunday dinner as non-negotiable family time. Consistency built closeness more than occasional grand gestures with Sarah, Michael, Anna, and extended family. I felt warmth and belonging. There was a time when in "Dad's final advice", At the hospital Dad squeezed my hand and said, 'Be kind before you are right.' That sentence has corrected me more than any management book with Dad. I felt grief and love. A guiding principle I learned is: For major transitions, plan ahead and lean on trusted relationships.
+  * Major transitions are easier when you prepare early and lean on trusted people.
+SELECTED PRINCIPLES:
+  * Major transitions are easier when you prepare early and lean on trusted people.
+RESPONSE: I remember in "Retirement planning conversation", Sarah asked what we were retiring to, not just from. We listed purpose, service, and family before any travel plans with Sarah. I felt reflective and peaceful. I recall in "Sunday dinners become sacred", With everyone busy, we protected Sunday dinner as non-negotiable family time. Consistency built closeness more than occasional grand gestures with Sarah, Michael, Anna, and extended family. I felt warmth and belonging. There was a time when in "Dad's final advice", At the hospital Dad squeezed my hand and said, 'Be kind before you are right.' That sentence has corrected me more than any management book with Dad. I felt grief and love. A guiding principle I learned is: Major transitions are easier when you prepare early and lean on trusted people.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Retirement planning conversation", Sarah asked what we were retiring to, not just from. We listed purpose
 [10/15] Core values
 
-[2026-03-16 22:58:19]
+[2026-03-16 23:05:27]
 CASE    : Core values
 QUESTION: What values were most important to you throughout your life?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 378428d5-59ff-4ee7-b82e-8d70f2df7f7a: "Graduating with honors"
-  * 3184d944-8ba9-4721-a885-bfd5abe28691: "Retirement planning conversation"
-  * 0a96b8b8-b337-4cfc-8e7f-0d7697706b86: "Letter to my children about life lessons"
-  * ad88091e-59b9-4380-a1c7-42811cdf9b49: "Turning down a higher-paying role"
-  * 3f92b046-e12f-4de9-81de-76b2fc20175f: "Daughter's school recital"
+  * 140a139c-3870-4667-8bcc-791642e7bebe: "Graduating with honors"
+  * 338acbd2-1145-4d20-9312-b889210f1c83: "Retirement planning conversation"
+  * 8af2f457-532a-4209-aa5f-73e6728477d9: "Letter to my children about life lessons"
+  * f52573bf-8319-46f6-bdab-9e202f35bcae: "Turning down a higher-paying role"
+  * 9d2070fb-4302-4f02-bdbe-3a78c72d239f: "Daughter's school recital"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Graduating with honors", When my name was called for honors, I looked up and saw my parents standing in the back because seats were full. Their sacrifice carried me there with Mom, Dad, and Sarah. I felt pride and gratitude. I recall in "Retirement planning conversation", Sarah asked what we were retiring to, not just from. We listed purpose, service, and family before any travel plans with Sarah. I felt reflective and peaceful. There was a time when in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Graduating with honors", When my name was called for honors, I looked up and saw my parents standing in t
 [11/15] Career regrets
 
-[2026-03-16 22:58:19]
+[2026-03-16 23:05:28]
 CASE    : Career regrets
 QUESTION: Is there anything in your career you would have done differently?
 STATUS  : 200 OK
 MEMORIES USED:
-  * ad88091e-59b9-4380-a1c7-42811cdf9b49: "Turning down a higher-paying role"
-  * 245ad8df-59e7-4484-90b3-eb77a5ac2d19: "Internship interview stumble"
-  * 288a3722-00c7-4cca-8c97-5754a15665f3: "Mentor who challenged my blind spots"
-  * 36ecfe93-a828-4e36-bc3a-ae4127a83d62: "Library night that changed my major"
-  * a6aa5f6c-e289-438a-8ea0-cab10250a32a: "Research lab assistantship"
+  * f52573bf-8319-46f6-bdab-9e202f35bcae: "Turning down a higher-paying role"
+  * f6502760-945c-40ae-8f19-6a2cdd69408d: "Internship interview stumble"
+  * d721e06a-0fbd-4e5b-a9e1-d399da27ca62: "Mentor who challenged my blind spots"
+  * ce21f448-0508-4271-8bd8-f5b59ec440ef: "Library night that changed my major"
+  * f8d392fa-90ce-42ef-983d-23e790b650f6: "Research lab assistantship"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Turning down a higher-paying role", I declined a better salary in another city to stay close to aging parents. It taught me that values should guide decisions before ambition does with Sarah, Dad, and Mom. I felt conflicted and clear. I recall in "Internship interview stumble", I rambled through technical questions and did not get the internship. Practicing clear answers taught me that communication can outweigh raw knowledge with hiring panel. I felt embarrassment and determination. There was a time when in "Mentor who challenged my blind spots", My mentor asked why I promoted only people who worked like me. It pushed me to value different working styles and made me a better manager with Mentor Grace. I felt defensive and reflective.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Turning down a higher-paying role", I declined a better salary in another city to stay close to aging par
 [12/15] Advice to younger self
 
-[2026-03-16 22:58:19]
+[2026-03-16 23:05:28]
 CASE    : Advice to younger self
 QUESTION: What would you tell your younger self if you could?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 5ef4fd51-16af-42ad-b671-3e0f7a59ddf1: "Missed design deadline"
+  * 8d1acf44-20cc-4b17-b798-42d0fa3d7c5c: "Missed design deadline"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Missed design deadline", I underestimated a systems integration task and missed a major deadline. Owning the mistake publicly rebuilt trust faster than excuses ever could with project manager and team. I felt stress and regret.
 ------------------------------------------------------------
   -> OK | memories:1 | I remember in "Missed design deadline", I underestimated a systems integration task and missed a major deadline. Owning 
 [13/15] Proudest achievement
 
-[2026-03-16 22:58:19]
+[2026-03-16 23:05:28]
 CASE    : Proudest achievement
 QUESTION: What are you most proud of in your life?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 0a96b8b8-b337-4cfc-8e7f-0d7697706b86: "Letter to my children about life lessons"
-  * 3f92b046-e12f-4de9-81de-76b2fc20175f: "Daughter's school recital"
+  * 8af2f457-532a-4209-aa5f-73e6728477d9: "Letter to my children about life lessons"
+  * 9d2070fb-4302-4f02-bdbe-3a78c72d239f: "Daughter's school recital"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early, apologize quickly, save steadily, and protect family rituals. Advice matters most when lived before spoken with Michael and Anna. I felt love and clarity. I recall in "Daughter's school recital", I arrived just before curtains and still caught Anna's solo. Her face in the spotlight reminded me that small attendance moments become lifelong memories with Anna and Sarah. I felt relief and pride.
 ------------------------------------------------------------
   -> OK | memories:2 | I remember in "Letter to my children about life lessons", I wrote Michael and Anna a long letter: choose kindness early,
 [14/15] Handling adversity
 
-[2026-03-16 22:58:19]
+[2026-03-16 23:05:28]
 CASE    : Handling adversity
 QUESTION: How did you handle difficult times and adversity?
 STATUS  : 200 OK
 MEMORIES USED:
-  * 0b4f9e1d-3b49-479a-bdec-e4f1ab356032: "Farewell party at headquarters"
+  * 278aeb83-857d-468b-8117-049bbc962e66: "Farewell party at headquarters"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Farewell party at headquarters", Colleagues shared stories about projects and difficult years we survived together. I realized impact is measured in people, not awards with colleagues, Sarah, and children. I felt nostalgia and pride.
 ------------------------------------------------------------
   -> OK | memories:1 | I remember in "Farewell party at headquarters", Colleagues shared stories about projects and difficult years we survived
 [15/15] Legacy and impact
 
-[2026-03-16 22:58:20]
+[2026-03-16 23:05:28]
 CASE    : Legacy and impact
 QUESTION: How do you want to be remembered by your family?
 STATUS  : 200 OK
 MEMORIES USED:
-  * f17ded3e-2b90-4235-a177-bffc0fd3f253: "Graduation handshake"
-  * 58a02b77-c5a8-4c4a-b174-6143f5d4e8cb: "Wedding in a small chapel"
-  * 260f3f8a-214c-4c43-8f2e-c59b69e2521e: "Becoming a grandfather"
-  * 378428d5-59ff-4ee7-b82e-8d70f2df7f7a: "Graduating with honors"
-  * 3aa805c3-a248-4762-a716-6fb2dbde48d4: "Taking the family on a road trip"
+  * ab7ef170-1f3a-4f0b-ad22-46cd98c54d19: "Graduation handshake"
+  * 13328592-1e35-45f7-a504-00b24f5bf4b8: "Wedding in a small chapel"
+  * 522cf3ea-deaf-457a-9c6f-159201591e3a: "Becoming a grandfather"
+  * 140a139c-3870-4667-8bcc-791642e7bebe: "Graduating with honors"
+  * 7d3f6631-dbfa-4a3f-8eb8-d14ab6f36f01: "Taking the family on a road trip"
 LESSONS EXTRACTED: NONE
 PATTERNS IDENTIFIED: NONE
 PRINCIPLES GENERATED: NONE
+SELECTED PRINCIPLES: NONE
 RESPONSE: I remember in "Graduation handshake", As principal shook my hand, Dad cried openly in the front row. That moment made education feel like a family achievement, not just a personal one with Dad, Mom, and Principal. I felt pride and gratitude. I recall in "Wedding in a small chapel", Sarah and I married in a simple chapel with homemade flowers and borrowed music. We started with little money but a lot of commitment with Sarah, family, and friends. I felt love and hope. There was a time when in "Becoming a grandfather", When I held my first grandchild, every old worry about legacy softened. Love suddenly felt both familiar and brand new with Anna, baby Emma, and Sarah. I felt awe and joy.
 ------------------------------------------------------------
   -> OK | memories:5 | I remember in "Graduation handshake", As principal shook my hand, Dad cried openly in the front row. That moment made ed
