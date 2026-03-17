@@ -24,6 +24,7 @@ from datetime import datetime
 from ..services.memory_capture_service import MemoryCaptureService, Memory
 from ..services.timeline_engine import TimelineEngine
 from ..services.ai.conversation_engine import ConversationEngine
+from ..services.memory.memory_embedding_service import MemoryEmbeddingService
 from ..services.security.legacy_access_service import LegacyAccessService, MemoryMetadata
 from ..services.security.response_moderation_service import ResponseModerationService
 
@@ -92,6 +93,24 @@ class TimelineEvent(BaseModel):
     age: int
 
 
+class CreateMemoryRequest(BaseModel):
+    """Request model for ingesting a new memory."""
+    title: str
+    description: str
+    timestamp: Optional[str] = None          # ISO-8601 string; defaults to now
+    people_involved: Optional[List[str]] = None
+    location: Optional[str] = ""
+    emotions: Optional[List[str]] = None
+    tags: Optional[List[str]] = None
+    sensitivity_tags: Optional[List[str]] = None
+
+
+class CreateMemoryResponse(BaseModel):
+    """Response model after memory creation."""
+    memory_id: str
+    title: str
+
+
 class FamilyInteractionAPI:
     """
     Family Interaction API for the Legacy AI platform.
@@ -110,7 +129,8 @@ class FamilyInteractionAPI:
         timeline_engine: TimelineEngine,
         conversation_engine: ConversationEngine,
         access_service: Optional[LegacyAccessService] = None,
-        moderation_service: Optional[ResponseModerationService] = None
+        moderation_service: Optional[ResponseModerationService] = None,
+        embedding_service: Optional[MemoryEmbeddingService] = None,
     ):
         """
         Initialize the Family Interaction API.
@@ -121,12 +141,14 @@ class FamilyInteractionAPI:
             conversation_engine: Engine for generating AI responses
             access_service: Optional service for access control and privacy
             moderation_service: Optional service for response safety and appropriateness
+            embedding_service: Optional service for storing/searching memory embeddings
         """
         self.memory_service = memory_service
         self.timeline_engine = timeline_engine
         self.conversation_engine = conversation_engine
         self.access_service = access_service
         self.moderation_service = moderation_service
+        self.embedding_service = embedding_service
 
         # Create FastAPI app
         self.app = FastAPI(
@@ -140,6 +162,28 @@ class FamilyInteractionAPI:
 
     def _register_routes(self):
         """Register all API routes."""
+
+        @self.app.post("/memories", response_model=CreateMemoryResponse, tags=["Memories"])
+        async def ingest_memory(request: CreateMemoryRequest):
+            """Ingest a new memory into the platform."""
+            try:
+                ts = datetime.fromisoformat(request.timestamp) if request.timestamp else None
+                memory_id = self.memory_service.create_memory(
+                    title=request.title,
+                    description=request.description,
+                    timestamp=ts,
+                    people_involved=request.people_involved or [],
+                    location=request.location or "",
+                    emotions=request.emotions or [],
+                    tags=request.tags or [],
+                    sensitivity_tags=request.sensitivity_tags or [],
+                )
+                if self.embedding_service:
+                    embed_text = f"{request.title}. {request.description}"
+                    self.embedding_service.store_memory_embedding(memory_id, embed_text)
+                return CreateMemoryResponse(memory_id=memory_id, title=request.title)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Error creating memory: {str(e)}")
 
         @self.app.post("/ask", response_model=AskResponse)
         async def ask_question(request: AskRequest):
@@ -383,7 +427,8 @@ def create_family_interaction_api(
     timeline_engine: TimelineEngine,
     conversation_engine: ConversationEngine,
     access_service: Optional[LegacyAccessService] = None,
-    moderation_service: Optional[ResponseModerationService] = None
+    moderation_service: Optional[ResponseModerationService] = None,
+    embedding_service: Optional[MemoryEmbeddingService] = None,
 ) -> FastAPI:
     """
     Factory function to create and configure the Family Interaction API.
@@ -394,6 +439,7 @@ def create_family_interaction_api(
         conversation_engine: Engine for generating AI responses
         access_service: Optional service for access control and privacy
         moderation_service: Optional service for response safety and appropriateness
+        embedding_service: Optional service for storing/searching memory embeddings
 
     Returns:
         Configured FastAPI application instance
@@ -403,7 +449,8 @@ def create_family_interaction_api(
         timeline_engine=timeline_engine,
         conversation_engine=conversation_engine,
         access_service=access_service,
-        moderation_service=moderation_service
+        moderation_service=moderation_service,
+        embedding_service=embedding_service,
     )
 
     return api.app

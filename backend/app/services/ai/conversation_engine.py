@@ -101,8 +101,12 @@ class ConversationEngine:
             - 'confidence_score': Float between 0-1 indicating response confidence.
             - 'access_denied': Boolean indicating if access was denied for some memories.
         """
-        # Step 1: Semantic search for relevant memories
+        # Step 1: Semantic search for relevant memories; fall back to all memories
+        # when the vector store is empty (e.g. no embeddings have been indexed yet).
         similar_memories = self.embedding_service.search_similar_memories(user_query, top_k=5)
+        if not similar_memories:
+            all_memories = self.memory_service.retrieve_all_memories()
+            similar_memories = [(m.id, 0.5) for m in all_memories[:5]]
         memory_ids = [mem_id for mem_id, _ in similar_memories]
 
         # Step 2: Retrieve full memory objects

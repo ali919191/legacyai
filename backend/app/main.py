@@ -160,6 +160,7 @@ def _build_services() -> dict:
     logger.info("All platform services initialised (birth_date=%s).", birth_date)
     return {
         "memory_service": memory_service,
+        "embedding_service": embedding_service,
         "document_backend": document_backend,
         "graph_backend": graph_backend,
         "person_profile_service": person_profile_service,
@@ -217,6 +218,7 @@ def create_app() -> FastAPI:
         conversation_engine=services["conversation_engine"],
         access_service=services["access_service"],
         moderation_service=services["moderation_service"],
+        embedding_service=services["embedding_service"],
     )
 
     # Root application — wraps the sub-app with CORS, lifespan, and metadata

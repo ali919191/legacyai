@@ -54,6 +54,8 @@ coverage.xml
 
 # Django stuff:
 *.log
+# Track pipeline test log output in the repo
+!logs/pipeline_test.log
 local_settings.py
 db.sqlite3
 

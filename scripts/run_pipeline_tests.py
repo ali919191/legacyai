@@ -41,11 +41,11 @@ TEST_CASES = [
         "query": "Tell me about a mistake you made and what you learned from it.",
     },
     {
-        "label": "Parenting advice — discipline",
+        "label": "Parenting advice -- discipline",
         "query": "What advice would you give your son about discipline?",
     },
     {
-        "label": "Person lookup — Mike",
+        "label": "Person lookup -- Mike",
         "query": "Who is Mike and what is your relationship with him?",
     },
     {
@@ -107,8 +107,9 @@ def _setup_logging() -> logging.Logger:
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter("%(message)s"))
 
-    # Console handler — progress summary
-    ch = logging.StreamHandler(sys.stdout)
+    # Console handler — progress summary (force UTF-8 on stdout)
+    stdout_utf8 = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1, closefd=False)
+    ch = logging.StreamHandler(stdout_utf8)
     ch.setLevel(logging.INFO)
     ch.setFormatter(logging.Formatter("%(message)s"))
 
@@ -155,7 +156,7 @@ def run_tests(base_url: str, user_id: str, logger: logging.Logger) -> None:
     failed = 0
 
     logger.info("\n%s", sep)
-    logger.info("Legacy AI Platform — Pipeline Test Run")
+    logger.info("Legacy AI Platform -- Pipeline Test Run")
     logger.info("Base URL : %s", base_url)
     logger.info("User ID  : %s", user_id)
     logger.info("Cases    : %d", total)
@@ -205,10 +206,10 @@ def run_tests(base_url: str, user_id: str, logger: logging.Logger) -> None:
         # Console — brief summary
         if status == 200:
             answer_preview = str(body.get("answer", ""))[:120].replace("\n", " ")
-            logger.info("  → %s | %.120s", status_label, answer_preview)
+            logger.info("  -> %s | %.120s", status_label, answer_preview)
         else:
             error_detail = body.get("error") or body.get("detail") or body_text[:200]
-            logger.info("  → %s | %s", status_label, error_detail)
+            logger.info("  -> %s | %s", status_label, error_detail)
 
     # Summary
     logger.info("\n%s", sep)
