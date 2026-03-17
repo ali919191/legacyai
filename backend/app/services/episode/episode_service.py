@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 import uuid
 
-from app.services.memory_capture_service import MemoryCaptureService, Memory
+from ..memory_capture_service import MemoryCaptureService, Memory
 
 
 @dataclass

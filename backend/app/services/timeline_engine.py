@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional, Any
 from datetime import datetime, date
-from app.services.memory_capture_service import Memory, MemoryCaptureService
+from .memory_capture_service import Memory, MemoryCaptureService
 
 
 class TimelineEngine:
