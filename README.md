@@ -2166,6 +2166,59 @@ All configuration lives in `.env` (copied from `.env.example`). Key variables:
 | `PERSONA_BIRTH_DATE` | `1950-01-01` | Birth date (ISO) for life-stage age calculations |
 | `MEDIA_STORAGE_PATH` | `/app/data/media` | Path inside the container for uploaded media |
 
+## Troubleshooting
+
+### KB Article: Uvicorn fails from repository root with ModuleNotFoundError for app
+
+#### Symptom
+
+Running the API from the repository root fails during import with an error similar to:
+
+- ModuleNotFoundError: No module named app
+
+This usually appears after starting with a command like:
+
+- uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8001
+
+#### Root cause
+
+One or more service modules used absolute imports that assume app is a top-level package.
+
+When startup happens through backend.app.main, Python resolves imports under backend.app, so absolute imports such as from app.services... can fail.
+
+#### Fix applied in this repository
+
+Imports were converted to package-relative form in these files:
+
+- [backend/app/services/timeline_engine.py](backend/app/services/timeline_engine.py)
+- [backend/app/services/episode/episode_service.py](backend/app/services/episode/episode_service.py)
+
+Example change pattern:
+
+- before: from app.services.memory_capture_service import ...
+- after: from .memory_capture_service import ... or from ..memory_capture_service import ...
+
+#### How to verify locally
+
+1. Install dependencies:
+
+    - pip install -r backend/requirements.txt
+
+2. Start from repository root:
+
+    - uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8001
+
+3. Check health:
+
+    - http://localhost:8001/health
+    - http://localhost:8001/api/v1/health
+
+#### If error still appears
+
+- Confirm you are using the same Python environment where backend requirements were installed.
+- Search for remaining absolute imports in backend/app and replace them with package-relative imports.
+- Re-run startup after clearing stale interpreter sessions.
+
 ## Getting Started
 
 ### Prerequisites
