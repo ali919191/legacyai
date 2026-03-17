@@ -226,11 +226,14 @@ class ConversationEngine:
         else:
             prompt = self._construct_prompt(user_query, context)
             response = self._generate_ai_response(prompt, context=context)
+            mem_trace = "\n".join(
+                f"  * {m.id}: {m.title}" for m in relevant_memories
+            )
             logger.info(
-                "Generated response for user=%s using %d memories: %s",
+                "Generated response for user=%s using %d memories:\n%s",
                 user_id or "anonymous",
                 len(relevant_memories),
-                [m.id for m in relevant_memories],
+                mem_trace,
             )
 
         # Step 10b: Adjust for recipient age/relationship on sensitive topics.
@@ -403,12 +406,18 @@ class ConversationEngine:
         Returns:
             Formatted prompt string.
         """
-        memories_text = "\n".join([
-            f"- {mem['timestamp']}: {mem['title']} - {mem['description']} "
-            f"(Location: {mem['location']}, People: {', '.join(mem['people_involved'])}, "
-            f"Emotions: {', '.join(mem['emotions'])}, Tags: {', '.join(mem['tags'])})"
-            for mem in context['memories']
-        ])
+        memory_lines = []
+        for i, mem in enumerate(context['memories'], start=1):
+            memory_lines.append(
+                f"Memory {i}: [{mem['id']}] {mem['title']}\n"
+                f"  Description: {mem['description']}\n"
+                f"  Date: {mem['timestamp']}"
+                f" | Location: {mem['location'] or 'unknown'}"
+                f" | People: {', '.join(mem['people_involved']) or 'none'}"
+                f" | Emotions: {', '.join(mem['emotions']) or 'none'}"
+                f" | Tags: {', '.join(mem['tags']) or 'none'}"
+            )
+        memories_text = "\n".join(memory_lines)
 
         personality_text = ""
         if self.personality_profile:
@@ -537,7 +546,10 @@ Please answer the question using ONLY these memories. If the memories do not con
 
         top_memories = memories[:3]
         used_ids = [m["id"] for m in top_memories]
-        logger.info("Memory IDs used in response synthesis: %s", used_ids)
+        mem_trace_lines = "\n".join(
+            f"  * {m['id']}: {m.get('title', 'untitled')}" for m in top_memories
+        )
+        logger.info("MEMORIES USED in response synthesis:\n%s", mem_trace_lines)
 
         intro_phrases = ["I remember", "I recall", "There was a time when"]
         sentences: List[str] = []
