@@ -24,6 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from .api.family_interaction_api import create_family_interaction_api  # noqa: E402
 from .services.ai.conversation_engine import ConversationEngine  # noqa: E402
 from .services.ai.knowledge_gap_service import KnowledgeGapService  # noqa: E402
+from .services.ai.identity_model_service import IdentityModelService  # noqa: E402
 from .services.ai.memory_distillation_service import MemoryDistillationService  # noqa: E402
 from .services.ai.memory_grounding_service import MemoryGroundingService  # noqa: E402
 from .services.ai.memory_priority_service import MemoryPriorityService  # noqa: E402
@@ -132,6 +133,7 @@ def _build_services() -> dict:
         memory_service=memory_service,
         person_profile_service=person_profile_service,
     )
+    identity_model_service = IdentityModelService()
     recipient_context_service = RecipientContextService()
     wisdom_engine = WisdomEngine()
     distillation_service = MemoryDistillationService(
@@ -153,6 +155,7 @@ def _build_services() -> dict:
         memory_grounding_service=memory_grounding_service,
         memory_priority_service=memory_priority_service,
         recipient_context_service=recipient_context_service,
+        identity_model_service=identity_model_service,
     )
     access_service = LegacyAccessService()
     moderation_service = ResponseModerationService()
@@ -169,6 +172,7 @@ def _build_services() -> dict:
         "timeline_engine": timeline_engine,
         "conversation_engine": conversation_engine,
         "knowledge_gap_service": knowledge_gap_service,
+        "identity_model_service": identity_model_service,
         "recipient_context_service": recipient_context_service,
         "distillation_service": distillation_service,
         "wisdom_engine": wisdom_engine,

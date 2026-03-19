@@ -21,6 +21,7 @@ Legacy AI is a platform designed to capture and preserve life experiences as str
 - [Wisdom Engine Integration](#wisdom-engine-integration)
 - [Multi-Memory Reasoning](#multi-memory-reasoning)
 - [Contextual Principle Selection](#contextual-principle-selection)
+- [Identity & Context-Aware Responses](#identity--context-aware-responses)
 - [Code Quality and Testing](#code-quality-and-testing)
 - [Project Structure](#project-structure)
 - [Running the Legacy AI Platform](#running-the-legacy-ai-platform)
@@ -1881,6 +1882,69 @@ SELECTED PRINCIPLES:
 ```
 
 This makes it explicit which principles were generated globally vs. which were chosen for the specific user question.
+
+## Identity & Context-Aware Responses
+
+The conversation pipeline now fuses both **identity traits** and **recipient context** before generating responses so output feels more human and audience-aware.
+
+### New IdentityModelService
+
+`IdentityModelService` stores and retrieves identity profiles with:
+
+- communication style (`direct`, `warm`, `humorous`, etc.)
+- values (`family`, `discipline`, `honesty`, etc.)
+- tone preferences (for response voice adaptation)
+
+Profiles are persisted in `backend/data/identity_profiles.json` and resolved per `user_id` with safe defaults.
+
+### Recipient context guarantees
+
+`RecipientContextService` now guarantees each recipient profile has:
+
+- relationship (`relationship_to_user`)
+- age
+- maturity level
+
+Older profiles are backfilled automatically when loaded.
+
+### ConversationEngine fusion flow
+
+Before response generation, `ConversationEngine` now:
+
+1. loads identity profile
+2. loads recipient profile
+3. injects both into prompt context
+4. applies tone adaptation rules to the synthesized response
+
+Prompt instruction now explicitly includes:
+
+```text
+You are responding as the user.
+The listener is their [relationship] who is [age] years old.
+Adjust tone, depth, and examples accordingly.
+```
+
+### Tone adaptation rules
+
+- child -> simple, supportive language
+- adult -> deeper reasoning
+- peer -> conversational tone
+
+Responses are further shaped by identity communication style and values to keep voice consistent with personality.
+
+### New logs
+
+Each response now records:
+
+```text
+RECIPIENT CONTEXT:
+    * relationship: ...
+    * age: ...
+
+IDENTITY TRAITS USED:
+    * tone: ...
+    * values: ...
+```
 
 ## Code Quality and Testing
 

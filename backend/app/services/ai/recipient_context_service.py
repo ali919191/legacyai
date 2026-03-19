@@ -141,7 +141,21 @@ class RecipientContextService:
     def retrieve_recipient_profile(self, user_id: str) -> Optional[Dict[str, Any]]:
         """Return recipient profile by user ID when available."""
         profile = self._profiles.get(user_id)
-        return profile.to_dict() if profile else None
+        if not profile:
+            return None
+
+        # Backfill required identity-aware fields for older stored profiles.
+        if not profile.relationship_to_user:
+            profile.relationship_to_user = "unknown"
+        if profile.age is None:
+            profile.age = 30
+        if not profile.age_bucket or profile.age_bucket == "unknown":
+            profile.age_bucket = self.determine_age_bucket(profile.age)
+        if not profile.maturity_level:
+            profile.maturity_level = self.determine_maturity_level(profile.age)
+
+        self._save_profiles()
+        return profile.to_dict()
 
     def determine_age_bucket(self, age: int) -> str:
         """Infer age bucket used for response adaptation."""

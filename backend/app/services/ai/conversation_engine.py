@@ -11,6 +11,7 @@ from .knowledge_gap_service import KnowledgeGapService
 from .memory_grounding_service import MemoryGroundingService
 from .memory_priority_service import MemoryPriorityService
 from .recipient_context_service import RecipientContextService
+from .identity_model_service import IdentityModelService
 from ..security.legacy_access_service import LegacyAccessService, MemoryMetadata
 from ..security.response_moderation_service import ResponseModerationService
 
@@ -66,6 +67,7 @@ class ConversationEngine:
         memory_grounding_service: Optional[MemoryGroundingService] = None,
         memory_priority_service: Optional[MemoryPriorityService] = None,
         recipient_context_service: Optional[RecipientContextService] = None,
+        identity_model_service: Optional[IdentityModelService] = None,
         access_service: Optional[LegacyAccessService] = None,
         moderation_service: Optional[ResponseModerationService] = None
     ):
@@ -97,6 +99,7 @@ class ConversationEngine:
         self.memory_grounding_service = memory_grounding_service
         self.memory_priority_service = memory_priority_service
         self.recipient_context_service = recipient_context_service
+        self.identity_model_service = identity_model_service
         self.access_service = access_service
         self.moderation_service = moderation_service
 
@@ -173,6 +176,9 @@ class ConversationEngine:
         recipient_profile = self._resolve_recipient_profile(user_id)
         recipient_context_text = self._build_recipient_context_text(recipient_profile)
 
+        # Step 3d: Resolve identity profile so every response reflects communication style and values.
+        identity_profile = self._resolve_identity_profile(user_id)
+
         # Step 4: Validate memories for grounding and keep ranking aligned.
         grounded_memories = relevant_memories
         if self.memory_grounding_service:
@@ -199,6 +205,7 @@ class ConversationEngine:
             )
 
         context["recipient_profile"] = recipient_profile
+        context["identity_profile"] = identity_profile
 
         if self.person_profile_service:
             context["person_profiles"] = self._get_related_person_profiles(
@@ -336,6 +343,17 @@ class ConversationEngine:
                 mem_trace,
             )
 
+        logger.info(
+            "RECIPIENT CONTEXT:\n  * relationship: %s\n  * age: %s",
+            recipient_profile.get("relationship_to_user", "unknown"),
+            recipient_profile.get("age", "unknown"),
+        )
+        logger.info(
+            "IDENTITY TRAITS USED:\n  * tone: %s\n  * values: %s",
+            ", ".join(identity_profile.get("tone_preferences", [])) or "neutral",
+            ", ".join(identity_profile.get("values", [])) or "unspecified",
+        )
+
         # Step 10b: Adjust for recipient age/relationship on sensitive topics.
         response = self._apply_recipient_safety(response, recipient_profile, relevant_memories)
 
@@ -386,6 +404,10 @@ class ConversationEngine:
             'moderation': moderation_result,
             'enhanced_questions': generated_question_records,
             'recipient_context': recipient_profile,
+            'identity_traits_used': {
+                'tone': identity_profile.get('tone_preferences', []),
+                'values': identity_profile.get('values', []),
+            },
             'extracted_family_profiles': extracted_family_profiles,
         }
 
@@ -666,9 +688,28 @@ Respond in a way that reflects these personality characteristics."""
 
         recipient_text = ""
         if context.get("recipient_profile"):
+            relationship = context["recipient_profile"].get("relationship_to_user", "unknown")
+            age = context["recipient_profile"].get("age", "unknown")
             recipient_text = (
-                "\nRecipient context: "
+                "\nYou are responding as the user.\n"
+                f"The listener is their {relationship} who is {age} years old.\n"
+                "Adjust tone, depth, and examples accordingly.\n"
+                "Tone adaptation rules:\n"
+                "- child -> simple, supportive language\n"
+                "- adult -> deeper reasoning\n"
+                "- peer -> conversational tone\n"
+                "Recipient context: "
                 + self._build_recipient_context_text(context["recipient_profile"])
+            )
+
+        identity_text = ""
+        if context.get("identity_profile"):
+            identity = context["identity_profile"]
+            identity_text = (
+                "\nIdentity traits to reflect in voice:\n"
+                f"- Communication style: {identity.get('communication_style', 'warm')}\n"
+                f"- Tone preferences: {', '.join(identity.get('tone_preferences', [])) or 'neutral'}\n"
+                f"- Values: {', '.join(identity.get('values', [])) or 'unspecified'}"
             )
 
         wisdom_text = ""
@@ -700,7 +741,7 @@ Respond in a way that reflects these personality characteristics."""
                 "Synthesize patterns across memories to give thoughtful advice."
             )
 
-        prompt = f"""You are an AI representation of a person built from their life memories. You MUST use ONLY the memories below to answer the question. If the answer is not present in these memories, say "I don't remember that clearly." Do not use any knowledge outside of these memories.{advice_instruction}{personality_text}{person_profile_text}{recipient_text}{wisdom_text}
+        prompt = f"""You are an AI representation of a person built from their life memories. You MUST use ONLY the memories below to answer the question. If the answer is not present in these memories, say "I don't remember that clearly." Do not use any knowledge outside of these memories.{advice_instruction}{personality_text}{person_profile_text}{recipient_text}{identity_text}{wisdom_text}
 
 User's question: {user_query}
 
@@ -855,6 +896,8 @@ Please answer the question using ONLY these memories. If the memories do not con
         if principles:
             response += f" A guiding principle I learned is: {principles[0]}"
 
+        response = self._adapt_response_voice(response, context)
+
         return response
 
     def _get_relevant_insights(self, user_query: str, relevant_memories: List[Memory]) -> List[DistilledInsight]:
@@ -942,6 +985,26 @@ Please answer the question using ONLY these memories. If the memories do not con
             "interaction_history": [],
         }
 
+    def _resolve_identity_profile(self, user_id: Optional[str]) -> Dict[str, Any]:
+        """Resolve identity profile or provide defaults for style and values."""
+        values_from_personality = []
+        if self.personality_profile and self.personality_profile.values:
+            values_from_personality = list(self.personality_profile.values)
+
+        if self.identity_model_service:
+            return self.identity_model_service.resolve_identity_profile(
+                user_id,
+                fallback_values=values_from_personality or ["family", "discipline", "honesty"],
+            )
+
+        return {
+            "user_id": user_id or "default",
+            "communication_style": "warm",
+            "values": values_from_personality or ["family", "discipline", "honesty"],
+            "tone_preferences": ["supportive", "clear"],
+            "interaction_history": [],
+        }
+
     def _build_recipient_context_text(self, recipient_profile: Dict[str, Any]) -> str:
         """Build prompt instruction with recipient relationship and maturity context."""
         relationship = recipient_profile.get("relationship_to_user", "unknown")
@@ -952,6 +1015,41 @@ Please answer the question using ONLY these memories. If the memories do not con
             f"The question is asked by the user's {relationship} who is {age} years old "
             f"(age bucket: {age_bucket}, maturity level: {maturity}). Adjust explanations accordingly."
         )
+
+    def _adapt_response_voice(self, response: str, context: Dict[str, Any]) -> str:
+        """Apply recipient and identity-aware tone adaptation to synthesized responses."""
+        recipient = context.get("recipient_profile", {})
+        identity = context.get("identity_profile", {})
+
+        relationship = (recipient.get("relationship_to_user") or "unknown").lower()
+        maturity = (recipient.get("maturity_level") or "adult").lower()
+        age_bucket = (recipient.get("age_bucket") or "adult").lower()
+
+        is_child = maturity in {"child", "teen"} or age_bucket in {"young_child", "child", "teenager"}
+        is_peer = relationship in {"friend", "peer", "colleague", "coworker", "teammate"}
+
+        style = (identity.get("communication_style") or "warm").lower()
+        tones = [t.lower() for t in identity.get("tone_preferences", [])]
+        values = identity.get("values", [])
+
+        if is_child:
+            response = f"I'll explain this simply and with care. {response}"
+        elif is_peer:
+            response = f"I'll keep this conversational. {response}"
+        else:
+            response = f"I'll share the deeper reasoning behind this. {response}"
+
+        if "direct" in style or "direct" in tones:
+            response += " Bottom line: learn early, act steadily, and stay honest with yourself."
+        elif "humorous" in style or "humorous" in tones:
+            response += " Life has a way of teaching with a crooked smile, but the lesson still matters."
+        elif "warm" in style or "supportive" in tones:
+            response += " I'm sharing this with care because your growth matters to me."
+
+        if values:
+            response += f" I try to stay grounded in values like {', '.join(values[:3])}."
+
+        return response
 
     def _apply_recipient_safety(
         self,
